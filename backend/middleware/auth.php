@@ -7,7 +7,9 @@ require_once __DIR__ . '/../utils/response.php';
 
 class Auth {
     
-    private static $secretKey = 'AnnesFashionSecretKey2026_ChangeThis!'; // CHANGE IN PRODUCTION!
+    private static function getSecretKey() {
+        return getenv('JWT_SECRET') ?: 'AnnesFashionSecretKey2026_ChangeThis!';
+    }
     
     // Generate JWT token
     public static function generateToken($userId, $role) {
@@ -21,7 +23,7 @@ class Auth {
         
         $base64UrlHeader = self::base64UrlEncode($header);
         $base64UrlPayload = self::base64UrlEncode($payload);
-        $signature = hash_hmac('sha256', $base64UrlHeader . "." . $base64UrlPayload, self::$secretKey, true);
+        $signature = hash_hmac('sha256', $base64UrlHeader . "." . $base64UrlPayload, self::getSecretKey(), true);
         $base64UrlSignature = self::base64UrlEncode($signature);
         
         return $base64UrlHeader . "." . $base64UrlPayload . "." . $base64UrlSignature;
@@ -52,7 +54,7 @@ class Auth {
         // Verify signature
         $base64UrlHeader = self::base64UrlEncode($header);
         $base64UrlPayload = self::base64UrlEncode($payload);
-        $signature = hash_hmac('sha256', $base64UrlHeader . "." . $base64UrlPayload, self::$secretKey, true);
+        $signature = hash_hmac('sha256', $base64UrlHeader . "." . $base64UrlPayload, self::getSecretKey(), true);
         $base64UrlSignature = self::base64UrlEncode($signature);
         
         if ($base64UrlSignature !== $signatureProvided) {

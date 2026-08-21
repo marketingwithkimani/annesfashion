@@ -3,10 +3,12 @@
 // Database Configuration
 // =====================================================
 
-define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
-define('DB_NAME', getenv('DB_NAME') ?: 'boutique_db');
-define('DB_USER', getenv('DB_USER') ?: 'root');
-define('DB_PASS', getenv('DB_PASS') !== false ? getenv('DB_PASS') : ''); // Default XAMPP password is empty
+define('DB_TYPE', getenv('DB_TYPE') ?: (getenv('SUPABASE_DB_HOST') ? 'pgsql' : 'mysql'));
+define('DB_HOST', getenv('SUPABASE_DB_HOST') ?: (getenv('DB_HOST') ?: 'localhost'));
+define('DB_PORT', getenv('SUPABASE_DB_PORT') ?: (getenv('DB_PORT') ?: (DB_TYPE === 'pgsql' ? '5432' : '3306')));
+define('DB_NAME', getenv('SUPABASE_DB_NAME') ?: (getenv('DB_NAME') ?: 'postgres'));
+define('DB_USER', getenv('SUPABASE_DB_USER') ?: (getenv('DB_USER') ?: 'root'));
+define('DB_PASS', getenv('SUPABASE_DB_PASS') !== false ? getenv('SUPABASE_DB_PASS') : (getenv('DB_PASS') !== false ? getenv('DB_PASS') : ''));
 
 // Create database connection
 class Database {
@@ -15,8 +17,14 @@ class Database {
     
     private function __construct() {
         try {
+            if (DB_TYPE === 'pgsql') {
+                $dsn = "pgsql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME;
+            } else {
+                $dsn = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";charset=utf8mb4";
+            }
+
             $this->conn = new PDO(
-                "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+                $dsn,
                 DB_USER,
                 DB_PASS,
                 [
