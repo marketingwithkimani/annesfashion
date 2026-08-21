@@ -325,14 +325,15 @@ window.renderProductGrid = function (container, items) {
     });
 };
 
+// Declare socialRail before the function definition uses it at call time
+const socialRail = document.getElementById('socialRail');
+
 // Initial fetch
 fetchRealTimeProducts();
 
 function renderSocialRail() {
     if (!socialRail) return;
     socialRail.innerHTML = '';
-    // We can still use some static product items for the social rail if needed, 
-    // or just show the social videos.
     window.socialVideos.slice(0, 8).forEach(item => {
         const card = document.createElement('div');
         card.className = 'social-video-card';
@@ -357,7 +358,7 @@ renderSocialRail();
 // ========================================
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-function addToWardrobe(productId) {
+window.addToWardrobe = function addToWardrobe(productId) {
     if (typeof productsData === 'undefined') return;
     const product = productsData.find(p => p.id == productId);
     if (product) {
@@ -366,10 +367,10 @@ function addToWardrobe(productId) {
         updateCartBadge();
         showNotification('Added to wardrobe!');
     }
-}
+};
 
 function updateCartBadge() {
-    const badge = document.querySelector('.nav-icon .badge');
+    const badge = document.getElementById('cartBadge');
     if (badge) {
         badge.textContent = cart.length;
     }
@@ -419,11 +420,28 @@ document.addEventListener('DOMContentLoaded', () => {
         observer.observe(el);
     });
 
-    // Search basic logic
+    // Search logic - filter products by title/category
     const searchInput = document.querySelector('.search-bar input');
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
-            console.log('Searching for:', e.target.value);
+            const query = e.target.value.toLowerCase().trim();
+            if (!query) {
+                // Re-render full grid if search cleared
+                const grid = document.getElementById('productsGrid');
+                if (grid && productsData.length > 0) {
+                    const mixedItems = window.mixContent(productsData, window.socialVideos);
+                    window.renderProductGrid(grid, mixedItems);
+                }
+                return;
+            }
+            const filtered = productsData.filter(p =>
+                p.title.toLowerCase().includes(query) ||
+                (p.category && p.category.toLowerCase().includes(query))
+            );
+            const grid = document.getElementById('productsGrid');
+            if (grid) {
+                window.renderProductGrid(grid, filtered);
+            }
         });
     }
 

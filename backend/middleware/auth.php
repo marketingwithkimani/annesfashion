@@ -69,6 +69,11 @@ class Auth {
         return $payloadData;
     }
     
+    // Verify token and return payload (authenticated user)
+    public static function requireAuth() {
+        return self::verifyToken();
+    }
+
     // Check if user is admin
     public static function requireAdmin() {
         $user = self::verifyToken();

@@ -47,7 +47,8 @@ try {
     }
 
     if (isset($_GET['preorder_only'])) {
-        $sql .= " AND p.allow_preorder = 1";
+        // Also enforce is_active so hidden products don't leak publicly
+        $sql .= " AND p.allow_preorder = 1 AND p.is_active = 1";
     }
     
     $sql .= " GROUP BY p.id ORDER BY p.created_at DESC";

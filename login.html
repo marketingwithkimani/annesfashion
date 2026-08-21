@@ -269,7 +269,7 @@
     </div>
 
     <script>
-        const API_BASE = '/Boutique/backend/api';
+        const API_BASE = '/annesfashion/api';
         const loginForm = document.getElementById('loginForm');
         const loginBtn = document.getElementById('loginBtn');
         const errorBox = document.getElementById('errorBox');
@@ -303,11 +303,11 @@
                     if (user.role === 'admin') {
                         localStorage.setItem('admin_token', token);
                         localStorage.setItem('admin_user', JSON.stringify(user));
-                        window.location.href = '/Boutique/admin/';
+                        window.location.href = '/annesfashion/admin/';
                     } else if (user.role === 'staff') {
                         localStorage.setItem('staff_token', token);
                         localStorage.setItem('staff_user', JSON.stringify(user));
-                        window.location.href = '/Boutique/staff/';
+                        window.location.href = '/annesfashion/staff/index.html';
                     } else {
                         showError('Unauthorized role access.');
                     }

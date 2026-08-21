@@ -46,7 +46,7 @@ try {
     // Validate all items and check stock
     foreach ($data['items'] as $item) {
         if (!isset($item['product_id']) || !isset($item['quantity'])) {
-            $db->rollBack();
+            if ($db->inTransaction()) $db->rollBack();
             Response::error('Each item must have product_id and quantity');
         }
         
@@ -61,7 +61,7 @@ try {
         $product = $stmt->fetch();
         
         if (!$product) {
-            $db->rollBack();
+            if ($db->inTransaction()) $db->rollBack();
             Response::error("Product ID {$item['product_id']} not found or inactive");
         }
         
@@ -70,7 +70,7 @@ try {
         
         // Check stock availability
         if ($stock < $item['quantity']) {
-            $db->rollBack();
+            if ($db->inTransaction()) $db->rollBack();
             Response::error("Insufficient stock for {$product['title']}. Available: {$stock}");
         }
         
@@ -176,6 +176,8 @@ try {
     Response::success($sale, 'Sale recorded successfully', 201);
     
 } catch (PDOException $e) {
-    $db->rollBack();
+    if (isset($db) && $db->inTransaction()) {
+        $db->rollBack();
+    }
     Response::error('Failed to record sale: ' . $e->getMessage(), 500);
 }
