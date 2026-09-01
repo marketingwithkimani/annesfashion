@@ -56,6 +56,10 @@
                 <i class="fas fa-clock"></i>
                 <span>Pre-orders</span>
             </button>
+            <button class="nav-item" data-view="chat" id="adminNavChat">
+                <i class="fas fa-comments"></i>
+                <span>Live Chat</span>
+            </button>
         </nav>
 
         <!-- Dashboard View -->
@@ -199,6 +203,45 @@
                 </div>
 
                 <div id="preorderList" class="products-list"></div>
+            </div>
+        </div>
+
+        <!-- Live Chat Oversight View -->
+        <div id="chatView" class="view">
+            <div class="view-content">
+                <div class="view-header">
+                    <h2><i class="fas fa-comments"></i> Live Chat Oversight</h2>
+                    <button class="btn btn-sm" id="refreshAdminChat">
+                        <i class="fas fa-sync"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #e5c158;">
+                            <i class="fas fa-headset"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">Pending Requests</div>
+                            <div class="stat-value" id="adminPendingChatCount">0</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #28A745;">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">Active Human Chats</div>
+                            <div class="stat-value" id="adminActiveChatCount">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <h3>Recent Customer Support Conversations</h3>
+                    <div id="adminChatList" class="admin-chat-list" style="margin-top: 10px;"></div>
+                </div>
             </div>
         </div>
     </div>

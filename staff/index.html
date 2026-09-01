@@ -55,6 +55,10 @@
                 <i class="fas fa-warehouse"></i>
                 <span>Stock</span>
             </button>
+            <button class="nav-item" data-view="chat" id="navChat">
+                <i class="fas fa-comments"></i>
+                <span>Live Chat</span>
+            </button>
         </nav>
 
         <!-- Record Sale View -->
@@ -192,6 +196,50 @@
                 </div>
 
                 <div id="stockList" class="stock-list"></div>
+            </div>
+        </div>
+
+        <!-- Live Chat View -->
+        <div id="chatView" class="view">
+            <div class="view-content">
+                <div class="view-header">
+                    <h2><i class="fas fa-comments"></i> Customer Support Chat</h2>
+                    <button class="btn btn-sm" id="refreshChatBtn">
+                        <i class="fas fa-sync"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="filter-tabs" id="chatFilterTabs">
+                    <button class="filter-tab active" data-chat-filter="pending">Pending Requests</button>
+                    <button class="filter-tab" data-chat-filter="assigned">Active Chats</button>
+                    <button class="filter-tab" data-chat-filter="all">All</button>
+                </div>
+
+                <div id="staffChatList" class="staff-chat-list" style="margin-top: 15px;"></div>
+
+                <!-- Chat Detail Container (shown when a chat is selected) -->
+                <div id="staffChatDetail" class="staff-chat-detail" style="display: none; margin-top: 15px; background: #fff; border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
+                        <div>
+                            <h3 id="staffChatCustomerName" style="margin: 0; font-size: 1.1rem; color: #111;">Customer</h3>
+                            <span id="staffChatContextInfo" style="font-size: 0.78rem; color: #666;">Product: None</span>
+                        </div>
+                        <button class="btn btn-sm btn-secondary" id="closeStaffChatDetail">Back to List</button>
+                    </div>
+
+                    <div id="staffChatMessagesContainer" style="height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 10px; background: #f8f9fa; border-radius: 8px; margin-bottom: 10px;"></div>
+
+                    <div id="staffChatActions" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button class="btn btn-primary btn-sm" id="acceptChatBtn" style="flex: 1;"><i class="fas fa-user-check"></i> Accept / Take Over</button>
+                        <button class="btn btn-secondary btn-sm" id="resolveChatBtn"><i class="fas fa-check"></i> Resolve</button>
+                        <button class="btn btn-secondary btn-sm" id="resumeAIChatBtn"><i class="fas fa-robot"></i> Resume AI</button>
+                    </div>
+
+                    <div id="staffChatInputArea" style="display: flex; gap: 8px; margin-top: 10px;">
+                        <input type="text" id="staffChatInput" placeholder="Type your response..." style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 20px; outline: none;">
+                        <button class="btn btn-primary" id="staffSendMsgBtn" style="border-radius: 50%; width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center;"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

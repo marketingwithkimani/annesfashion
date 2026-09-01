@@ -155,6 +155,8 @@ function switchView(viewName) {
         loadInventory('all');
     } else if (viewName === 'preorder') {
         loadPreorders();
+    } else if (viewName === 'chat') {
+        loadAdminChatOverview();
     }
 }
 
@@ -762,3 +764,51 @@ async function handleImageSelect(e) {
     showLoading(false);
     e.target.value = ''; // Reset input
 }
+
+// ===== Live Chat Oversight =====
+document.addEventListener('DOMContentLoaded', () => {
+    const refreshBtn = document.getElementById('refreshAdminChat');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', loadAdminChatOverview);
+    }
+});
+
+async function loadAdminChatOverview() {
+    showLoading(true);
+    try {
+        const response = await fetch(`${API_BASE}/chat/staff_list.php?status=all`);
+        const data = await response.json();
+        const container = document.getElementById('adminChatList');
+        if (!container) return;
+
+        if (data.success && data.data) {
+            const pending = data.data.filter(c => c.status === 'HUMAN_REQUESTED');
+            const active = data.data.filter(c => c.status === 'HUMAN_ACTIVE' || c.status === 'HUMAN_ASSIGNED');
+
+            const pendingCountEl = document.getElementById('adminPendingChatCount');
+            const activeCountEl = document.getElementById('adminActiveChatCount');
+            if (pendingCountEl) pendingCountEl.textContent = pending.length;
+            if (activeCountEl) activeCountEl.textContent = active.length;
+
+            if (data.data.length > 0) {
+                container.innerHTML = data.data.map(conv => `
+                    <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-weight: bold; color: var(--text-gold);">${conv.customer_name || 'Customer'}</div>
+                            <div style="font-size: 0.8rem; color: #ccc;">State: <strong>${conv.status}</strong> ${conv.assigned_staff_name ? ' | Assigned: ' + conv.assigned_staff_name : ''}</div>
+                            <div style="font-size: 0.78rem; color: #999;">Last Msg: ${conv.last_message || 'None'}</div>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #888;">${formatTime(conv.last_message_at || conv.created_at)}</div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<div class="empty-state"><p>No customer chats logged yet.</p></div>';
+            }
+        }
+    } catch (e) {
+        showToast('Failed to load live chat overview');
+    } finally {
+        showLoading(false);
+    }
+}
+

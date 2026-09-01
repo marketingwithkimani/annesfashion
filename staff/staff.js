@@ -170,6 +170,8 @@ function switchView(viewName) {
         loadProductCatalog();
     } else if (viewName === 'stock') {
         loadStock('all');
+    } else if (viewName === 'chat') {
+        loadStaffChatList('pending');
     }
 }
 
@@ -555,3 +557,235 @@ function showError(message) {
 function hideError() {
     document.getElementById('loginError').style.display = 'none';
 }
+
+// ===== Live Customer Support Chat Management =====
+let activeStaffConvId = null;
+let staffChatPollInterval = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+    const refreshBtn = document.getElementById('refreshChatBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+            const activeFilter = document.querySelector('#chatFilterTabs .filter-tab.active')?.dataset.chatFilter || 'pending';
+            loadStaffChatList(activeFilter);
+        });
+    }
+
+    document.querySelectorAll('#chatFilterTabs .filter-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('#chatFilterTabs .filter-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            loadStaffChatList(tab.dataset.chatFilter);
+        });
+    });
+
+    const closeDetailBtn = document.getElementById('closeStaffChatDetail');
+    if (closeDetailBtn) {
+        closeDetailBtn.addEventListener('click', () => {
+            document.getElementById('staffChatDetail').style.display = 'none';
+            document.getElementById('staffChatList').style.display = 'block';
+            activeStaffConvId = null;
+            if (staffChatPollInterval) clearInterval(staffChatPollInterval);
+        });
+    }
+
+    const acceptBtn = document.getElementById('acceptChatBtn');
+    if (acceptBtn) acceptBtn.addEventListener('click', () => handleStaffChatAction('accept'));
+
+    const resolveBtn = document.getElementById('resolveChatBtn');
+    if (resolveBtn) resolveBtn.addEventListener('click', () => handleStaffChatAction('resolve'));
+
+    const resumeAIBtn = document.getElementById('resumeAIChatBtn');
+    if (resumeAIBtn) resumeAIBtn.addEventListener('click', () => handleStaffChatAction('resume_ai'));
+
+    const sendMsgBtn = document.getElementById('staffSendMsgBtn');
+    if (sendMsgBtn) sendMsgBtn.addEventListener('click', sendStaffChatMessage);
+
+    const chatInput = document.getElementById('staffChatInput');
+    if (chatInput) {
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendStaffChatMessage();
+        });
+    }
+});
+
+async function loadStaffChatList(filter = 'pending') {
+    showLoading(true);
+    try {
+        const response = await fetch(`${API_BASE}/chat/staff_list.php?status=${encodeURIComponent(filter)}`);
+        const data = await response.json();
+
+        const container = document.getElementById('staffChatList');
+        if (!container) return;
+
+        if (data.success && data.data && data.data.length > 0) {
+            container.innerHTML = data.data.map(conv => {
+                let badgeClass = 'badge-pending';
+                let badgeText = 'Human Requested';
+                if (conv.status === 'HUMAN_ACTIVE' || conv.status === 'HUMAN_ASSIGNED') {
+                    badgeClass = 'badge-assigned';
+                    badgeText = `Active (${conv.assigned_staff_name || 'Staff'})`;
+                } else if (conv.status === 'RESOLVED') {
+                    badgeClass = 'badge-resolved';
+                    badgeText = 'Resolved';
+                }
+
+                const productInfo = conv.current_product_title ? `Product: ${conv.current_product_title}` : (conv.current_page ? `Page: ${conv.current_page}` : 'Browsing');
+
+                return `
+                    <div class="staff-chat-card" onclick="openStaffChatDetail('${conv.id}')">
+                        <div class="chat-card-header">
+                            <div class="chat-card-title"><i class="fas fa-user"></i> ${conv.customer_name || 'Customer'}</div>
+                            <span class="chat-card-badge ${badgeClass}">${badgeText}</span>
+                        </div>
+                        <div style="font-size: 0.8rem; color: var(--text-gold); margin-bottom: 4px;">
+                            <i class="fas fa-shopping-bag"></i> ${productInfo}
+                        </div>
+                        <div style="font-size: 0.85rem; color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            ${conv.last_message || 'New request initialized...'}
+                        </div>
+                        <div style="font-size: 0.72rem; color: #888; text-align: right; margin-top: 6px;">
+                            ${formatTime(conv.last_message_at || conv.created_at)}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-comments"></i><p>No customer support chats found.</p></div>';
+        }
+    } catch (error) {
+        console.error('Error loading staff chat list:', error);
+        showToast('Failed to load chat list');
+    } finally {
+        showLoading(false);
+    }
+}
+
+async function openStaffChatDetail(conversationId) {
+    activeStaffConvId = conversationId;
+    document.getElementById('staffChatList').style.display = 'none';
+    document.getElementById('staffChatDetail').style.display = 'block';
+
+    fetchAndRenderStaffChatDetail();
+
+    if (staffChatPollInterval) clearInterval(staffChatPollInterval);
+    staffChatPollInterval = setInterval(fetchAndRenderStaffChatDetail, 2500);
+}
+
+async function fetchAndRenderStaffChatDetail() {
+    if (!activeStaffConvId) return;
+
+    try {
+        const response = await fetch(`${API_BASE}/chat/start_or_get.php?session_id=view&conversation_id=${encodeURIComponent(activeStaffConvId)}`);
+        const res = await response.json();
+
+        if (res.success && res.data) {
+            const conv = res.data.conversation;
+            const msgs = res.data.messages;
+
+            document.getElementById('staffChatCustomerName').textContent = `${conv.customer_name || 'Customer'} [${conv.status}]`;
+            document.getElementById('staffChatContextInfo').textContent = conv.current_product_title ? `Product: ${conv.current_product_title}` : `Page: ${conv.current_page || 'Home'}`;
+
+            const msgContainer = document.getElementById('staffChatMessagesContainer');
+            msgContainer.innerHTML = msgs.map(m => {
+                let bg = '#fff';
+                let align = 'flex-start';
+                let color = '#333';
+                let border = '1px solid #e0e0e0';
+
+                if (m.sender_type === 'customer') {
+                    bg = '#e3f2fd';
+                    align = 'flex-end';
+                    color = '#0d47a1';
+                    border = '1px solid #bbdefb';
+                } else if (m.sender_type === 'staff') {
+                    bg = '#fff3e0';
+                    align = 'flex-start';
+                    color = '#e65100';
+                    border = '1px solid #ffe0b2';
+                } else if (m.sender_type === 'system') {
+                    bg = '#eeeeee';
+                    align = 'center';
+                    color = '#666';
+                    border = '1px dashed #ccc';
+                }
+
+                return `
+                    <div style="align-self: ${align}; max-width: 85%; background: ${bg}; color: ${color}; border: ${border}; padding: 8px 12px; border-radius: 12px; font-size: 0.88rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <div style="font-size: 0.7rem; font-weight: bold; margin-bottom: 2px;">${m.sender_name} (${m.sender_type})</div>
+                        ${m.content}
+                    </div>
+                `;
+            }).join('');
+
+            msgContainer.scrollTop = msgContainer.scrollHeight;
+        }
+    } catch (e) {
+        console.warn('Error fetching chat detail:', e);
+    }
+}
+
+async function handleStaffChatAction(action) {
+    if (!activeStaffConvId) return;
+
+    const staffName = currentUser ? `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || 'Staff Agent' : 'Staff Agent';
+    const staffId = currentUser ? currentUser.id : null;
+
+    showLoading(true);
+    try {
+        const response = await fetch(`${API_BASE}/chat/staff_action.php`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: action,
+                conversation_id: activeStaffConvId,
+                staff_name: staffName,
+                staff_id: staffId
+            })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            showToast(`Chat ${action} action recorded successfully!`);
+            fetchAndRenderStaffChatDetail();
+        } else {
+            showToast(`Action failed: ${data.message}`);
+        }
+    } catch (e) {
+        showToast('Connection error during staff chat action');
+    } finally {
+        showLoading(false);
+    }
+}
+
+async function sendStaffChatMessage() {
+    const input = document.getElementById('staffChatInput');
+    const content = input.value.trim();
+    if (!content || !activeStaffConvId) return;
+
+    input.value = '';
+    const staffName = currentUser ? `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || 'Staff Agent' : 'Staff Agent';
+
+    try {
+        const response = await fetch(`${API_BASE}/chat/staff_action.php`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'send_message',
+                conversation_id: activeStaffConvId,
+                staff_name: staffName,
+                content: content
+            })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            fetchAndRenderStaffChatDetail();
+        } else {
+            showToast(`Failed to send: ${data.message}`);
+        }
+    } catch (e) {
+        showToast('Connection error');
+    }
+}
+
