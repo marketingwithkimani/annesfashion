@@ -1,7 +1,7 @@
 // Category Page Logic
-// Relies on productsData from main.js
+// Relies on productsData from products-data.js / main.js
 
-document.addEventListener('DOMContentLoaded', () => {
+function initCategoryPage() {
     const categoryGrid = document.getElementById('categoryProducts');
     if (!categoryGrid) return;
 
@@ -22,72 +22,38 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // 2. Render Function
-    const renderItems = (data) => {
-        const filtered = data.filter(item => item.category === currentCategory);
-        categoryGrid.innerHTML = '';
+    // Get available products from global productsData or fallback
+    const sourceData = (window.productsData && window.productsData.length > 0)
+        ? window.productsData
+        : (typeof productsData !== 'undefined' ? productsData : []);
 
-        if (filtered.length > 0) {
-            const contentToRender = window.mixContent && window.socialVideos
-                ? window.mixContent(filtered, window.socialVideos)
-                : filtered;
+    const filtered = sourceData.filter(item => item.category === currentCategory);
+    categoryGrid.innerHTML = '';
 
-            if (window.renderProductGrid) {
-                window.renderProductGrid(categoryGrid, contentToRender);
-            }
+    if (filtered.length > 0) {
+        const contentToRender = window.mixContent && window.socialVideos
+            ? window.mixContent(filtered, window.socialVideos)
+            : filtered;
 
-            const countEl = document.querySelector('.results-count');
-            if (countEl) {
-                countEl.textContent = `Showing ${filtered.length} products`;
-            }
-        } else {
-            categoryGrid.innerHTML = '<p class="no-results">No products found in this category.</p>';
-            const countEl = document.querySelector('.results-count');
-            if (countEl) countEl.textContent = '0 products found';
+        if (window.renderProductGrid) {
+            window.renderProductGrid(categoryGrid, contentToRender);
         }
-    };
 
-    // 3. Initial or Event-driven Load
-    if (window.productsData && window.productsData.length > 0) {
-        renderItems(window.productsData);
+        const countEl = document.querySelector('.results-count');
+        if (countEl) {
+            countEl.textContent = `Showing ${filtered.length} products`;
+        }
+    } else {
+        categoryGrid.innerHTML = '<p class="no-results" style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">No products found in this category.</p>';
+        const countEl = document.querySelector('.results-count');
+        if (countEl) countEl.textContent = '0 products found';
     }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initCategoryPage();
 });
 
 document.addEventListener('productsLoaded', (e) => {
-    // We need to re-select the grid if it wasn't available during initial load
-    const categoryGrid = document.getElementById('categoryProducts');
-    if (categoryGrid) {
-        const currentUrl = window.location.href.toLowerCase();
-        let currentCategory = '';
-        const categories = ['dresses', 'casual', 'corporate', 'shoes', 'wigs', 'makeup', 'weekend', 'beauty'];
-
-        for (const cat of categories) {
-            if (currentUrl.includes(cat)) {
-                currentCategory = cat;
-                break;
-            }
-        }
-
-        if (currentCategory) {
-            const filtered = e.detail.filter(item => item.category === currentCategory);
-            categoryGrid.innerHTML = '';
-
-            if (filtered.length > 0) {
-                const contentToRender = window.mixContent && window.socialVideos
-                    ? window.mixContent(filtered, window.socialVideos)
-                    : filtered;
-
-                if (window.renderProductGrid) {
-                    window.renderProductGrid(categoryGrid, contentToRender);
-                }
-
-                const countEl = document.querySelector('.results-count');
-                if (countEl) countEl.textContent = `Showing ${filtered.length} products`;
-            } else {
-                categoryGrid.innerHTML = '<p class="no-results">No products found in this category.</p>';
-                const countEl = document.querySelector('.results-count');
-                if (countEl) countEl.textContent = '0 products found';
-            }
-        }
-    }
+    initCategoryPage();
 });

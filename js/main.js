@@ -106,61 +106,64 @@ if (heroCarousel && heroSlides.length > 0 && dotsContainer) {
 // Product Data & Grid Generation
 // ========================================
 
-// Note: productsData is now fetched from the API for real-time sync
-if (typeof productsData === 'undefined') {
-    var productsData = [];
-}
+// Initialize productsData immediately from local catalogue fallback if available
+var productsData = (window.productsData || []).map(p => ({
+    id: p.id,
+    title: p.title,
+    price: (typeof p.price === 'string' && p.price.startsWith('KSh')) ? p.price : `KSh ${parseFloat(p.price || 0).toLocaleString()}`,
+    image: p.image || p.image_url,
+    category: p.category,
+    type: 'product',
+    description: p.description,
+    stock: p.stock || 10,
+    allow_preorder: p.allow_preorder || false
+}));
 
 async function fetchRealTimeProducts() {
     try {
         const response = await fetch('api/products/list.php?active_only=true');
 
-        // Ensure we got a JSON response
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            const text = await response.text();
-            if (text.includes('<?php')) {
-                throw new Error('Server returned raw PHP code. Check Vercel configuration.');
+        if (response.ok) {
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                const data = await response.json();
+                if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+                    productsData = data.data.map(p => ({
+                        id: p.id,
+                        title: p.title,
+                        price: `KSh ${parseFloat(p.price).toLocaleString()}`,
+                        image: p.image_url || p.image,
+                        category: p.category,
+                        type: 'product',
+                        description: p.description,
+                        stock: parseInt(p.total_stock) || 0,
+                        allow_preorder: parseInt(p.allow_preorder) === 1
+                    }));
+                    window.productsData = productsData;
+                }
             }
-            throw new Error(`Expected JSON but got ${contentType || 'unknown content'}`);
-        }
-
-        const data = await response.json();
-        if (data.success) {
-            // Transform backend data to match frontend expectations
-            productsData = data.data.map(p => ({
-                id: p.id,
-                title: p.title,
-                price: `KSh ${parseFloat(p.price).toLocaleString()}`,
-                image: p.image_url,
-                category: p.category,
-                type: 'product',
-                description: p.description,
-                stock: parseInt(p.total_stock) || 0,
-                allow_preorder: parseInt(p.allow_preorder) === 1
-            }));
-
-            // Re-render grids if they exist
-            const grid = document.getElementById('productsGrid');
-            const rail = document.getElementById('socialRail');
-
-            if (grid) {
-                const mixedItems = window.mixContent(productsData, window.socialVideos);
-                window.renderProductGrid(grid, mixedItems);
-            }
-            if (rail) {
-                renderSocialRail();
-            }
-
-            // Dispatch event for other scripts (like category.js)
-            document.dispatchEvent(new CustomEvent('productsLoaded', { detail: productsData }));
-
-            // Handle Pre-orders section on homepage
-            fetchPreorders();
         }
     } catch (error) {
-        console.error('Error fetching real-time products:', error);
+        console.warn('Network error fetching real-time products, using local catalogue:', error);
+    } finally {
+        refreshGrids();
     }
+}
+
+function refreshGrids() {
+    const grid = document.getElementById('productsGrid');
+    const rail = document.getElementById('socialRail');
+
+    if (grid && productsData.length > 0) {
+        const mixedItems = window.mixContent(productsData, window.socialVideos);
+        window.renderProductGrid(grid, mixedItems);
+    }
+    if (rail) {
+        renderSocialRail();
+    }
+
+    document.dispatchEvent(new CustomEvent('productsLoaded', { detail: productsData }));
+    fetchPreorders();
 }
 
 async function fetchPreorders() {
@@ -274,8 +277,15 @@ window.renderProductGrid = function (container, items) {
     if (!container) return;
     container.innerHTML = '';
 
+    if (!items || items.length === 0) {
+        container.innerHTML = '<p class="no-results" style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">No products found.</p>';
+        return;
+    }
+
     items.forEach(item => {
         const card = document.createElement('div');
+        card.style.opacity = '1';
+        card.style.transform = 'none';
 
         if (item.type === 'product') {
             card.className = 'product-card';
@@ -305,8 +315,7 @@ window.renderProductGrid = function (container, items) {
 
         } else if (item.type === 'social') {
             card.className = 'product-card social-insert';
-            // Styling enhancement for video cards in grid
-            card.style.gridRow = 'span 1'; // Maintain grid flow
+            card.style.gridRow = 'span 1';
             card.innerHTML = `
                 <div class="product-media" style="height: 100%;">
                     <video autoplay muted loop playsinline style="width: 100%; height: 100%; object-fit: cover;">
@@ -402,6 +411,7 @@ function showNotification(message) {
 // ========================================
 document.addEventListener('DOMContentLoaded', () => {
     updateCartBadge();
+    refreshGrids();
 
     // Intersection Observer for animations
     const observer = new IntersectionObserver((entries) => {

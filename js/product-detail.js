@@ -230,32 +230,55 @@ document.addEventListener('DOMContentLoaded', () => {
         if (detailSection) detailSection.style.visibility = 'visible';
     }
 
-    // 5. Fetch product from API
+    // 5. Fetch product from API or local fallback
     async function fetchProductDetails(id) {
+        let product = null;
+
         try {
             const response = await fetch(`api/products/list.php?active_only=true`);
-            const data = await response.json();
-            if (data.success) {
-                const product = data.data.find(p => p.id == id);
-                if (product) {
-                    renderProduct(product);
-                } else {
-                    showError();
+            if (response.ok) {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await response.json();
+                    if (data.success && Array.isArray(data.data)) {
+                        product = data.data.find(p => p.id == id);
+                        window.productsData = data.data.map(p => ({
+                            id: p.id,
+                            title: p.title,
+                            price: `KSh ${parseFloat(p.price).toLocaleString()}`,
+                            image: p.image_url || p.image,
+                            category: p.category,
+                            type: 'product',
+                            description: p.description
+                        }));
+                    }
                 }
-
-                window.productsData = data.data.map(p => ({
-                    id: p.id,
-                    title: p.title,
-                    price: `KSh ${parseFloat(p.price).toLocaleString()}`,
-                    image: p.image_url,
-                    category: p.category,
-                    type: 'product',
-                    description: p.description
-                }));
-                loadRelatedProducts(id);
             }
         } catch (error) {
-            console.error('Error fetching product:', error);
+            console.warn('Network issue fetching product API, falling back to products-data.js:', error);
+        }
+
+        // Fallback to local productsData array if not found via API
+        if (!product && typeof productsData !== 'undefined' && Array.isArray(productsData)) {
+            const fallbackItem = productsData.find(p => p.id == id);
+            if (fallbackItem) {
+                product = {
+                    id: fallbackItem.id,
+                    title: fallbackItem.title,
+                    price: fallbackItem.price.startsWith('KSh') ? fallbackItem.price.replace('KSh ', '') : fallbackItem.price,
+                    image_url: fallbackItem.image || fallbackItem.image_url,
+                    category: fallbackItem.category,
+                    description: fallbackItem.description,
+                    total_stock: fallbackItem.stock || 10,
+                    allow_preorder: fallbackItem.allow_preorder || false
+                };
+            }
+        }
+
+        if (product) {
+            renderProduct(product);
+            loadRelatedProducts(id);
+        } else {
             showError();
         }
     }
