@@ -11,13 +11,14 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Alex+Brush&family=Pinyon+Script&display=swap" rel="stylesheet">
 
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/chatbot.css">
+    <link rel="stylesheet" href="css/cart.css">
 </head>
 
 <body>
@@ -92,7 +93,7 @@
         <div class="hero-main">
             <div class="hero-carousel" id="heroCarousel">
                 <div class="hero-slide active">
-                    <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200" alt="Fashion Hero 1">
+                    <img src="assets/hero/slide-1-elegant.jpg" alt="Elevate Your Style - African Fashion">
                     <div class="hero-overlay">
                         <h1 class="hero-title luxury-script">Elevate Your Style</h1>
                         <p class="hero-subtitle">Curated pieces for the modern African woman</p>
@@ -100,7 +101,7 @@
                     </div>
                 </div>
                 <div class="hero-slide">
-                    <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=1200" alt="Fashion Hero 2">
+                    <img src="assets/hero/slide-2-corporate.jpg" alt="Corporate Chic Power Dressing">
                     <div class="hero-overlay">
                         <h1 class="hero-title luxury-script">Corporate Chic</h1>
                         <p class="hero-subtitle">Power dressing redefined</p>
@@ -108,11 +109,19 @@
                     </div>
                 </div>
                 <div class="hero-slide">
-                    <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1200" alt="Fashion Hero 3">
+                    <img src="assets/hero/slide-3-weekend.jpg" alt="Weekend Vibes Lifestyle">
                     <div class="hero-overlay">
                         <h1 class="hero-title luxury-script">Weekend Vibes</h1>
                         <p class="hero-subtitle">Effortlessly chic, always</p>
                         <button class="btn-primary">Discover More</button>
+                    </div>
+                </div>
+                <div class="hero-slide">
+                    <img src="assets/hero/slide-4-drip.jpg" alt="Nairobi Street Drip Fashion">
+                    <div class="hero-overlay">
+                        <h1 class="hero-title luxury-script">Nairobi Street Drip</h1>
+                        <p class="hero-subtitle">Baggy denim, fresh kicks &amp; iconic bling</p>
+                        <button class="btn-primary">Shop Street Drip</button>
                     </div>
                 </div>
             </div>
@@ -320,35 +329,35 @@
         <div class="container">
             <div class="category-grid">
                 <a href="dresses.html" class="category-card large">
-                    <img src="https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800" alt="Dresses">
+                    <img src="assets/categories/cat-dresses.jpg" alt="Dresses">
                     <div class="category-overlay">
                         <h3 class="luxury-script">Dresses</h3>
                         <p>From casual to cocktail</p>
                     </div>
                 </a>
                 <a href="corporate.html" class="category-card">
-                    <img src="https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?w=600" alt="Corporate">
+                    <img src="assets/categories/cat-corporate.jpg" alt="Corporate">
                     <div class="category-overlay">
                         <h3>Corporate</h3>
                         <p>Boss moves only</p>
                     </div>
                 </a>
                 <a href="casual.html" class="category-card">
-                    <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600" alt="Casual">
+                    <img src="assets/categories/cat-casual.jpg" alt="Casual">
                     <div class="category-overlay">
                         <h3>Casual</h3>
-                        <p>Everyday chic</p>
+                        <p>Everyday chic &amp; drip</p>
                     </div>
                 </a>
                 <a href="makeup.html" class="category-card">
-                    <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600" alt="Beauty">
+                    <img src="assets/categories/cat-beauty.jpg" alt="Beauty">
                     <div class="category-overlay">
                         <h3>Beauty</h3>
                         <p>Glow from within</p>
                     </div>
                 </a>
                 <a href="shoes.html" class="category-card">
-                    <img src="https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=600" alt="Shoes">
+                    <img src="assets/categories/cat-shoes.jpg" alt="Shoes">
                     <div class="category-overlay">
                         <h3>Shoes</h3>
                         <p>Step up your game</p>
@@ -414,6 +423,7 @@
 
     <script src="js/products-data.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/cart.js"></script>
 </body>
 
 </html>
