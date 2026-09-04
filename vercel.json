@@ -2,6 +2,9 @@
   "functions": {
     "api/index.php": {
       "runtime": "vercel-php@0.7.2"
+    },
+    "app/download.php": {
+      "runtime": "vercel-php@0.7.2"
     }
   },
   "routes": [

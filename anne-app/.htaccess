@@ -1,0 +1,8 @@
+# Allow direct access to files in this directory
+Options -Indexes
+<Files "*.apk">
+    Order Allow,Deny
+    Allow from all
+    Header set Content-Type "application/vnd.android.package-archive"
+    Header set Content-Disposition "attachment"
+</Files>

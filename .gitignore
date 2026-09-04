@@ -18,5 +18,3 @@ Thumbs.db
 .vscode/
 .idea/
 
-# APK binary (served directly from XAMPP, not tracked in git)
-anne-app/
