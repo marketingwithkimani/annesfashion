@@ -1,0 +1,169 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration App | Anne's Fashion Line</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #0d0d0f;
+            color: #f1f1f1;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .card {
+            background: #16161c;
+            border: 1px solid rgba(201, 169, 110, 0.25);
+            border-radius: 20px;
+            padding: 48px 36px;
+            max-width: 460px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 40px rgba(201, 169, 110, 0.08);
+            position: relative;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #c9a96e, #e8d5b5, #c9a96e);
+            border-radius: 20px 20px 0 0;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(201, 169, 110, 0.12);
+            color: #c9a96e;
+            border: 1px solid rgba(201, 169, 110, 0.3);
+            border-radius: 999px;
+            padding: 6px 14px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+        }
+        .icon-circle {
+            width: 88px;
+            height: 88px;
+            background: rgba(201, 169, 110, 0.1);
+            border: 1px solid rgba(201, 169, 110, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            color: #c9a96e;
+            font-size: 2.5rem;
+        }
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #ffffff;
+        }
+        .subtitle {
+            font-size: 0.88rem;
+            color: #999;
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+        .file-box {
+            background: #1f1f27;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-align: left;
+            margin-bottom: 24px;
+        }
+        .file-box i {
+            font-size: 2rem;
+            color: #3DDC84;
+        }
+        .file-name {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+        .file-meta {
+            font-size: 0.75rem;
+            color: #777;
+            margin-top: 2px;
+        }
+        .btn-download {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            background: linear-gradient(135deg, #c9a96e, #b38b4d);
+            color: #111;
+            padding: 15px 24px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 20px rgba(201, 169, 110, 0.35);
+        }
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(201, 169, 110, 0.5);
+            background: linear-gradient(135deg, #d6b77e, #c09657);
+        }
+        .note {
+            margin-top: 20px;
+            font-size: 0.76rem;
+            color: #888;
+            line-height: 1.45;
+            background: rgba(255,255,255,0.02);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px dashed rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="badge">
+            <i class="fas fa-shield-alt"></i> Internal Use Only
+        </div>
+        <div class="icon-circle">
+            <i class="fas fa-mobile-screen-button"></i>
+        </div>
+        <h1>Admin Mobile App</h1>
+        <p class="subtitle">Official Anne's Fashion Line administration package. Authorized personnel only.</p>
+        
+        <div class="file-box">
+            <i class="fab fa-android"></i>
+            <div>
+                <div class="file-name">annes-fashion-line.apk</div>
+                <div class="file-meta">Android Package &bull; ~28 MB</div>
+            </div>
+        </div>
+
+        <a href="../anne%20app/annes-fashion-line.apk" download="annes-fashion-line.apk" class="btn-download">
+            <i class="fas fa-download"></i> Download APK
+        </a>
+
+        <div class="note">
+            <i class="fas fa-info-circle"></i> On Android, allow "Install Unknown Apps" in system settings to complete installation.
+        </div>
+    </div>
+</body>
+</html>
