@@ -168,10 +168,15 @@ ON CONFLICT (email) DO NOTHING;
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.product_images ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.inventory ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Allow public read products" ON public.products FOR SELECT USING (true);
 CREATE POLICY "Allow public read images" ON public.product_images FOR SELECT USING (true);
 CREATE POLICY "Allow public read inventory" ON public.inventory FOR SELECT USING (true);
+CREATE POLICY "Allow public read settings" ON public.settings FOR SELECT USING (true);
+CREATE POLICY "Allow public update settings" ON public.settings FOR UPDATE USING (true);
+CREATE POLICY "Allow public insert settings" ON public.settings FOR INSERT WITH CHECK (true);
+
 
 -- 11. CHAT CONVERSATIONS TABLE
 CREATE TABLE IF NOT EXISTS public.chat_conversations (

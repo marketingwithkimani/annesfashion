@@ -6,6 +6,7 @@
 require_once __DIR__ . '/../../backend/config/cors.php';
 require_once __DIR__ . '/../../backend/config/database.php';
 require_once __DIR__ . '/../../backend/utils/response.php';
+require_once __DIR__ . '/../../backend/utils/supabase.php';
 require_once __DIR__ . '/../../backend/middleware/auth.php';
 
 // Only accept PUT requests
@@ -90,6 +91,17 @@ try {
     $getStmt->execute(['id' => $productId]);
     $product = $getStmt->fetch();
     
+    // Sync updated product and images to Supabase
+    try {
+        $images = null;
+        if (isset($data['images']) && is_array($data['images'])) {
+            $images = $data['images'];
+        }
+        SupabaseClient::getInstance()->syncFullProduct($product, $images ?? [], null);
+    } catch (Throwable $syncEx) {
+        error_log("[ProductUpdate] Supabase sync error: " . $syncEx->getMessage());
+    }
+
     Response::success($product, 'Product updated successfully');
     
 } catch (PDOException $e) {

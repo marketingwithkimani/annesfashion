@@ -6,6 +6,7 @@
 require_once __DIR__ . '/../../backend/config/cors.php';
 require_once __DIR__ . '/../../backend/config/database.php';
 require_once __DIR__ . '/../../backend/utils/response.php';
+require_once __DIR__ . '/../../backend/utils/supabase.php';
 require_once __DIR__ . '/../../backend/middleware/auth.php';
 
 // Only accept POST requests
@@ -92,6 +93,15 @@ try {
     $getStmt = $db->prepare("SELECT * FROM products WHERE id = :id");
     $getStmt->execute(['id' => $productId]);
     $product = $getStmt->fetch();
+
+    // Sync to Supabase in background/REST
+    try {
+        $images = isset($data['images']) && is_array($data['images']) ? $data['images'] : ($primaryImage ? [$primaryImage] : []);
+        $stock = isset($data['initial_stock']) ? (int)$data['initial_stock'] : 0;
+        SupabaseClient::getInstance()->syncFullProduct($product, $images, $stock);
+    } catch (Throwable $syncEx) {
+        error_log("[ProductCreate] Supabase sync error: " . $syncEx->getMessage());
+    }
     
     Response::success($product, 'Product created successfully', 201);
     

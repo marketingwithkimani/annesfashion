@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../../backend/config/cors.php';
 require_once __DIR__ . '/../../backend/config/database.php';
 require_once __DIR__ . '/../../backend/utils/response.php';
+require_once __DIR__ . '/../../backend/utils/supabase.php';
 require_once __DIR__ . '/../../backend/middleware/auth.php';
 
 // Only accept POST requests
@@ -29,6 +30,19 @@ try {
         'key' => $data['key'],
         'value' => $data['value']
     ]);
+
+    // Also sync to Supabase settings table
+    try {
+        SupabaseClient::getInstance()->request('POST', 'settings', [
+            [
+                'setting_key' => $data['key'],
+                'setting_value' => (string)$data['value'],
+                'updated_at' => date('c')
+            ]
+        ], ['Prefer: resolution=merge-duplicates']);
+    } catch (Throwable $syncEx) {
+        error_log("[SettingsUpdate] Supabase sync notice: " . $syncEx->getMessage());
+    }
     
     Response::success(null, 'Setting updated successfully');
     

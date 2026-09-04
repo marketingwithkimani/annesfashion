@@ -6,6 +6,7 @@
 require_once __DIR__ . '/../../backend/config/cors.php';
 require_once __DIR__ . '/../../backend/config/database.php';
 require_once __DIR__ . '/../../backend/utils/response.php';
+require_once __DIR__ . '/../../backend/utils/supabase.php';
 require_once __DIR__ . '/../../backend/middleware/auth.php';
 
 // Only accept PUT requests
@@ -112,6 +113,14 @@ try {
     $getStmt->execute(['id' => $productId]);
     $result = $getStmt->fetch();
     
+    // Sync stock to Supabase
+    try {
+        $newStock = isset($result['stock']) ? (int)$result['stock'] : 0;
+        SupabaseClient::getInstance()->setProductStock($productId, $newStock);
+    } catch (Throwable $syncEx) {
+        error_log("[InventoryUpdate] Supabase sync error: " . $syncEx->getMessage());
+    }
+
     Response::success($result, 'Inventory updated successfully');
     
 } catch (PDOException $e) {

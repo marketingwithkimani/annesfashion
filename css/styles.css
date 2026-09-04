@@ -897,3 +897,178 @@ section {
         font-size: 3rem;
     }
 }
+
+/* ========================================
+   App Download Banner
+   ======================================== */
+.app-download-banner {
+    background: linear-gradient(135deg, #1a0a2e 0%, #2d1b69 40%, #c9a96e 100%);
+    padding: 80px 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.app-download-banner::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(201,169,110,0.15) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.app-download-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+}
+
+.app-download-text {
+    flex: 1;
+    max-width: 560px;
+}
+
+.app-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(201, 169, 110, 0.2);
+    border: 1px solid rgba(201, 169, 110, 0.4);
+    color: #c9a96e;
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+}
+
+.app-download-text h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 16px;
+    line-height: 1.2;
+}
+
+.app-download-text p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1rem;
+    line-height: 1.7;
+    margin-bottom: 32px;
+}
+
+.btn-download-app {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    background: linear-gradient(135deg, #c9a96e, #a8823a);
+    color: #1a0a2e;
+    padding: 16px 32px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 32px rgba(201, 169, 110, 0.4);
+}
+
+.btn-download-app i {
+    font-size: 1.6rem;
+}
+
+.btn-download-app span {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.btn-download-app small {
+    font-size: 0.7rem;
+    font-weight: 400;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-download-app:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 48px rgba(201, 169, 110, 0.6);
+    color: #1a0a2e;
+}
+
+.app-download-mockup {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.phone-mockup {
+    width: 180px;
+    height: 180px;
+    background: linear-gradient(135deg, rgba(201,169,110,0.2), rgba(201,169,110,0.05));
+    border: 2px solid rgba(201,169,110,0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 5rem;
+    color: #c9a96e;
+    animation: pulse-phone 3s ease-in-out infinite;
+    box-shadow: 0 0 60px rgba(201, 169, 110, 0.2), 0 0 120px rgba(201, 169, 110, 0.1);
+}
+
+@keyframes pulse-phone {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 60px rgba(201, 169, 110, 0.2), 0 0 120px rgba(201, 169, 110, 0.1); }
+    50% { transform: scale(1.05); box-shadow: 0 0 80px rgba(201, 169, 110, 0.35), 0 0 160px rgba(201, 169, 110, 0.15); }
+}
+
+/* Footer APK link */
+.footer-apk-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #c9a96e, #a8823a);
+    color: #111 !important;
+    padding: 10px 20px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+    margin-top: 8px;
+}
+
+.footer-apk-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(201, 169, 110, 0.4);
+}
+
+/* Responsive App Download */
+@media (max-width: 768px) {
+    .app-download-inner {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .app-download-text h2 {
+        font-size: 1.7rem;
+    }
+
+    .phone-mockup {
+        width: 120px;
+        height: 120px;
+        font-size: 3.5rem;
+    }
+
+    .btn-download-app {
+        width: 100%;
+        justify-content: center;
+    }
+}

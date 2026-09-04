@@ -1,12 +1,12 @@
-// AUTOMATICALLY GENERATED CATALOG - DO NOT EDIT MANUALLY
-// Generated on: 1/1/2026, 1:48:23 AM
+// AUTOMATICALLY GENERATED CATALOG
+// Generated on: Fri, 04 Sep 2026 13:37:03 +0200
 
 var productsData = [
     {
         "id": 45,
         "title": "Beach Casual Weekend",
         "price": "KSh 0",
-        "image": "assets/instagram/photos/Beach Casual Weekend.jpg",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/beach_casual_weekend.jpg",
         "videoUrl": null,
         "category": "weekend",
         "type": "product",
@@ -22,10 +22,29 @@ var productsData = [
         ]
     },
     {
+        "id": 101,
+        "title": "Casual Summer Dress",
+        "price": "KSh 5,200",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/dresses_casual-summer-dress_5200_101.jpg",
+        "videoUrl": null,
+        "category": "dresses",
+        "type": "product",
+        "description": "Experience the premium quality of our Casual Summer Dress. Perfect for your unique style.",
+        "sizes": [
+            "S",
+            "M",
+            "L",
+            "XL"
+        ],
+        "colors": [
+            "Default"
+        ]
+    },
+    {
         "id": 201,
         "title": "Black Bags",
-        "price": "KSh 12500",
-        "image": "assets/instagram/photos/CASUAL_Black-Bags_12500_201.jpg",
+        "price": "KSh 12,500",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/casual_black-bags_12500_201.jpg",
         "videoUrl": null,
         "category": "casual",
         "type": "product",
@@ -43,8 +62,8 @@ var productsData = [
     {
         "id": 202,
         "title": "Campus Sneakers",
-        "price": "KSh 5800",
-        "image": "assets/instagram/photos/CASUAL_Campus-Sneakers_5800_202.jpg",
+        "price": "KSh 5,800",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/casual_campus-sneakers_5800_202.jpg",
         "videoUrl": null,
         "category": "casual",
         "type": "product",
@@ -60,67 +79,10 @@ var productsData = [
         ]
     },
     {
-        "id": 6541,
-        "title": "Cheetah Heels",
-        "price": "KSh 0",
-        "image": "assets/instagram/photos/Cheetah Heels.jpg",
-        "videoUrl": null,
-        "category": "general",
-        "type": "product",
-        "description": "Experience the premium quality of our Cheetah Heels. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 6661,
-        "title": "Corporate Casual Date",
-        "price": "KSh 0",
-        "image": "assets/instagram/photos/Corporate Casual Date.jpg",
-        "videoUrl": null,
-        "category": "corporate",
-        "type": "product",
-        "description": "Experience the premium quality of our Corporate Casual Date. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 8961,
-        "title": "Corporate Dresses Elegance",
-        "price": "KSh 0",
-        "image": "assets/instagram/photos/Corporate Dresses Elegance.jpg",
-        "videoUrl": null,
-        "category": "corporate",
-        "type": "product",
-        "description": "Experience the premium quality of our Corporate Dresses Elegance. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
         "id": 301,
         "title": "Black Heels",
-        "price": "KSh 8500",
-        "image": "assets/instagram/photos/CORPORATE_Black-Heels_8500_301.jpg",
+        "price": "KSh 8,500",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/corporate_black-heels_8500_301.jpg",
         "videoUrl": null,
         "category": "corporate",
         "type": "product",
@@ -136,14 +98,14 @@ var productsData = [
         ]
     },
     {
-        "id": 6055,
-        "title": "Curly Wigs",
+        "id": 983,
+        "title": "Wigs",
         "price": "KSh 0",
-        "image": "assets/instagram/photos/Curly Wigs.jpg",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/wigs.jpg",
         "videoUrl": null,
         "category": "wigs",
         "type": "product",
-        "description": "Experience the premium quality of our Curly Wigs. Perfect for your unique style.",
+        "description": "Experience the premium quality of our Wigs. Perfect for your unique style.",
         "sizes": [
             "S",
             "M",
@@ -155,242 +117,14 @@ var productsData = [
         ]
     },
     {
-        "id": 4827,
-        "title": "Dresses 2",
+        "id": 1125,
+        "title": "Sphagetti Dress",
         "price": "KSh 0",
-        "image": "assets/instagram/photos/Dresses 2.jpg",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/sphagetti_dress.jpg",
         "videoUrl": null,
         "category": "dresses",
         "type": "product",
-        "description": "Experience the premium quality of our Dresses 2. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 6799,
-        "title": "Dresses 5",
-        "price": "KSh 0",
-        "image": "assets/instagram/photos/Dresses 5.jpg",
-        "videoUrl": null,
-        "category": "dresses",
-        "type": "product",
-        "description": "Experience the premium quality of our Dresses 5. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 6928,
-        "title": "Dresses 6",
-        "price": "KSh 0",
-        "image": "assets/instagram/photos/Dresses 6.jpg",
-        "videoUrl": null,
-        "category": "dresses",
-        "type": "product",
-        "description": "Experience the premium quality of our Dresses 6. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 6231,
-        "title": "Dresses Corporate 4",
-        "price": "KSh 0",
-        "image": "assets/instagram/photos/Dresses Corporate 4.jpg",
-        "videoUrl": null,
-        "category": "corporate",
-        "type": "product",
-        "description": "Experience the premium quality of our Dresses Corporate 4. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 101,
-        "title": "Casual Summer Dress",
-        "price": "KSh 5200",
-        "image": "assets/instagram/photos/DRESSES_Casual-Summer-Dress_5200_101.jpg",
-        "videoUrl": null,
-        "category": "dresses",
-        "type": "product",
-        "description": "Experience the premium quality of our Casual Summer Dress. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 9748,
-        "title": "Elegant Heels",
-        "price": "KSh 0",
-        "image": "assets/instagram/photos/Elegant Heels.jpg",
-        "videoUrl": null,
-        "category": "general",
-        "type": "product",
-        "description": "Experience the premium quality of our Elegant Heels. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 5769,
-        "title": "Flat Sneakers",
-        "price": "KSh 0",
-        "image": "assets/instagram/photos/Flat Sneakers.jpg",
-        "videoUrl": null,
-        "category": "general",
-        "type": "product",
-        "description": "Experience the premium quality of our Flat Sneakers. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 3089,
-        "title": "Glow Makeup",
-        "price": "KSh 0",
-        "image": "assets/instagram/photos/Glow Makeup.jpg",
-        "videoUrl": null,
-        "category": "makeup",
-        "type": "product",
-        "description": "Experience the premium quality of our Glow Makeup. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 1745,
-        "title": "Handbags 2",
-        "price": "KSh 0",
-        "image": "assets/instagram/photos/Handbags 2.jpg",
-        "videoUrl": null,
-        "category": "general",
-        "type": "product",
-        "description": "Experience the premium quality of our Handbags 2. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 5800,
-        "title": "Handbags 3",
-        "price": "KSh 0",
-        "image": "assets/instagram/photos/Handbags 3.jpg",
-        "videoUrl": null,
-        "category": "general",
-        "type": "product",
-        "description": "Experience the premium quality of our Handbags 3. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 4625,
-        "title": "Handbags 4",
-        "price": "KSh 0",
-        "image": "assets/instagram/photos/Handbags 4.jpg",
-        "videoUrl": null,
-        "category": "general",
-        "type": "product",
-        "description": "Experience the premium quality of our Handbags 4. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 7739,
-        "title": "Heels 4",
-        "price": "KSh 0",
-        "image": "assets/instagram/photos/Heels 4.jpg",
-        "videoUrl": null,
-        "category": "general",
-        "type": "product",
-        "description": "Experience the premium quality of our Heels 4. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 2321,
-        "title": "Heels 5",
-        "price": "KSh 0",
-        "image": "assets/instagram/photos/Heels 5.jpg",
-        "videoUrl": null,
-        "category": "general",
-        "type": "product",
-        "description": "Experience the premium quality of our Heels 5. Perfect for your unique style.",
+        "description": "Experience the premium quality of our Sphagetti Dress. Perfect for your unique style.",
         "sizes": [
             "S",
             "M",
@@ -405,7 +139,7 @@ var productsData = [
         "id": 1177,
         "title": "Heels Corporate",
         "price": "KSh 0",
-        "image": "assets/instagram/photos/Heels Corporate.jpg",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/heels_corporate.jpg",
         "videoUrl": null,
         "category": "corporate",
         "type": "product",
@@ -421,14 +155,14 @@ var productsData = [
         ]
     },
     {
-        "id": 7662,
-        "title": "Hnadbags 5",
+        "id": 1480,
+        "title": "Stilleto Heels",
         "price": "KSh 0",
-        "image": "assets/instagram/photos/Hnadbags 5.jpg",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/stilleto_heels.jpg",
         "videoUrl": null,
         "category": "general",
         "type": "product",
-        "description": "Experience the premium quality of our Hnadbags 5. Perfect for your unique style.",
+        "description": "Experience the premium quality of our Stilleto Heels. Perfect for your unique style.",
         "sizes": [
             "S",
             "M",
@@ -440,14 +174,14 @@ var productsData = [
         ]
     },
     {
-        "id": 8692,
-        "title": "Jeans Casual",
+        "id": 1745,
+        "title": "Handbags 2",
         "price": "KSh 0",
-        "image": "assets/instagram/photos/Jeans Casual.jpg",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/handbags_2.jpg",
         "videoUrl": null,
-        "category": "casual",
+        "category": "general",
         "type": "product",
-        "description": "Experience the premium quality of our Jeans Casual. Perfect for your unique style.",
+        "description": "Experience the premium quality of our Handbags 2. Perfect for your unique style.",
         "sizes": [
             "S",
             "M",
@@ -459,14 +193,71 @@ var productsData = [
         ]
     },
     {
-        "id": 4185,
-        "title": "Jeans Weekend",
+        "id": 2056,
+        "title": "Wigs 4",
         "price": "KSh 0",
-        "image": "assets/instagram/photos/Jeans Weekend.jpg",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/wigs_4.jpg",
         "videoUrl": null,
-        "category": "weekend",
+        "category": "wigs",
         "type": "product",
-        "description": "Experience the premium quality of our Jeans Weekend. Perfect for your unique style.",
+        "description": "Experience the premium quality of our Wigs 4. Perfect for your unique style.",
+        "sizes": [
+            "S",
+            "M",
+            "L",
+            "XL"
+        ],
+        "colors": [
+            "Default"
+        ]
+    },
+    {
+        "id": 2321,
+        "title": "Heels 5",
+        "price": "KSh 0",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/heels_5.jpg",
+        "videoUrl": null,
+        "category": "general",
+        "type": "product",
+        "description": "Experience the premium quality of our Heels 5. Perfect for your unique style.",
+        "sizes": [
+            "S",
+            "M",
+            "L",
+            "XL"
+        ],
+        "colors": [
+            "Default"
+        ]
+    },
+    {
+        "id": 2937,
+        "title": "Stillettos",
+        "price": "KSh 0",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/stillettos.jpg",
+        "videoUrl": null,
+        "category": "general",
+        "type": "product",
+        "description": "Experience the premium quality of our Stillettos. Perfect for your unique style.",
+        "sizes": [
+            "S",
+            "M",
+            "L",
+            "XL"
+        ],
+        "colors": [
+            "Default"
+        ]
+    },
+    {
+        "id": 3089,
+        "title": "Glow Makeup",
+        "price": "KSh 0",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/glow_makeup.jpg",
+        "videoUrl": null,
+        "category": "makeup",
+        "type": "product",
+        "description": "Experience the premium quality of our Glow Makeup. Perfect for your unique style.",
         "sizes": [
             "S",
             "M",
@@ -481,7 +272,7 @@ var productsData = [
         "id": 3372,
         "title": "Lifestyle Tracksuits",
         "price": "KSh 0",
-        "image": "assets/instagram/photos/Lifestyle Tracksuits.jpg",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/lifestyle_tracksuits.jpg",
         "videoUrl": null,
         "category": "general",
         "type": "product",
@@ -500,7 +291,7 @@ var productsData = [
         "id": 3461,
         "title": "Makeup 2",
         "price": "KSh 0",
-        "image": "assets/instagram/photos/Makeup 2.jpg",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/makeup_2.jpg",
         "videoUrl": null,
         "category": "makeup",
         "type": "product",
@@ -516,181 +307,10 @@ var productsData = [
         ]
     },
     {
-        "id": 4411,
-        "title": "Makeup",
-        "price": "KSh 0",
-        "image": "assets/instagram/photos/Makeup.jpg",
-        "videoUrl": null,
-        "category": "makeup",
-        "type": "product",
-        "description": "Experience the premium quality of our Makeup. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 5770,
-        "title": "Mummy Jeans",
-        "price": "KSh 0",
-        "image": "assets/instagram/photos/Mummy Jeans.jpg",
-        "videoUrl": null,
-        "category": "general",
-        "type": "product",
-        "description": "Experience the premium quality of our Mummy Jeans. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 9271,
-        "title": "Nude Heels",
-        "price": "KSh 0",
-        "image": "assets/instagram/photos/Nude Heels.jpg",
-        "videoUrl": null,
-        "category": "general",
-        "type": "product",
-        "description": "Experience the premium quality of our Nude Heels. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 7562,
-        "title": "Shoes Dance Casual",
-        "price": "KSh 0",
-        "image": "assets/instagram/photos/Shoes Dance Casual.jpg",
-        "videoUrl": null,
-        "category": "shoes",
-        "type": "product",
-        "description": "Experience the premium quality of our Shoes Dance Casual. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 9515,
-        "title": "Simmi Heels",
-        "price": "KSh 0",
-        "image": "assets/instagram/photos/Simmi Heels.jpg",
-        "videoUrl": null,
-        "category": "general",
-        "type": "product",
-        "description": "Experience the premium quality of our Simmi Heels. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 8679,
-        "title": "Sneakers 3",
-        "price": "KSh 0",
-        "image": "assets/instagram/photos/Sneakers 3.jpg",
-        "videoUrl": null,
-        "category": "general",
-        "type": "product",
-        "description": "Experience the premium quality of our Sneakers 3. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 1125,
-        "title": "Sphagetti Dress",
-        "price": "KSh 0",
-        "image": "assets/instagram/photos/Sphagetti Dress.jpg",
-        "videoUrl": null,
-        "category": "dresses",
-        "type": "product",
-        "description": "Experience the premium quality of our Sphagetti Dress. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 1480,
-        "title": "Stilleto Heels",
-        "price": "KSh 0",
-        "image": "assets/instagram/photos/Stilleto Heels.jpg",
-        "videoUrl": null,
-        "category": "general",
-        "type": "product",
-        "description": "Experience the premium quality of our Stilleto Heels. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 2937,
-        "title": "Stillettos",
-        "price": "KSh 0",
-        "image": "assets/instagram/photos/Stillettos.jpg",
-        "videoUrl": null,
-        "category": "general",
-        "type": "product",
-        "description": "Experience the premium quality of our Stillettos. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
         "id": 3896,
         "title": "Tracksuit Weekend",
         "price": "KSh 0",
-        "image": "assets/instagram/photos/Tracksuit Weekend.jpg",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/tracksuit_weekend.jpg",
         "videoUrl": null,
         "category": "weekend",
         "type": "product",
@@ -706,29 +326,10 @@ var productsData = [
         ]
     },
     {
-        "id": 4173,
-        "title": "Tracksuits Lifestyle",
-        "price": "KSh 0",
-        "image": "assets/instagram/photos/Tracksuits Lifestyle.jpg",
-        "videoUrl": null,
-        "category": "general",
-        "type": "product",
-        "description": "Experience the premium quality of our Tracksuits Lifestyle. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
         "id": 4155,
         "title": "Waist Jeans",
         "price": "KSh 0",
-        "image": "assets/instagram/photos/Waist Jeans.jpg",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/waist_jeans.jpg",
         "videoUrl": null,
         "category": "general",
         "type": "product",
@@ -744,10 +345,105 @@ var productsData = [
         ]
     },
     {
+        "id": 4173,
+        "title": "Tracksuits Lifestyle",
+        "price": "KSh 0",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/tracksuits_lifestyle.jpg",
+        "videoUrl": null,
+        "category": "general",
+        "type": "product",
+        "description": "Experience the premium quality of our Tracksuits Lifestyle. Perfect for your unique style.",
+        "sizes": [
+            "S",
+            "M",
+            "L",
+            "XL"
+        ],
+        "colors": [
+            "Default"
+        ]
+    },
+    {
+        "id": 4185,
+        "title": "Jeans Weekend",
+        "price": "KSh 0",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/jeans_weekend.jpg",
+        "videoUrl": null,
+        "category": "weekend",
+        "type": "product",
+        "description": "Experience the premium quality of our Jeans Weekend. Perfect for your unique style.",
+        "sizes": [
+            "S",
+            "M",
+            "L",
+            "XL"
+        ],
+        "colors": [
+            "Default"
+        ]
+    },
+    {
+        "id": 4411,
+        "title": "Makeup",
+        "price": "KSh 0",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/makeup.jpg",
+        "videoUrl": null,
+        "category": "makeup",
+        "type": "product",
+        "description": "Experience the premium quality of our Makeup. Perfect for your unique style.",
+        "sizes": [
+            "S",
+            "M",
+            "L",
+            "XL"
+        ],
+        "colors": [
+            "Default"
+        ]
+    },
+    {
+        "id": 4625,
+        "title": "Handbags 4",
+        "price": "KSh 0",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/handbags_4.jpg",
+        "videoUrl": null,
+        "category": "general",
+        "type": "product",
+        "description": "Experience the premium quality of our Handbags 4. Perfect for your unique style.",
+        "sizes": [
+            "S",
+            "M",
+            "L",
+            "XL"
+        ],
+        "colors": [
+            "Default"
+        ]
+    },
+    {
+        "id": 4827,
+        "title": "Dresses 2",
+        "price": "KSh 0",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/dresses_2.jpg",
+        "videoUrl": null,
+        "category": "dresses",
+        "type": "product",
+        "description": "Experience the premium quality of our Dresses 2. Perfect for your unique style.",
+        "sizes": [
+            "S",
+            "M",
+            "L",
+            "XL"
+        ],
+        "colors": [
+            "Default"
+        ]
+    },
+    {
         "id": 5573,
         "title": "White Heels",
         "price": "KSh 0",
-        "image": "assets/instagram/photos/White Heels.jpg",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/white_heels.jpg",
         "videoUrl": null,
         "category": "general",
         "type": "product",
@@ -763,14 +459,14 @@ var productsData = [
         ]
     },
     {
-        "id": 6790,
-        "title": "Wigs 2",
+        "id": 5769,
+        "title": "Flat Sneakers",
         "price": "KSh 0",
-        "image": "assets/instagram/photos/Wigs 2.jpg",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/flat_sneakers.jpg",
         "videoUrl": null,
-        "category": "wigs",
+        "category": "general",
         "type": "product",
-        "description": "Experience the premium quality of our Wigs 2. Perfect for your unique style.",
+        "description": "Experience the premium quality of our Flat Sneakers. Perfect for your unique style.",
         "sizes": [
             "S",
             "M",
@@ -782,14 +478,14 @@ var productsData = [
         ]
     },
     {
-        "id": 2056,
-        "title": "Wigs 4",
+        "id": 5770,
+        "title": "Mummy Jeans",
         "price": "KSh 0",
-        "image": "assets/instagram/photos/Wigs 4.jpg",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/mummy_jeans.jpg",
         "videoUrl": null,
-        "category": "wigs",
+        "category": "general",
         "type": "product",
-        "description": "Experience the premium quality of our Wigs 4. Perfect for your unique style.",
+        "description": "Experience the premium quality of our Mummy Jeans. Perfect for your unique style.",
         "sizes": [
             "S",
             "M",
@@ -801,14 +497,14 @@ var productsData = [
         ]
     },
     {
-        "id": 983,
-        "title": "Wigs",
+        "id": 5800,
+        "title": "Handbags 3",
         "price": "KSh 0",
-        "image": "assets/instagram/photos/Wigs.jpg",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/handbags_3.jpg",
         "videoUrl": null,
-        "category": "wigs",
+        "category": "general",
         "type": "product",
-        "description": "Experience the premium quality of our Wigs. Perfect for your unique style.",
+        "description": "Experience the premium quality of our Handbags 3. Perfect for your unique style.",
         "sizes": [
             "S",
             "M",
@@ -823,7 +519,7 @@ var productsData = [
         "id": 5825,
         "title": "Zara Heels",
         "price": "KSh 0",
-        "image": "assets/instagram/photos/Zara Heels.jpg",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/zara_heels.jpg",
         "videoUrl": null,
         "category": "general",
         "type": "product",
@@ -839,14 +535,14 @@ var productsData = [
         ]
     },
     {
-        "id": 5114,
-        "title": "Casual 3",
+        "id": 6055,
+        "title": "Curly Wigs",
         "price": "KSh 0",
-        "image": null,
-        "videoUrl": "assets/instagram/videos/Casual 3.mp4",
-        "category": "casual",
-        "type": "social",
-        "description": "Experience the premium quality of our Casual 3. Perfect for your unique style.",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/curly_wigs.jpg",
+        "videoUrl": null,
+        "category": "wigs",
+        "type": "product",
+        "description": "Experience the premium quality of our Curly Wigs. Perfect for your unique style.",
         "sizes": [
             "S",
             "M",
@@ -858,90 +554,14 @@ var productsData = [
         ]
     },
     {
-        "id": 9705,
-        "title": "Casual Wear Weekend",
+        "id": 6231,
+        "title": "Dresses Corporate 4",
         "price": "KSh 0",
-        "image": null,
-        "videoUrl": "assets/instagram/videos/Casual Wear Weekend.mp4",
-        "category": "weekend",
-        "type": "social",
-        "description": "Experience the premium quality of our Casual Wear Weekend. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 3130,
-        "title": "Casual Weekend 2",
-        "price": "KSh 0",
-        "image": null,
-        "videoUrl": "assets/instagram/videos/Casual Weekend 2.mp4",
-        "category": "weekend",
-        "type": "social",
-        "description": "Experience the premium quality of our Casual Weekend 2. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 6713,
-        "title": "Casual Weekend Club",
-        "price": "KSh 0",
-        "image": null,
-        "videoUrl": "assets/instagram/videos/Casual Weekend Club.mp4",
-        "category": "weekend",
-        "type": "social",
-        "description": "Experience the premium quality of our Casual Weekend Club. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 3087,
-        "title": "Dress Dinner Out",
-        "price": "KSh 0",
-        "image": null,
-        "videoUrl": "assets/instagram/videos/Dress Dinner Out.mp4",
-        "category": "dresses",
-        "type": "social",
-        "description": "Experience the premium quality of our Dress Dinner Out. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 7734,
-        "title": "Dresses Corporate 2",
-        "price": "KSh 0",
-        "image": null,
-        "videoUrl": "assets/instagram/videos/Dresses Corporate 2.mp4",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/dresses_corporate_4.jpg",
+        "videoUrl": null,
         "category": "corporate",
-        "type": "social",
-        "description": "Experience the premium quality of our Dresses Corporate 2. Perfect for your unique style.",
+        "type": "product",
+        "description": "Experience the premium quality of our Dresses Corporate 4. Perfect for your unique style.",
         "sizes": [
             "S",
             "M",
@@ -953,71 +573,14 @@ var productsData = [
         ]
     },
     {
-        "id": 1188,
-        "title": "Dresses Corporate Elegante",
+        "id": 6541,
+        "title": "Cheetah Heels",
         "price": "KSh 0",
-        "image": null,
-        "videoUrl": "assets/instagram/videos/Dresses Corporate Elegante.mp4",
-        "category": "corporate",
-        "type": "social",
-        "description": "Experience the premium quality of our Dresses Corporate Elegante. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 7089,
-        "title": "Dresses",
-        "price": "KSh 0",
-        "image": null,
-        "videoUrl": "assets/instagram/videos/Dresses.mp4",
-        "category": "dresses",
-        "type": "social",
-        "description": "Experience the premium quality of our Dresses. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 8272,
-        "title": "Elegant Work Dresses",
-        "price": "KSh 0",
-        "image": null,
-        "videoUrl": "assets/instagram/videos/Elegant Work Dresses.mp4",
-        "category": "dresses",
-        "type": "social",
-        "description": "Experience the premium quality of our Elegant Work Dresses. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 5177,
-        "title": "Elegante Heels",
-        "price": "KSh 0",
-        "image": null,
-        "videoUrl": "assets/instagram/videos/Elegante Heels.mp4",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/cheetah_heels.jpg",
+        "videoUrl": null,
         "category": "general",
-        "type": "social",
-        "description": "Experience the premium quality of our Elegante Heels. Perfect for your unique style.",
+        "type": "product",
+        "description": "Experience the premium quality of our Cheetah Heels. Perfect for your unique style.",
         "sizes": [
             "S",
             "M",
@@ -1029,14 +592,90 @@ var productsData = [
         ]
     },
     {
-        "id": 1387,
-        "title": "Flat shoes",
+        "id": 6661,
+        "title": "Corporate Casual Date",
         "price": "KSh 0",
-        "image": null,
-        "videoUrl": "assets/instagram/videos/Flat shoes.mp4",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/corporate_casual_date.jpg",
+        "videoUrl": null,
+        "category": "corporate",
+        "type": "product",
+        "description": "Experience the premium quality of our Corporate Casual Date. Perfect for your unique style.",
+        "sizes": [
+            "S",
+            "M",
+            "L",
+            "XL"
+        ],
+        "colors": [
+            "Default"
+        ]
+    },
+    {
+        "id": 6790,
+        "title": "Wigs 2",
+        "price": "KSh 0",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/wigs_2.jpg",
+        "videoUrl": null,
+        "category": "wigs",
+        "type": "product",
+        "description": "Experience the premium quality of our Wigs 2. Perfect for your unique style.",
+        "sizes": [
+            "S",
+            "M",
+            "L",
+            "XL"
+        ],
+        "colors": [
+            "Default"
+        ]
+    },
+    {
+        "id": 6799,
+        "title": "Dresses 5",
+        "price": "KSh 0",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/dresses_5.jpg",
+        "videoUrl": null,
+        "category": "dresses",
+        "type": "product",
+        "description": "Experience the premium quality of our Dresses 5. Perfect for your unique style.",
+        "sizes": [
+            "S",
+            "M",
+            "L",
+            "XL"
+        ],
+        "colors": [
+            "Default"
+        ]
+    },
+    {
+        "id": 6928,
+        "title": "Dresses 6",
+        "price": "KSh 0",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/dresses_6.jpg",
+        "videoUrl": null,
+        "category": "dresses",
+        "type": "product",
+        "description": "Experience the premium quality of our Dresses 6. Perfect for your unique style.",
+        "sizes": [
+            "S",
+            "M",
+            "L",
+            "XL"
+        ],
+        "colors": [
+            "Default"
+        ]
+    },
+    {
+        "id": 7562,
+        "title": "Shoes Dance Casual",
+        "price": "KSh 0",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/shoes_dance_casual.jpg",
+        "videoUrl": null,
         "category": "shoes",
-        "type": "social",
-        "description": "Experience the premium quality of our Flat shoes. Perfect for your unique style.",
+        "type": "product",
+        "description": "Experience the premium quality of our Shoes Dance Casual. Perfect for your unique style.",
         "sizes": [
             "S",
             "M",
@@ -1048,14 +687,14 @@ var productsData = [
         ]
     },
     {
-        "id": 324,
-        "title": "Handbags",
+        "id": 7662,
+        "title": "Hnadbags 5",
         "price": "KSh 0",
-        "image": null,
-        "videoUrl": "assets/instagram/videos/Handbags.mp4",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/hnadbags_5.jpg",
+        "videoUrl": null,
         "category": "general",
-        "type": "social",
-        "description": "Experience the premium quality of our Handbags. Perfect for your unique style.",
+        "type": "product",
+        "description": "Experience the premium quality of our Hnadbags 5. Perfect for your unique style.",
         "sizes": [
             "S",
             "M",
@@ -1067,33 +706,14 @@ var productsData = [
         ]
     },
     {
-        "id": 4676,
-        "title": "Heels Casual Date Club",
+        "id": 7739,
+        "title": "Heels 4",
         "price": "KSh 0",
-        "image": null,
-        "videoUrl": "assets/instagram/videos/Heels Casual Date Club.mp4",
-        "category": "casual",
-        "type": "social",
-        "description": "Experience the premium quality of our Heels Casual Date Club. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 4787,
-        "title": "Heels Elegance",
-        "price": "KSh 0",
-        "image": null,
-        "videoUrl": "assets/instagram/videos/Heels Elegance.mp4",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/heels_4.jpg",
+        "videoUrl": null,
         "category": "general",
-        "type": "social",
-        "description": "Experience the premium quality of our Heels Elegance. Perfect for your unique style.",
+        "type": "product",
+        "description": "Experience the premium quality of our Heels 4. Perfect for your unique style.",
         "sizes": [
             "S",
             "M",
@@ -1105,14 +725,14 @@ var productsData = [
         ]
     },
     {
-        "id": 8183,
-        "title": "Heely Dolls",
+        "id": 8679,
+        "title": "Sneakers 3",
         "price": "KSh 0",
-        "image": null,
-        "videoUrl": "assets/instagram/videos/Heely Dolls.mp4",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/sneakers_3.jpg",
+        "videoUrl": null,
         "category": "general",
-        "type": "social",
-        "description": "Experience the premium quality of our Heely Dolls. Perfect for your unique style.",
+        "type": "product",
+        "description": "Experience the premium quality of our Sneakers 3. Perfect for your unique style.",
         "sizes": [
             "S",
             "M",
@@ -1124,51 +744,13 @@ var productsData = [
         ]
     },
     {
-        "id": 1625,
-        "title": "High Heels",
-        "price": "KSh 0",
-        "image": null,
-        "videoUrl": "assets/instagram/videos/High Heels.mp4",
-        "category": "general",
-        "type": "social",
-        "description": "Experience the premium quality of our High Heels. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 5835,
-        "title": "Jeans Casual Weekend",
-        "price": "KSh 0",
-        "image": null,
-        "videoUrl": "assets/instagram/videos/Jeans Casual Weekend.mp4",
-        "category": "weekend",
-        "type": "social",
-        "description": "Experience the premium quality of our Jeans Casual Weekend. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 2341,
+        "id": 8692,
         "title": "Jeans Casual",
         "price": "KSh 0",
-        "image": null,
-        "videoUrl": "assets/instagram/videos/Jeans Casual.mp4",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/jeans_casual.jpg",
+        "videoUrl": null,
         "category": "casual",
-        "type": "social",
+        "type": "product",
         "description": "Experience the premium quality of our Jeans Casual. Perfect for your unique style.",
         "sizes": [
             "S",
@@ -1181,14 +763,14 @@ var productsData = [
         ]
     },
     {
-        "id": 1965,
-        "title": "Lifestyle Casual",
+        "id": 8961,
+        "title": "Corporate Dresses Elegance",
         "price": "KSh 0",
-        "image": null,
-        "videoUrl": "assets/instagram/videos/Lifestyle Casual.mp4",
-        "category": "casual",
-        "type": "social",
-        "description": "Experience the premium quality of our Lifestyle Casual. Perfect for your unique style.",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/corporate_dresses_elegance.jpg",
+        "videoUrl": null,
+        "category": "corporate",
+        "type": "product",
+        "description": "Experience the premium quality of our Corporate Dresses Elegance. Perfect for your unique style.",
         "sizes": [
             "S",
             "M",
@@ -1200,33 +782,14 @@ var productsData = [
         ]
     },
     {
-        "id": 8304,
-        "title": "Shoes Corporate",
+        "id": 9271,
+        "title": "Nude Heels",
         "price": "KSh 0",
-        "image": null,
-        "videoUrl": "assets/instagram/videos/Shoes Corporate.mp4",
-        "category": "shoes",
-        "type": "social",
-        "description": "Experience the premium quality of our Shoes Corporate. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 6515,
-        "title": "Sneakers",
-        "price": "KSh 0",
-        "image": null,
-        "videoUrl": "assets/instagram/videos/Sneakers.mp4",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/nude_heels.jpg",
+        "videoUrl": null,
         "category": "general",
-        "type": "social",
-        "description": "Experience the premium quality of our Sneakers. Perfect for your unique style.",
+        "type": "product",
+        "description": "Experience the premium quality of our Nude Heels. Perfect for your unique style.",
         "sizes": [
             "S",
             "M",
@@ -1238,14 +801,14 @@ var productsData = [
         ]
     },
     {
-        "id": 1433,
-        "title": "Tracksuits Casual",
+        "id": 9515,
+        "title": "Simmi Heels",
         "price": "KSh 0",
-        "image": null,
-        "videoUrl": "assets/instagram/videos/Tracksuits Casual.mp4",
-        "category": "casual",
-        "type": "social",
-        "description": "Experience the premium quality of our Tracksuits Casual. Perfect for your unique style.",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/simmi_heels.jpg",
+        "videoUrl": null,
+        "category": "general",
+        "type": "product",
+        "description": "Experience the premium quality of our Simmi Heels. Perfect for your unique style.",
         "sizes": [
             "S",
             "M",
@@ -1257,33 +820,14 @@ var productsData = [
         ]
     },
     {
-        "id": 1730,
-        "title": "Weekend Club Dresses",
+        "id": 9748,
+        "title": "Elegant Heels",
         "price": "KSh 0",
-        "image": null,
-        "videoUrl": "assets/instagram/videos/Weekend Club Dresses.mp4",
-        "category": "weekend",
-        "type": "social",
-        "description": "Experience the premium quality of our Weekend Club Dresses. Perfect for your unique style.",
-        "sizes": [
-            "S",
-            "M",
-            "L",
-            "XL"
-        ],
-        "colors": [
-            "Default"
-        ]
-    },
-    {
-        "id": 2601,
-        "title": "Weekend Lifestyle",
-        "price": "KSh 0",
-        "image": null,
-        "videoUrl": "assets/instagram/videos/Weekend Lifestyle.mp4",
-        "category": "weekend",
-        "type": "social",
-        "description": "Experience the premium quality of our Weekend Lifestyle. Perfect for your unique style.",
+        "image": "https://yteejssnesajnuibfacx.supabase.co/storage/v1/object/public/products/elegant_heels.jpg",
+        "videoUrl": null,
+        "category": "general",
+        "type": "product",
+        "description": "Experience the premium quality of our Elegant Heels. Perfect for your unique style.",
         "sizes": [
             "S",
             "M",

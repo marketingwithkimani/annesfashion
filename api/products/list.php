@@ -6,6 +6,7 @@
 require_once __DIR__ . '/../../backend/config/cors.php';
 require_once __DIR__ . '/../../backend/config/database.php';
 require_once __DIR__ . '/../../backend/utils/response.php';
+require_once __DIR__ . '/../../backend/utils/supabase.php';
 
 // Only accept GET requests
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
@@ -20,11 +21,41 @@ try {
     $search = isset($_GET['search']) ? $_GET['search'] : null;
     $active_only = isset($_GET['active_only']) ? filter_var($_GET['active_only'], FILTER_VALIDATE_BOOLEAN) : true;
     
+    // Check if preorder_only is requested
+    if (isset($_GET['preorder_only'])) {
+        $preorderMode = 'off';
+        try {
+            // Check Supabase first for real-time toggle from mobile app
+            $sup = SupabaseClient::getInstance();
+            $supRes = $sup->request('GET', 'settings?setting_key=eq.pre_order_mode&select=setting_value');
+            if (!empty($supRes['data'][0]['setting_value'])) {
+                $preorderMode = strtolower($supRes['data'][0]['setting_value']);
+            }
+        } catch (Throwable $e) {}
+
+        if ($preorderMode === 'off') {
+            // Fallback to local DB
+            try {
+                $setStmt = $db->query("SELECT setting_value FROM settings WHERE setting_key = 'pre_order_mode'");
+                $setRow = $setStmt->fetch();
+                if ($setRow && strtolower($setRow['setting_value']) === 'on') {
+                    $preorderMode = 'on';
+                }
+            } catch (Throwable $e) {}
+        }
+
+        // If pre-order mode is disabled globally, return empty immediately
+        if ($preorderMode !== 'on') {
+            Response::success([], 'Pre-order mode is currently disabled');
+            exit;
+        }
+    }
+
     // Build query
     $sql = "
         SELECT 
             p.*,
-            IFNULL(SUM(i.quantity), 0) as total_stock
+            COALESCE(SUM(i.quantity), 0) as total_stock
         FROM products p
         LEFT JOIN inventory i ON p.id = i.product_id
         WHERE 1=1
@@ -47,8 +78,14 @@ try {
     }
 
     if (isset($_GET['preorder_only'])) {
-        // Also enforce is_active so hidden products don't leak publicly
-        $sql .= " AND p.allow_preorder = 1 AND p.is_active = 1";
+        // When pre_order_mode is ON: check if specific products are flagged
+        $countExplicit = (int)$db->query("SELECT COUNT(*) FROM products WHERE allow_preorder = 1 AND is_active = 1")->fetchColumn();
+        if ($countExplicit > 0) {
+            $sql .= " AND p.allow_preorder = 1 AND p.is_active = 1";
+        } else {
+            // If none explicitly marked, show active products in the pre-order showcase
+            $sql .= " AND p.is_active = 1";
+        }
     }
     
     $sql .= " GROUP BY p.id ORDER BY p.created_at DESC";
