@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="theme-color" content="#D4AF37">
+    <title>Staff Portal - Anne's Fashion Line</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="staff.css">
+    <link rel="manifest" href="../manifest.json">
+</head>
+
+<body>
+    <!-- Redirecting State -->
+    <div id="loginScreen" class="screen active">
+        <div class="login-container">
+            <div class="logo-section">
+                <i class="fas fa-store fa-3x"></i>
+                <h1>Staff Portal</h1>
+                <p>Checking authentication...</p>
+                <div class="spinner" style="margin: 20px auto;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainScreen" class="screen">
+        <!-- Header -->
+        <header class="app-header">
+            <button class="menu-btn" id="menuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1>Anne's Fashion</h1>
+            <button class="logout-btn" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-view="record">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Record Sale</span>
+            </button>
+            <button class="nav-item" data-view="history">
+                <i class="fas fa-history"></i>
+                <span>My Sales</span>
+            </button>
+            <button class="nav-item" data-view="products">
+                <i class="fas fa-box"></i>
+                <span>Products</span>
+            </button>
+            <button class="nav-item" data-view="stock">
+                <i class="fas fa-warehouse"></i>
+                <span>Stock</span>
+            </button>
+            <button class="nav-item" data-view="chat" id="navChat">
+                <i class="fas fa-comments"></i>
+                <span>Live Chat</span>
+            </button>
+        </nav>
+
+        <!-- Record Sale View -->
+        <div id="recordView" class="view active">
+            <div class="view-content">
+                <div class="view-header">
+                    <h2><i class="fas fa-shopping-cart"></i> Record In-Store Sale</h2>
+                </div>
+
+                <!-- Product Search -->
+                <div class="search-section">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="productSearch" placeholder="Search products...">
+                    </div>
+                    <select id="categoryFilter" class="category-filter">
+                        <option value="">All Categories</option>
+                        <option value="casual">Casual</option>
+                        <option value="corporate">Corporate</option>
+                        <option value="weekend">Weekend</option>
+                        <option value="dresses">Dresses</option>
+                        <option value="wigs">Wigs</option>
+                        <option value="makeup">Makeup</option>
+                        <option value="shoes">Shoes</option>
+                    </select>
+                </div>
+
+                <!-- Product Results -->
+                <div id="productResults" class="product-list"></div>
+
+                <!-- Cart -->
+                <div id="cartSection" class="cart-section" style="display: none;">
+                    <div class="cart-header">
+                        <h3><i class="fas fa-shopping-bag"></i> Sale Items</h3>
+                        <button class="btn btn-sm btn-secondary" id="clearCartBtn">Clear</button>
+                    </div>
+
+                    <div id="cartItems" class="cart-items"></div>
+
+                    <div class="cart-total">
+                        <span>Total:</span>
+                        <span id="cartTotal">KSh 0</span>
+                    </div>
+
+                    <!-- Payment Details -->
+                    <div class="payment-section">
+                        <h4>Payment Details</h4>
+
+                        <div class="form-group">
+                            <label>Customer Name (Optional)</label>
+                            <input type="text" id="customerName" placeholder="Walk-in Customer">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Payment Method *</label>
+                            <div class="payment-methods">
+                                <button class="payment-btn" data-method="cash">
+                                    <i class="fas fa-money-bill"></i> Cash
+                                </button>
+                                <button class="payment-btn" data-method="mpesa">
+                                    <i class="fas fa-mobile-alt"></i> M-Pesa
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="mpesaField" class="form-group" style="display: none;">
+                            <label>M-Pesa Code</label>
+                            <input type="text" id="mpesaCode" placeholder="e.g. QCX8H9M2">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Notes (Optional)</label>
+                            <textarea id="saleNotes" rows="2" placeholder="Additional notes..."></textarea>
+                        </div>
+
+                        <button class="btn btn-primary btn-block btn-lg" id="confirmSaleBtn" disabled>
+                            <i class="fas fa-check-circle"></i> Confirm Sale
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Sales View -->
+        <div id="historyView" class="view">
+            <div class="view-content">
+                <div class="view-header">
+                    <h2><i class="fas fa-history"></i> My Sales Today</h2>
+                </div>
+
+                <div id="todayStats" class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">Sales Count</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">KSh 0</div>
+                        <div class="stat-label">Revenue</div>
+                    </div>
+                </div>
+
+                <div id="salesHistory" class="sales-list"></div>
+            </div>
+        </div>
+
+        <!-- Products View -->
+        <div id="productsView" class="view">
+            <div class="view-content">
+                <div class="view-header">
+                    <h2><i class="fas fa-box"></i> Product Catalog</h2>
+                </div>
+
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="catalogSearch" placeholder="Search all products...">
+                </div>
+
+                <div id="catalogList" class="product-grid"></div>
+            </div>
+        </div>
+
+        <!-- Stock View -->
+        <div id="stockView" class="view">
+            <div class="view-content">
+                <div class="view-header">
+                    <h2><i class="fas fa-warehouse"></i> Stock Levels</h2>
+                    <button class="btn btn-sm" id="refreshStockBtn">
+                        <i class="fas fa-sync"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="filter-tabs">
+                    <button class="filter-tab active" data-filter="all">All Items</button>
+                    <button class="filter-tab" data-filter="low">Low Stock</button>
+                </div>
+
+                <div id="stockList" class="stock-list"></div>
+            </div>
+        </div>
+
+        <!-- Live Chat View -->
+        <div id="chatView" class="view">
+            <div class="view-content">
+                <div class="view-header">
+                    <h2><i class="fas fa-comments"></i> Customer Support Chat</h2>
+                    <button class="btn btn-sm" id="refreshChatBtn">
+                        <i class="fas fa-sync"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="filter-tabs" id="chatFilterTabs">
+                    <button class="filter-tab active" data-chat-filter="pending">Pending Requests</button>
+                    <button class="filter-tab" data-chat-filter="assigned">Active Chats</button>
+                    <button class="filter-tab" data-chat-filter="all">All</button>
+                </div>
+
+                <div id="staffChatList" class="staff-chat-list" style="margin-top: 15px;"></div>
+
+                <!-- Chat Detail Container (shown when a chat is selected) -->
+                <div id="staffChatDetail" class="staff-chat-detail" style="display: none; margin-top: 15px; background: #fff; border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
+                        <div>
+                            <h3 id="staffChatCustomerName" style="margin: 0; font-size: 1.1rem; color: #111;">Customer</h3>
+                            <span id="staffChatContextInfo" style="font-size: 0.78rem; color: #666;">Product: None</span>
+                        </div>
+                        <button class="btn btn-sm btn-secondary" id="closeStaffChatDetail">Back to List</button>
+                    </div>
+
+                    <div id="staffChatMessagesContainer" style="height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 10px; background: #f8f9fa; border-radius: 8px; margin-bottom: 10px;"></div>
+
+                    <div id="staffChatActions" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button class="btn btn-primary btn-sm" id="acceptChatBtn" style="flex: 1;"><i class="fas fa-user-check"></i> Accept / Take Over</button>
+                        <button class="btn btn-secondary btn-sm" id="resolveChatBtn"><i class="fas fa-check"></i> Resolve</button>
+                        <button class="btn btn-secondary btn-sm" id="resumeAIChatBtn"><i class="fas fa-robot"></i> Resume AI</button>
+                    </div>
+
+                    <div id="staffChatInputArea" style="display: flex; gap: 8px; margin-top: 10px;">
+                        <input type="text" id="staffChatInput" placeholder="Type your response..." style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 20px; outline: none;">
+                        <button class="btn btn-primary" id="staffSendMsgBtn" style="border-radius: 50%; width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center;"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script src="staff.js"></script>
+</body>
+
+</html>

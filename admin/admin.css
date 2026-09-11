@@ -1,0 +1,781 @@
+/* ===== Admin Portal Styles ===== */
+/* Extends staff.css with admin-specific styles */
+
+@import url('../staff/staff.css');
+
+/* ===== Dashboard Stats Grid ===== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.stat-card {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+}
+
+.stat-info {
+    flex: 1;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+/* ===== Section Cards ===== */
+.section-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.section-card h3 {
+    font-size: 16px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--secondary-color);
+}
+
+/* ===== Top Products List ===== */
+.top-products-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.top-product-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: var(--bg-light);
+    border-radius: 8px;
+}
+
+.top-product-info h4 {
+    font-size: 14px;
+    margin-bottom: 3px;
+}
+
+.top-product-stats {
+    font-size: 12px;
+    color: var(--text-light);
+}
+
+.top-product-revenue {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 14px;
+}
+
+/* ===== Recent Sales List ===== */
+.recent-sales-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.recent-sale-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background: var(--bg-light);
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.recent-sale-info {
+    flex: 1;
+}
+
+.recent-sale-number {
+    font-weight: 600;
+    margin-bottom: 3px;
+}
+
+.recent-sale-details {
+    color: var(--text-light);
+    font-size: 12px;
+}
+
+.recent-sale-amount {
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+/* ===== Products List ===== */
+.products-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.product-list-item {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.product-list-img {
+    width: 70px;
+    height: 70px;
+    border-radius: 8px;
+    object-fit: cover;
+    background: var(--bg-light);
+}
+
+.product-list-info {
+    flex: 1;
+}
+
+.product-list-title {
+    font-weight: 600;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.product-list-meta {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-bottom: 5px;
+}
+
+.product-list-price {
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.product-list-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.action-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: all 0.3s;
+}
+
+.action-btn-edit {
+    background: #007BFF;
+    color: white;
+}
+
+.action-btn-stock {
+    background: var(--primary-color);
+    color: white;
+}
+
+.action-btn-delete {
+    background: var(--danger-color);
+    color: white;
+}
+
+/* ===== Filter Section ===== */
+.filter-section {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.filter-select,
+.filter-input {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+/* ===== Sales List ===== */
+.sales-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sale-list-item {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    border-left: 4px solid var(--primary-color);
+}
+
+.sale-list-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.sale-list-number {
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.sale-list-amount {
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.sale-list-details {
+    font-size: 12px;
+    color: var(--text-light);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5px;
+}
+
+.sale-type-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+.sale-type-online {
+    background: #E3F2FD;
+    color: #1976D2;
+}
+
+.sale-type-instore {
+    background: #FFF3E0;
+    color: #F57C00;
+}
+
+/* ===== Inventory List ===== */
+.inventory-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.inventory-item {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.inventory-item:hover {
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.inventory-info h4 {
+    font-size: 14px;
+    margin-bottom: 3px;
+}
+
+.inventory-meta {
+    font-size: 12px;
+    color: var(--text-light);
+}
+
+.inventory-stock {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.inventory-stock.high {
+    color: var(--success-color);
+}
+
+.inventory-stock.medium {
+    color: var(--warning-color);
+}
+
+.inventory-stock.low {
+    color: var(--danger-color);
+}
+
+/* ===== Modal ===== */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    padding: 20px;
+    border-bottom: 2px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    font-size: 18px;
+    color: var(--secondary-color);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--text-light);
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-body .form-group {
+    margin-bottom: 15px;
+}
+
+.modal-body label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.modal-body input[type="text"],
+.modal-body input[type="number"],
+.modal-body input[type="url"],
+.modal-body textarea,
+.modal-body select {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.modal-body textarea {
+    resize: vertical;
+    font-family: inherit;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.modal-actions .btn {
+    flex: 1;
+}
+
+/* ===== Stock Info ===== */
+.stock-info {
+    background: var(--bg-light);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.stock-info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.stock-info-label {
+    color: var(--text-light);
+}
+
+.stock-info-value {
+    font-weight: 600;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-card {
+        padding: 12px;
+    }
+
+    .stat-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== Empty State ===== */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-light);
+}
+
+.empty-state i {
+    font-size: 48px;
+    opacity: 0.3;
+    margin-bottom: 15px;
+}
+
+.empty-state p {
+    font-size: 14px;
+}
+
+/* ===== Toggle Switch ===== */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+}
+
+input:checked+.slider {
+    background-color: var(--primary-color);
+}
+
+input:checked+.slider:before {
+    transform: translateX(26px);
+}
+
+.slider.round {
+    border-radius: 24px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+.global-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* ===== Multi-Image Gallery ===== */
+.image-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+    margin-top: 15px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px dashed var(--border-glass);
+    border-radius: 8px;
+    min-height: 120px;
+}
+
+.image-preview-item {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #000;
+    border: 2px solid transparent;
+}
+
+.image-preview-item.main {
+    border-color: var(--primary-color);
+}
+
+.image-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.remove-img {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(220, 53, 69, 0.9);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    z-index: 2;
+}
+
+.main-badge {
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    background: var(--primary-color);
+    color: #000;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.image-preview-grid p#noImageText {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: #888;
+    margin-top: 40px;
+}
+
+/* ===== Luxury Overhaul: Root Theme Updates ===== */
+:root {
+    --primary-color: #D4AF37;
+    /* Gold */
+    --secondary-color: #1A1A1A;
+    /* Luxe Black */
+    --accent-color: #C5A028;
+    /* Darker Gold */
+    --bg-luxury: #0D0D0D;
+    --card-glass: rgba(255, 255, 255, 0.05);
+    --border-glass: rgba(255, 255, 255, 0.1);
+    --text-gold: #D4AF37;
+}
+
+/* Dark/Luxury Foundation */
+body {
+    background-color: var(--bg-luxury) !important;
+    color: #FFFFFF !important;
+}
+
+.screen {
+    background: radial-gradient(circle at top right, #1a1a1a, #0d0d0d) !important;
+    color: white !important;
+}
+
+.app-header {
+    background: rgba(13, 13, 13, 0.8) !important;
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-glass) !important;
+}
+
+.app-header h1 {
+    color: var(--text-gold) !important;
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+}
+
+.bottom-nav {
+    background: rgba(26, 26, 26, 0.9) !important;
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border-glass) !important;
+}
+
+.nav-item i {
+    transition: all 0.3s ease;
+}
+
+.nav-item.active {
+    color: var(--text-gold) !important;
+}
+
+.nav-item.active i {
+    filter: drop-shadow(0 0 5px var(--text-gold));
+}
+
+.view-header h2 {
+    color: var(--text-gold) !important;
+}
+
+/* Luxury Cards */
+.section-card,
+.stat-card,
+.inventory-item,
+.product-list-item,
+.sale-list-item,
+.modal-content {
+    background: var(--card-glass) !important;
+    border: 1px solid var(--border-glass) !important;
+    backdrop-filter: blur(10px);
+    color: #FFFFFF !important;
+}
+
+.stat-value {
+    color: var(--text-gold) !important;
+}
+
+.stat-label,
+.inventory-meta,
+.product-list-meta,
+.sale-list-details {
+    color: #AAAAAA !important;
+}
+
+.top-product-item,
+.recent-sale-item {
+    background: rgba(255, 255, 255, 0.03) !important;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color)) !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+    color: #000 !important;
+    font-weight: 700;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #FFFFFF !important;
+    border: 1px solid var(--border-glass) !important;
+}
+
+/* Inputs in Luxury Theme */
+input,
+select,
+textarea {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid var(--border-glass) !important;
+    color: #FFFFFF !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--primary-color) !important;
+    outline: none;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.1);
+}
+
+/* Refining Dashboard Colors for User Feedback */
+.stat-icon {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+}
+
+.stat-card:nth-child(1) .stat-icon i {
+    color: #4CAF50;
+}
+
+/* Subtle Green */
+.stat-card:nth-child(2) .stat-icon i {
+    color: #2196F3;
+}
+
+/* Subtle Blue */
+.stat-card:nth-child(3) .stat-icon i {
+    color: #D4AF37;
+}
+
+/* Gold */

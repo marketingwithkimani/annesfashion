@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Product details and virtual try-on for premium African fashion">
+    <title>Product Details | Anne's Fashion Line</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/product-detail.css">
+    <link rel="stylesheet" href="css/chatbot.css">
+    <link rel="stylesheet" href="css/cart.css">
+</head>
+
+<body>
+    <!-- Header (Same as homepage) -->
+    <header class="header">
+        <div class="container-fluid">
+            <nav class="navbar">
+                <div class="nav-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <!-- Brand Logo Image & Text -->
+                    <a href="index.html" class="logo">
+                        <img id="brandLogo" src="assets/Logo%20Black.png" alt="Anne's Fashion Line"
+                            class="brand-logo-img">
+                        <div class="logo-text-container">
+                            <span class="brand-name">Anne's</span>
+                            <span class="brand-line">Fashion Line</span>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="nav-center">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search for styles, trends, vibes...">
+                    </div>
+                </div>
+
+                <div class="nav-right">
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <a href="#" class="nav-icon">
+                        <i class="fas fa-heart"></i>
+                        <span class="badge">3</span>
+                    </a>
+                    <a href="#" class="nav-icon" id="cartIcon">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span class="badge" id="cartBadge">0</span>
+                    </a>
+                    <a href="#" class="nav-icon">
+                        <i class="fas fa-user"></i>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Side Navigation -->
+    <aside class="side-nav" id="sideNav">
+        <div class="side-nav-header">
+            <h3>Collections</h3>
+            <button class="close-nav" id="closeNav">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <ul class="nav-menu">
+            <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="casual.html"><i class="fas fa-tshirt"></i> Casual Wear</a></li>
+            <li><a href="corporate.html"><i class="fas fa-briefcase"></i> Corporate Wear</a></li>
+            <li><a href="weekend.html"><i class="fas fa-sun"></i> Weekend & Lifestyle</a></li>
+            <li><a href="dresses.html"><i class="fas fa-user-tie"></i> Dresses</a></li>
+            <li><a href="wigs.html"><i class="fas fa-hat-wizard"></i> Wigs & Hair</a></li>
+            <li><a href="makeup.html"><i class="fas fa-palette"></i> Makeup & Beauty</a></li>
+            <li><a href="shoes.html"><i class="fas fa-shoe-prints"></i> Shoes & Sneakers</a></li>
+        </ul>
+    </aside>
+
+    <!-- Product Detail Section -->
+    <section class="product-detail-section">
+        <div class="container">
+            <div class="product-detail-grid">
+                <!-- Product Images -->
+                <div class="product-images">
+                    <div class="main-image">
+                        <img id="mainProductImage" src="" alt="Loading...">
+                    </div>
+                    <div class="image-thumbnails" id="thumbnailContainer">
+                        <!-- Thumbnails will be dynamically inserted -->
+                    </div>
+                </div>
+
+                <!-- Product Info -->
+                <div class="product-info-detail" id="productInfoDetail" style="visibility: hidden;">
+                    <div class="breadcrumb" id="productBreadcrumb">
+                        <a href="index.html">Home</a> / <a href="#">Category</a> / <span>Product Name</span>
+                    </div>
+
+                    <h1 class="product-title-main">Loading Product...</h1>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                        <span class="rating-count">(Recently added)</span>
+                    </div>
+
+                    <p class="product-price-main">---</p>
+
+                    <p class="product-description">
+                        Please wait while we fetch the latest style details for you.
+                    </p>
+
+                    <div class="product-options">
+                        <div class="option-group">
+                            <label>Size:</label>
+                            <div class="size-selector" id="sizeSelector">
+                                <!-- Dynamic sizes -->
+                            </div>
+                        </div>
+
+                        <div class="option-group">
+                            <label>Color:</label>
+                            <div class="color-selector" id="colorSelector">
+                                <!-- Dynamic colors -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="product-actions">
+                        <button class="btn-add-to-cart">
+                            <i class="fas fa-shopping-bag"></i> Add to Wardrobe
+                        </button>
+                        <button class="btn-wishlist">
+                            <i class="far fa-heart"></i>
+                        </button>
+                        <button class="btn-share">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                    </div>
+
+                    <div class="product-meta" id="productMeta">
+                        <p><strong>SKU:</strong> ---</p>
+                        <p><strong>Category:</strong> ---</p>
+                    </div>
+                </div>
+
+                <!-- Error State (Hidden by default) -->
+                <div id="productNotFoundError" class="error-container"
+                    style="display: none; grid-column: 1 / -1; text-align: center; padding: 50px 20px;">
+                    <i class="fas fa-exclamation-circle"
+                        style="font-size: 3rem; color: var(--accent-gold); margin-bottom: 20px;"></i>
+                    <h2 class="luxury-script">Style Not Found</h2>
+                    <p>We couldn't find the product you're looking for. It may have been moved or is no longer
+                        available.</p>
+                    <a href="index.html" class="btn-upload"
+                        style="display: inline-block; margin-top: 20px; text-decoration: none;">Return to Shop</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Try-On Section: "See Yourself in This Look" -->
+    <section class="try-on-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title" style="font-weight: 400;">See Yourself In This Look</h2>
+                <p class="section-subtitle">Choose your skin tone and body type to visualize this piece on you</p>
+            </div>
+
+            <div class="try-on-interface">
+                <div class="try-on-controls">
+
+
+                    <div class="customization-options">
+                        <h3>Customize Your Preview</h3>
+
+                        <div class="option-group">
+                            <label><i class="fas fa-palette"></i> Skin Tone</label>
+                            <div class="tone-selector">
+                                <button class="tone-btn" data-tone="ebony" style="background: #3d2817;"></button>
+                                <button class="tone-btn" data-tone="chocolate" style="background: #5c3317;"></button>
+                                <button class="tone-btn" data-tone="medium" style="background: #8d5524;"></button>
+                                <button class="tone-btn active" data-tone="light" style="background: #c68642;"></button>
+                            </div>
+                        </div>
+
+
+
+                        <div class="option-group">
+                            <label><i class="fas fa-female"></i> Body Type</label>
+                            <div class="body-type-selector">
+                                <button class="body-btn" data-type="A">
+                                    <img src="assets/A.png" alt="Pear" class="body-preview-img">
+                                    <span>Pear</span>
+                                </button>
+                                <button class="body-btn active" data-type="B">
+                                    <img src="assets/B.png" alt="Hourglass" class="body-preview-img">
+                                    <span>Hourglass</span>
+                                </button>
+                                <button class="body-btn" data-type="C">
+                                    <img src="assets/C.png" alt="Rectangle" class="body-preview-img">
+                                    <span>Rectangle</span>
+                                </button>
+                                <button class="body-btn" data-type="D">
+                                    <img src="assets/D.png" alt="Apple" class="body-preview-img">
+                                    <span>Apple</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button class="btn-generate-preview" id="generateBtn">
+                            <i class="fas fa-magic"></i> Generate Preview
+                        </button>
+                    </div>
+                </div>
+
+                <div class="try-on-preview">
+                    <div class="preview-placeholder" id="previewArea">
+                        <i class="fas fa-image"></i>
+                        <p>Your AI-generated preview will appear here</p>
+                        <small>Selecting a skin tone or body type will update the preview automatically</small>
+                    </div>
+
+                    <div class="preview-actions" style="display: none;" id="previewActions">
+                        <button class="btn-download"><i class="fas fa-download"></i> Download</button>
+                        <button class="btn-share-preview"><i class="fas fa-share"></i> Share</button>
+                        <button class="btn-reset"><i class="fas fa-redo"></i> Try Again</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="try-on-disclaimer">
+                <p><i class="fas fa-info-circle"></i> <strong>Note:</strong> This is an AI-powered visualization tool.
+                    Actual fit and appearance may vary. For best results, use a clear, well-lit photo.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Related Products -->
+    <section class="related-products">
+        <div class="container">
+            <h2 class="section-title">You May Also Like</h2>
+            <div class="products-grid" id="relatedProducts">
+                <!-- Will be populated by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4 class="luxury-script">Anne's Fashion Line</h4>
+                    <p>Premium fashion for the modern African woman. Curated with love from Nairobi.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-tiktok"></i></a>
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>Shop</h4>
+                    <ul>
+                        <li><a href="casual.html">Casual Wear</a></li>
+                        <li><a href="corporate.html">Corporate Wear</a></li>
+                        <li><a href="dresses.html">Dresses</a></li>
+                        <li><a href="shoes.html">Shoes & Sneakers</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Beauty</h4>
+                    <ul>
+                        <li><a href="makeup.html">Makeup</a></li>
+                        <li><a href="wigs.html">Wigs & Hair</a></li>
+                        <li><a href="makeup.html">Skincare</a></li>
+                        <li><a href="makeup.html">Beauty Kits</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Customer Service</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                        <li><a href="#">Returns</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Anne's Fashion Line. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- WhatsApp Button Removed -->
+
+    <script src="js/cloudflare-client.js"></script>
+    <script src="https://js.puter.com/v2/"></script>
+    <script src="js/puter.js?v=2"></script>
+    <script src="js/main.js?v=2"></script>
+    <script src="js/product-detail.js?v=2"></script>
+    <script src="js/chatbot.js?v=2"></script>
+    <script src="js/cart.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Discover premium African fashion for the modern millennial woman. Explore curated collections of dresses, corporate wear, casual styles, beauty products, and more.">
+    <title>Anne's Fashion Line | Premium African Fashion for Modern Women</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Alex+Brush&family=Pinyon+Script&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/chatbot.css">
+    <link rel="stylesheet" href="css/cart.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container-fluid">
+            <nav class="navbar">
+                <div class="nav-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <!-- Brand Logo Image & Text -->
+                    <a href="index.html" class="logo">
+                        <img id="brandLogo" src="assets/Logo%20Black.png" alt="Anne's Fashion Line"
+                            class="brand-logo-img">
+                        <div class="logo-text-container">
+                            <span class="brand-name">Anne's</span>
+                            <span class="brand-line">Fashion Line</span>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="nav-center">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search for styles, trends, vibes...">
+                    </div>
+                </div>
+
+                <div class="nav-right">
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <a href="#" class="nav-icon">
+                        <i class="fas fa-heart"></i>
+                        <span class="badge">3</span>
+                    </a>
+                    <a href="#" class="nav-icon" id="cartIcon">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span class="badge" id="cartBadge">0</span>
+                    </a>
+                    <a href="#" class="nav-icon">
+                        <i class="fas fa-user"></i>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Side Navigation -->
+    <aside class="side-nav" id="sideNav">
+        <div class="side-nav-header">
+            <h3>Collections</h3>
+            <button class="close-nav" id="closeNav">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <ul class="nav-menu">
+            <li><a href="index.html" class="active"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="casual.html"><i class="fas fa-tshirt"></i> Casual Wear</a></li>
+            <li><a href="corporate.html"><i class="fas fa-briefcase"></i> Corporate Wear</a></li>
+            <li><a href="weekend.html"><i class="fas fa-sun"></i> Weekend & Lifestyle</a></li>
+            <li><a href="dresses.html"><i class="fas fa-user-tie"></i> Dresses</a></li>
+            <li><a href="wigs.html"><i class="fas fa-hat-wizard"></i> Wigs & Hair</a></li>
+            <li><a href="makeup.html"><i class="fas fa-palette"></i> Makeup & Beauty</a></li>
+            <li><a href="shoes.html"><i class="fas fa-shoe-prints"></i> Shoes & Sneakers</a></li>
+        </ul>
+    </aside>
+
+    <!-- Hero Section: Split Carousel -->
+    <section class="hero-split">
+        <div class="hero-main">
+            <div class="hero-carousel" id="heroCarousel">
+                <div class="hero-slide active">
+                    <img src="assets/hero/slide-1-elegant.jpg" alt="Elevate Your Style - African Fashion">
+                    <div class="hero-overlay">
+                        <h1 class="hero-title luxury-script">Elevate Your Style</h1>
+                        <p class="hero-subtitle">Curated pieces for the modern African woman</p>
+                        <button class="btn-primary">Shop Now</button>
+                    </div>
+                </div>
+                <div class="hero-slide">
+                    <img src="assets/hero/slide-2-corporate.jpg" alt="Corporate Chic Power Dressing">
+                    <div class="hero-overlay">
+                        <h1 class="hero-title luxury-script">Corporate Chic</h1>
+                        <p class="hero-subtitle">Power dressing redefined</p>
+                        <button class="btn-primary">Explore Collection</button>
+                    </div>
+                </div>
+                <div class="hero-slide">
+                    <img src="assets/hero/slide-3-weekend.jpg" alt="Weekend Vibes Lifestyle">
+                    <div class="hero-overlay">
+                        <h1 class="hero-title luxury-script">Weekend Vibes</h1>
+                        <p class="hero-subtitle">Effortlessly chic, always</p>
+                        <button class="btn-primary">Discover More</button>
+                    </div>
+                </div>
+                <div class="hero-slide">
+                    <img src="assets/hero/slide-4-drip.jpg" alt="Nairobi Street Drip Fashion">
+                    <div class="hero-overlay">
+                        <h1 class="hero-title luxury-script">Nairobi Street Drip</h1>
+                        <p class="hero-subtitle">Baggy denim, fresh kicks &amp; iconic bling</p>
+                        <button class="btn-primary">Shop Street Drip</button>
+                    </div>
+                </div>
+            </div>
+            <div class="carousel-dots" id="carouselDots"></div>
+        </div>
+
+        <div class="hero-sidebar">
+            <div class="vertical-carousel" id="verticalCarousel">
+                <div class="vertical-slide">
+                    <video autoplay muted loop playsinline>
+                        <source src="assets/instagram/videos/Lifestyle Casual.mp4" type="video/mp4">
+                    </video>
+                    <div class="video-label">
+                        <i class="fas fa-play-circle"></i> New Arrivals
+                    </div>
+                </div>
+                <div class="vertical-slide">
+                    <video autoplay muted loop playsinline>
+                        <source src="assets/instagram/videos/Weekend Lifestyle.mp4" type="video/mp4">
+                    </video>
+                    <div class="video-label">
+                        <i class="fas fa-play-circle"></i> Style Inspo
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sliding Category Banner -->
+    <section class="sliding-banner">
+        <div class="banner-track" id="bannerTrack">
+            <div class="banner-item">Corporate</div>
+            <div class="banner-item">Elegant</div>
+            <div class="banner-item">Casual</div>
+            <div class="banner-item">Weekend</div>
+            <div class="banner-item">Beauty</div>
+            <div class="banner-item">Corporate</div>
+            <div class="banner-item">Elegant</div>
+            <div class="banner-item">Casual</div>
+        </div>
+    </section>
+
+    <!-- Pre-order Section (Dynamic) -->
+    <section class="products-section preorder-section-compact" id="preorderSection"
+        style="display: none; background: var(--bg-card); padding: 40px 0;">
+        <div class="container">
+            <div class="section-header" style="margin-bottom: 20px;">
+                <span class="luxury-badge">Limited Time</span>
+                <h2 class="section-title" style="font-size: 1.5rem;">Pre-order Exclusives</h2>
+                <p class="section-subtitle">Secure these styles before they're gone</p>
+            </div>
+            <div class="preorder-scroll-container">
+                <div class="products-grid-mini horizontal-scroll" id="preorderGrid">
+                    <!-- Pre-order products will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <style>
+        .preorder-section-compact .products-grid-mini {
+            display: grid;
+            grid-auto-flow: column;
+            grid-auto-columns: calc(100% / 8 - 15px);
+            gap: 15px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+        }
+
+        @media (max-width: 1200px) {
+            .preorder-section-compact .products-grid-mini {
+                grid-auto-columns: calc(100% / 6 - 15px);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .preorder-section-compact .products-grid-mini {
+                grid-auto-columns: calc(100% / 4 - 10px);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .preorder-section-compact .products-grid-mini {
+                grid-auto-columns: calc(100% / 2 - 10px);
+            }
+        }
+
+        .preorder-section-compact .product-card {
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--bg-body);
+            transition: transform 0.3s ease;
+        }
+
+        .preorder-section-compact .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .preorder-section-compact .product-media {
+            height: 180px;
+        }
+
+        .preorder-section-compact .product-info {
+            padding: 10px;
+        }
+
+        .preorder-section-compact .product-title {
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .preorder-section-compact .product-price {
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+        }
+
+        .preorder-section-compact .btn-add-cart {
+            padding: 6px 10px;
+            font-size: 0.7rem;
+            width: 100%;
+        }
+
+        .preorder-scroll-container {
+            position: relative;
+            overflow: hidden;
+        }
+    </style>
+
+    <!-- Featured Products Grid -->
+    <section class="products-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Trending Now</h2>
+                <p class="section-subtitle">Pieces that are stopping the timeline</p>
+            </div>
+
+            <div class="products-grid" id="productsGrid">
+                <!-- Products will be dynamically inserted -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Videos Section -->
+    <section class="social-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Social Videos</h2>
+                <p class="section-subtitle">See how others are styling their looks</p>
+            </div>
+
+            <div class="social-rail horizontal-scroll" id="socialRail">
+                <div class="social-video-card">
+                    <video autoplay muted loop playsinline>
+                        <source src="assets/instagram/videos/Dresses.mp4" type="video/mp4">
+                    </video>
+                    <div class="social-overlay">
+                        <div class="social-engagement">
+                            <button class="like-btn"><i class="fas fa-heart"></i> 1.2K</button>
+                            <button class="comment-btn"><i class="fas fa-comment"></i> 234</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="social-video-card">
+                    <video autoplay muted loop playsinline>
+                        <source src="assets/instagram/videos/Casual Weekend Club.mp4" type="video/mp4">
+                    </video>
+                    <div class="social-overlay">
+                        <div class="social-engagement">
+                            <button class="like-btn"><i class="fas fa-heart"></i> 890</button>
+                            <button class="comment-btn"><i class="fas fa-comment"></i> 156</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="social-video-card">
+                    <video autoplay muted loop playsinline>
+                        <source src="assets/instagram/videos/Heels Casual Date Club.mp4" type="video/mp4">
+                    </video>
+                    <div class="social-overlay">
+                        <div class="social-engagement">
+                            <button class="like-btn"><i class="fas fa-heart"></i> 2.1K</button>
+                            <button class="comment-btn"><i class="fas fa-comment"></i> 345</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="social-video-card">
+                    <video autoplay muted loop playsinline>
+                        <source src="assets/instagram/videos/Jeans Casual Weekend.mp4" type="video/mp4">
+                    </video>
+                    <div class="social-overlay">
+                        <div class="social-engagement">
+                            <button class="like-btn"><i class="fas fa-heart"></i> 1.5K</button>
+                            <button class="comment-btn"><i class="fas fa-comment"></i> 289</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Category Showcase -->
+    <section class="category-showcase">
+        <div class="container">
+            <div class="category-grid">
+                <a href="dresses.html" class="category-card large">
+                    <img src="assets/categories/cat-dresses.jpg" alt="Dresses">
+                    <div class="category-overlay">
+                        <h3 class="luxury-script">Dresses</h3>
+                        <p>From casual to cocktail</p>
+                    </div>
+                </a>
+                <a href="corporate.html" class="category-card">
+                    <img src="assets/categories/cat-corporate.jpg" alt="Corporate">
+                    <div class="category-overlay">
+                        <h3>Corporate</h3>
+                        <p>Boss moves only</p>
+                    </div>
+                </a>
+                <a href="casual.html" class="category-card">
+                    <img src="assets/categories/cat-casual.jpg" alt="Casual">
+                    <div class="category-overlay">
+                        <h3>Casual</h3>
+                        <p>Everyday chic &amp; drip</p>
+                    </div>
+                </a>
+                <a href="makeup.html" class="category-card">
+                    <img src="assets/categories/cat-beauty.jpg" alt="Beauty">
+                    <div class="category-overlay">
+                        <h3>Beauty</h3>
+                        <p>Glow from within</p>
+                    </div>
+                </a>
+                <a href="shoes.html" class="category-card">
+                    <img src="assets/categories/cat-shoes.jpg" alt="Shoes">
+                    <div class="category-overlay">
+                        <h3>Shoes</h3>
+                        <p>Step up your game</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4 class="luxury-script">Anne's Fashion Line</h4>
+                    <p>Premium fashion for the modern African woman. Curated with love from Nairobi.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-tiktok"></i></a>
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>Shop</h4>
+                    <ul>
+                        <li><a href="casual.html">Casual Wear</a></li>
+                        <li><a href="corporate.html">Corporate Wear</a></li>
+                        <li><a href="dresses.html">Dresses</a></li>
+                        <li><a href="shoes.html">Shoes & Sneakers</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Beauty</h4>
+                    <ul>
+                        <li><a href="makeup.html">Makeup</a></li>
+                        <li><a href="wigs.html">Wigs & Hair</a></li>
+                        <li><a href="makeup.html">Skincare</a></li>
+                        <li><a href="makeup.html">Beauty Kits</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Customer Service</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                        <li><a href="#">Returns</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Anne's Fashion Line. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- WhatsApp Sticky Button -->
+    <a href="https://wa.me/254798840085?text=Hi%2C%20I'm%20interested%20in%20your%20fashion%20pieces"
+        class="whatsapp-float" target="_blank" aria-label="Chat on WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <script src="js/cloudflare-client.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/cart.js"></script>
+</body>
+
+</html>

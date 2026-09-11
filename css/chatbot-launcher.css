@@ -1,0 +1,52 @@
+/* Launcher Button (Sticky) */
+.chatbot-launcher {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background: var(--accent-gold);
+    color: #000;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(197, 160, 89, 0.4);
+    cursor: pointer;
+    z-index: 1000;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    animation: pulse-gold 2s infinite;
+}
+
+.chatbot-launcher:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(197, 160, 89, 0.6);
+}
+
+.chatbot-launcher.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0);
+}
+
+@keyframes pulse-gold {
+    0% {
+        box-shadow: 0 0 0 0 rgba(197, 160, 89, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 15px rgba(197, 160, 89, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(197, 160, 89, 0);
+    }
+}
+
+/* Adjust container z-index to be above launcher if needed, but launcher hides */
+.chatbot-container {
+    z-index: 1001;
+    /* Above launcher */
+}

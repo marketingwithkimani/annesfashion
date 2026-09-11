@@ -1,0 +1,35 @@
+{
+  // ─────────────────────────────────────────────────────────────
+  // Development Worker: client-api-dev
+  // ─────────────────────────────────────────────────────────────
+  // This file defines the development configuration for the client-api-dev Worker.
+  // It contains D1 and R2 bindings for development resources only.
+  //
+  // IMPORTANT: Do NOT put secrets or API keys in this file.
+  //            Use `npx wrangler secret put SECRET_NAME` instead.
+  //
+  // If a wrangler.jsonc or wrangler.toml already exists for this Worker,
+  // MERGE these bindings into the existing config rather than replacing it.
+  // ─────────────────────────────────────────────────────────────
+
+  "name": "client-api-dev",
+  "main": "./src/index.ts",
+  "compatibility_date": "2026-09-11",
+
+  // D1 database binding (development)
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "client-development",
+      "database_id": "REPLACE_WITH_ACTUAL_D1_DEVELOPMENT_ID_FROM_SETUP_OUTPUT"
+    }
+  ],
+
+  // R2 bucket binding (development)
+  "r2_buckets": [
+    {
+      "binding": "FILES",
+      "bucket_name": "client-development-files"
+    }
+  ]
+}

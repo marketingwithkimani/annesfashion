@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="theme-color" content="#D4AF37">
+    <title>Admin Portal - Anne's Fashion Line</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="admin.css">
+    <link rel="manifest" href="../manifest.json">
+</head>
+
+<body>
+    <!-- Redirecting State -->
+    <div id="loginScreen" class="screen active">
+        <div class="login-container">
+            <div class="logo-section">
+                <i class="fas fa-crown fa-3x"></i>
+                <h1>Admin Portal</h1>
+                <p>Checking authentication...</p>
+                <div class="spinner" style="margin: 20px auto;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainScreen" class="screen">
+        <!-- Header -->
+        <header class="app-header">
+            <h1><i class="fas fa-crown"></i> Admin</h1>
+            <button class="logout-btn" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-view="dashboard">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </button>
+            <button class="nav-item" data-view="products">
+                <i class="fas fa-box"></i>
+                <span>Products</span>
+            </button>
+            <button class="nav-item" data-view="sales">
+                <i class="fas fa-receipt"></i>
+                <span>Sales</span>
+            </button>
+            <button class="nav-item" data-view="inventory">
+                <i class="fas fa-warehouse"></i>
+                <span>Inventory</span>
+            </button>
+            <button class="nav-item" data-view="preorder">
+                <i class="fas fa-clock"></i>
+                <span>Pre-orders</span>
+            </button>
+            <button class="nav-item" data-view="chat" id="adminNavChat">
+                <i class="fas fa-comments"></i>
+                <span>Live Chat</span>
+            </button>
+        </nav>
+
+        <!-- Dashboard View -->
+        <div id="dashboardView" class="view active">
+            <div class="view-content">
+                <div class="view-header">
+                    <h2><i class="fas fa-chart-line"></i> Dashboard</h2>
+                    <button class="btn btn-sm" id="refreshDashboard">
+                        <i class="fas fa-sync"></i>
+                    </button>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #28A745;">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">Today's Revenue</div>
+                            <div class="stat-value" id="todayRevenue">KSh 0</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #007BFF;">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">Today's Sales</div>
+                            <div class="stat-value" id="todaySales">0</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #D4AF37;">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">This Month</div>
+                            <div class="stat-value" id="monthRevenue">KSh 0</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #DC3545;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">Low Stock Items</div>
+                            <div class="stat-value" id="lowStockCount">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Products -->
+                <div class="section-card">
+                    <h3><i class="fas fa-fire"></i> Top Selling Products</h3>
+                    <div id="topProducts" class="top-products-list"></div>
+                </div>
+
+                <!-- Recent Sales -->
+                <div class="section-card">
+                    <h3><i class="fas fa-clock"></i> Recent Sales</h3>
+                    <div id="recentSales" class="recent-sales-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products View -->
+        <div id="productsView" class="view">
+            <div class="view-content">
+                <div class="view-header">
+                    <h2><i class="fas fa-box"></i> Products</h2>
+                    <button class="btn btn-primary btn-sm" id="addProductBtn">
+                        <i class="fas fa-plus"></i> New
+                    </button>
+                </div>
+
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="productSearch" placeholder="Search products...">
+                </div>
+
+                <div id="productsList" class="products-list"></div>
+            </div>
+        </div>
+
+        <!-- Sales View -->
+        <div id="salesView" class="view">
+            <div class="view-content">
+                <div class="view-header">
+                    <h2><i class="fas fa-receipt"></i> All Sales</h2>
+                </div>
+
+                <div class="filter-section">
+                    <select id="saleTypeFilter" class="filter-select">
+                        <option value="">All Types</option>
+                        <option value="online">Online</option>
+                        <option value="in-store">In-Store</option>
+                    </select>
+                    <input type="date" id="saleDateFilter" class="filter-input">
+                </div>
+
+                <div id="salesList" class="sales-list"></div>
+            </div>
+        </div>
+
+        <!-- Inventory View -->
+        <div id="inventoryView" class="view">
+            <div class="view-content">
+                <div class="view-header">
+                    <h2><i class="fas fa-warehouse"></i> Inventory</h2>
+                </div>
+
+                <div class="filter-tabs">
+                    <button class="filter-tab active" data-filter="all">All Items</button>
+                    <button class="filter-tab" data-filter="low">Low Stock</button>
+                </div>
+
+                <div id="inventoryList" class="inventory-list"></div>
+            </div>
+        </div>
+
+        <!-- Pre-order & Flash Sale View -->
+        <div id="preorderView" class="view">
+            <div class="view-content">
+                <div class="view-header" style="flex-wrap: wrap; gap: 15px;">
+                    <h2><i class="fas fa-clock"></i> Pre-orders &amp; Flash Sales</h2>
+                    <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+                        <div class="global-toggle">
+                            <span>Pre-order Mode:</span>
+                            <label class="switch">
+                                <input type="checkbox" id="globalPreOrderToggle">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                        <div class="global-toggle">
+                            <span style="color: #ff5252; font-weight: 700;"><i class="fas fa-bolt"></i> Flash Sale Mode:</span>
+                            <label class="switch">
+                                <input type="checkbox" id="globalFlashSaleToggle">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Parcel & Shipment Waybill Tracking Broadcast -->
+                <div class="section-card" style="margin-bottom: 25px; border-left: 4px solid var(--primary-gold, #c9a96e); background: rgba(255,255,255,0.03);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                        <h3 style="font-size: 1.1rem; color: #fff; margin: 0;">
+                            <i class="fas fa-truck-fast" style="color: var(--primary-gold, #c9a96e);"></i> 
+                            Broadcast Parcel / Shipment Waybill Status
+                        </h3>
+                        <span style="font-size: 0.8rem; color: #aaa;">Reflects in all client order dashboards</span>
+                    </div>
+                    <p style="font-size: 0.85rem; color: #bbb; margin-bottom: 15px;">
+                        Post live updates received from your shipping company or cargo forwarder. All customers with pending pre-orders or parcels will immediately see this status in their dashboard.
+                    </p>
+                    <form id="shipmentUpdateForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div>
+                            <label style="display:block; font-size: 0.8rem; color: #aaa; margin-bottom: 4px;">Update Title</label>
+                            <input type="text" id="shipmentUpdateTitle" placeholder="e.g. Batch #12 Dispatched to Nairobi" required style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.3); border: 1px solid #444; border-radius: 6px; color: #fff;">
+                        </div>
+                        <div>
+                            <label style="display:block; font-size: 0.8rem; color: #aaa; margin-bottom: 4px;">Status Stage</label>
+                            <select id="shipmentUpdateBadge" style="width: 100%; padding: 8px 12px; background: #222; border: 1px solid #444; border-radius: 6px; color: #fff;">
+                                <option value="In Transit">✈️ In Transit / Flight Departed</option>
+                                <option value="Customs Cleared">🛃 Customs Cleared</option>
+                                <option value="Arrived at Hub">🏢 Arrived at Nairobi Sorting Hub</option>
+                                <option value="Sorting & Packing">📦 Sorting &amp; Packaging</option>
+                                <option value="Out for Delivery">🚚 Dispatched / Out for Delivery</option>
+                                <option value="Ready for Pickup">🏪 Ready for Store Pickup</option>
+                            </select>
+                        </div>
+                        <div style="grid-column: 1 / -1;">
+                            <label style="display:block; font-size: 0.8rem; color: #aaa; margin-bottom: 4px;">Waybill / Tracking Reference (Optional)</label>
+                            <input type="text" id="shipmentUpdateWaybill" placeholder="e.g. AWB-98234-KE or Container AF-08" style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.3); border: 1px solid #444; border-radius: 6px; color: #fff;">
+                        </div>
+                        <div style="grid-column: 1 / -1;">
+                            <label style="display:block; font-size: 0.8rem; color: #aaa; margin-bottom: 4px;">Update Message / Carrier Details</label>
+                            <textarea id="shipmentUpdateText" rows="2" placeholder="Paste shipping update details or notes here..." required style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.3); border: 1px solid #444; border-radius: 6px; color: #fff;"></textarea>
+                        </div>
+                        <div style="grid-column: 1 / -1;">
+                            <button type="submit" class="btn btn-primary" id="btnPostShipmentUpdate" style="padding: 10px 20px;">
+                                <i class="fas fa-paper-plane"></i> Broadcast Live Status Update
+                            </button>
+                        </div>
+                    </form>
+
+                    <div style="margin-top: 20px;">
+                        <h4 style="font-size: 0.9rem; color: #ddd; margin-bottom: 10px;">Recent Status Updates</h4>
+                        <div id="recentShipmentUpdatesList" style="max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                            <!-- Dynamically loaded -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <p>Items toggled 'Allow Pre-order' will appear below for inventory and order tracking.</p>
+                </div>
+
+                <div id="preorderList" class="products-list"></div>
+            </div>
+        </div>
+
+        <!-- Live Chat Oversight View -->
+        <div id="chatView" class="view">
+            <div class="view-content">
+                <div class="view-header">
+                    <h2><i class="fas fa-comments"></i> Live Chat Oversight</h2>
+                    <button class="btn btn-sm" id="refreshAdminChat">
+                        <i class="fas fa-sync"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #e5c158;">
+                            <i class="fas fa-headset"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">Pending Requests</div>
+                            <div class="stat-value" id="adminPendingChatCount">0</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #28A745;">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">Active Human Chats</div>
+                            <div class="stat-value" id="adminActiveChatCount">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <h3>Recent Customer Support Conversations</h3>
+                    <div id="adminChatList" class="admin-chat-list" style="margin-top: 10px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Product Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Add New Product</h3>
+                <button class="modal-close" onclick="closeProductModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="productForm" class="modal-body">
+                <input type="hidden" id="productId">
+
+                <div class="form-group">
+                    <label>Product Title *</label>
+                    <input type="text" id="productTitle" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="productDescription" rows="3"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Price (KSh) *</label>
+                        <input type="number" id="productPrice" step="0.01" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Category *</label>
+                        <select id="productCategory" required>
+                            <option value="">Select...</option>
+                            <option value="casual">Casual</option>
+                            <option value="corporate">Corporate</option>
+                            <option value="weekend">Weekend</option>
+                            <option value="dresses">Dresses</option>
+                            <option value="wigs">Wigs</option>
+                            <option value="makeup">Makeup</option>
+                            <option value="shoes">Shoes</option>
+                            <option value="general">General</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Product Images (Gallery)</label>
+                    <div class="image-upload-wrapper">
+                        <input type="file" id="productImageInput" accept="image/*" multiple style="display: none;">
+                        <button type="button" class="btn btn-secondary btn-block"
+                            onclick="document.getElementById('productImageInput').click()">
+                            <i class="fas fa-camera"></i> Choose from Gallery
+                        </button>
+                    </div>
+                    <div id="imagePreviewContainer" class="image-preview-grid">
+                        <p id="noImageText">No image selected</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Initial Stock Quantity</label>
+                    <input type="number" id="productStock" min="0" value="0">
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="productFeatured">
+                        <span>Featured Product</span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="productAllowPreOrder">
+                        <span>Allow Pre-order</span>
+                    </label>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeProductModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Update Stock Modal -->
+    <div id="stockModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Update Stock</h3>
+                <button class="modal-close" onclick="closeStockModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="stockForm" class="modal-body">
+                <input type="hidden" id="stockProductId">
+
+                <div class="stock-info" id="stockInfo"></div>
+
+                <div class="form-group">
+                    <label>Action *</label>
+                    <select id="stockAction" required>
+                        <option value="restock">Add Stock (Restock)</option>
+                        <option value="adjustment">Remove Stock (Adjustment)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Quantity *</label>
+                    <input type="number" id="stockQuantity" min="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Reason</label>
+                    <textarea id="stockReason" rows="2" placeholder="Optional notes..."></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeStockModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Stock</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <script src="admin.js"></script>
+</body>
+
+</html>

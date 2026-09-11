@@ -1,0 +1,42 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "client-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2024-09-23",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "client-production",
+      "database_id": "b0b177b0-9783-4ce1-9eb5-1a8644a14bcb"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "IMAGES",
+      "bucket_name": "client-production-images"
+    },
+    {
+      "binding": "FILES",
+      "bucket_name": "client-production-files"
+    },
+    {
+      "binding": "BACKUPS",
+      "bucket_name": "client-production-backups"
+    }
+  ],
+  "stream": {
+    "binding": "STREAM"
+  },
+  "triggers": {
+    "crons": ["0 2 * * *"]
+  },
+  "vars": {
+    "ENVIRONMENT": "production",
+    "CLOUDFLARE_ACCOUNT_ID": "b4316201bd84751a7e7b3e43f5461c1f",
+    "API_BASE_URL": "https://api.annesfashion.co.ke",
+    "IMAGES_BASE_URL": "https://images.annesfashion.co.ke",
+    "R2_PUBLIC_DOMAIN": "https://images.annesfashion.co.ke",
+    "CORS_ORIGINS": "https://www.annesfashion.co.ke,https://annesfashion.co.ke"
+  }
+}
