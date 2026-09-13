@@ -185,21 +185,31 @@ async function fetchPreorders() {
             grid.innerHTML = '';
 
             preorders.forEach(p => {
-                const card = document.createElement('div');
-                card.className = 'product-card';
-                card.innerHTML = `
-                    <div class="product-media">
-                        <span class="luxury-badge" style="background: ${badgeColor}; color: ${badgeTextColor};">${modeBadge}</span>
-                        <img src="${p.image}" alt="${p.title}" loading="lazy">
+                const wrapper = document.createElement('div');
+                wrapper.className = 'preorder-card-wrapper';
+                wrapper.style.cssText = 'display: flex; flex-direction: column; gap: 8px; flex-shrink: 0;';
+
+                wrapper.innerHTML = `
+                    <div class="preorder-badge-above" style="text-align: center; display: flex; justify-content: center;">
+                        <span class="luxury-badge-above" style="display: inline-flex; align-items: center; gap: 5px; background: ${badgeColor}; color: ${badgeTextColor}; padding: 4px 10px; border-radius: 50px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+                            ${modeBadge}
+                        </span>
                     </div>
-                    <div class="product-info">
-                        <h3 class="product-title">${p.title}</h3>
-                        <p class="product-price">${p.price}</p>
-                        <button class="btn-add-cart">
-                            <i class="fas ${btnIcon}"></i> ${btnText}
-                        </button>
+                    <div class="product-card" style="border-radius: 18px; overflow: hidden; position: relative;">
+                        <div class="product-media" style="border-radius: 18px 18px 0 0; overflow: hidden;">
+                            <img src="${p.image}" alt="${p.title}" loading="lazy" onerror="this.onerror=null; this.src='assets/Logo%20Black.png';">
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-title">${p.title}</h3>
+                            <p class="product-price">${p.price}</p>
+                            <button class="btn-add-cart">
+                                <i class="fas ${btnIcon}"></i> ${btnText}
+                            </button>
+                        </div>
                     </div>
                 `;
+
+                const card = wrapper.querySelector('.product-card');
                 card.addEventListener('click', (e) => {
                     if (!e.target.closest('.btn-add-cart')) {
                         window.location.href = `product-detail.html?id=${p.id}`;
@@ -209,7 +219,7 @@ async function fetchPreorders() {
                     e.stopPropagation();
                     if (window.addToWardrobe) window.addToWardrobe(p.id);
                 });
-                grid.appendChild(card);
+                grid.appendChild(wrapper);
             });
 
             startPreorderAutoScroll();
@@ -291,19 +301,19 @@ window.renderProductGrid = function (container, items) {
 
         if (item.type === 'product') {
             card.className = 'product-card';
-            const isVideo = item.media_type === 'video' || Boolean(item.is_video);
+            const hasRealVideo = (item.media_type === 'video' || Boolean(item.is_video)) && Boolean(item.video_url);
+            const isVideo = hasRealVideo;
             let mediaHtml = '';
 
             if (isVideo) {
-                // Video Product: poster first, lazy-loading on demand, no Anne's logo fallback for valid videos
                 const posterSrc = item.poster_url || (item.image && !item.image.includes('.mp4') ? item.image : 'assets/Logo%20Black.png');
-                const videoSrc = item.video_url || item.image || item.media_reference;
+                const videoSrc = item.video_url;
                 
                 mediaHtml = `
                     <div class="product-media video-container" style="position: relative; overflow: hidden; width: 100%; height: 100%;">
-                        <img src="${posterSrc}" alt="${item.title}" class="product-poster" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                        <img src="${posterSrc}" alt="${item.title}" class="product-poster" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; display: block;" onerror="this.onerror=null; this.src='assets/Logo%20Black.png';">
                         <span class="video-indicator-badge" style="position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.7); color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 5px; z-index: 2; pointer-events: none; backdrop-filter: blur(4px);">
-                            <i class="fas fa-play" style="font-size: 9px; color: #ff3366;"></i> VIDEO
+                            <i class="fas fa-play" style="font-size: 9px; color: var(--accent-gold);"></i> VIDEO
                         </span>
                         <video class="lazy-product-video" loop muted playsinline preload="none" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.3s ease; pointer-events: none;">
                             <source src="${videoSrc}" type="video/mp4">
@@ -311,7 +321,7 @@ window.renderProductGrid = function (container, items) {
                     </div>
                 `;
             } else {
-                const imgUrl = item.image && !item.image.startsWith('content://') ? item.image : 'assets/Logo%20Black.png';
+                const imgUrl = (item.image && !item.image.startsWith('content://') && !item.image.includes('.mp4')) ? item.image : (item.poster_url || 'assets/Logo%20Black.png');
                 mediaHtml = `
                     <div class="product-media">
                         <img src="${imgUrl}" alt="${item.title}" loading="lazy" onerror="this.onerror=null; this.src='assets/Logo%20Black.png';">

@@ -425,23 +425,29 @@
 
         try {
             let data = null;
-            if (typeof supabaseClientAuth === 'function') {
+            const workerBase = (typeof CF_WORKER_URL !== 'undefined' ? CF_WORKER_URL : 'https://api.annesfashion.co.ke');
+
+            if (typeof cfCustomerAuth === 'function') {
+                data = await cfCustomerAuth(phone, pin, name);
+            } else if (typeof supabaseClientAuth === 'function') {
                 data = await supabaseClientAuth(phone, pin, name);
             } else {
-                const res = await fetch(`${API_BASE}/client/auth.php`, {
+                const res = await fetch(`${workerBase}/api/client/auth`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone, pin, name, action: 'auto' })
+                    body: JSON.stringify({ phone, pin, name })
                 });
                 const resJson = await res.json();
-                if (resJson.success && resJson.data) data = resJson.data;
+                if (resJson.success) data = resJson;
             }
 
-            if (data && data.customer) {
-                currentCustomer = data.customer;
+            const customerObj = (data && data.customer) ? data.customer : data;
+
+            if (customerObj && (customerObj.id || customerObj.phone)) {
+                currentCustomer = customerObj;
                 localStorage.setItem('annes_client', JSON.stringify(currentCustomer));
                 updateHeaderUserBadge();
-                showBabeToast(data.message || `Welcome, gorgeous ${currentCustomer.name}! 💕`);
+                showBabeToast(data.message || `Welcome, gorgeous ${currentCustomer.name || 'babe'}! 💕`);
                 checkoutStep = 2;
                 renderCheckoutStep();
             } else {
@@ -449,7 +455,7 @@
             }
         } catch (e) {
             console.error('Auth submit error:', e);
-            showBabeToast("Could not sign in, babe. Please try again! 🌸");
+            showBabeToast(e.message && !e.message.includes('object') ? e.message : "Could not sign in, babe. Please try again! 🌸");
         } finally {
             btn.disabled = false;
             btn.innerHTML = 'Continue, Babe 💋 &rarr;';
@@ -462,7 +468,8 @@
     async function getDeliveryLocations() {
         if (deliveryLocationsCache.length > 0) return deliveryLocationsCache;
         try {
-            const res = await fetch('https://client-api.marketingwithkimani.workers.dev/api/delivery/rates');
+            const workerBase = (typeof CF_WORKER_URL !== 'undefined' ? CF_WORKER_URL : 'https://api.annesfashion.co.ke');
+            const res = await fetch(`${workerBase}/api/delivery/rates`);
             const data = await res.json();
             if (data.success && data.locations) {
                 deliveryLocationsCache = data.locations;
@@ -808,7 +815,8 @@
 
             // Send to Cloudflare Worker API first
             try {
-                const workerRes = await fetch('https://client-api.marketingwithkimani.workers.dev/api/client/order', {
+                const workerBase = (typeof CF_WORKER_URL !== 'undefined' ? CF_WORKER_URL : 'https://api.annesfashion.co.ke');
+                const workerRes = await fetch(`${workerBase}/api/client/order`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(orderPayload)
@@ -955,7 +963,7 @@
 
         try {
             const phone = currentCustomer.phone;
-            const workerApi = 'https://client-api.marketingwithkimani.workers.dev';
+            const workerApi = (typeof CF_WORKER_URL !== 'undefined' ? CF_WORKER_URL : 'https://api.annesfashion.co.ke');
             const res = await fetch(`${workerApi}/api/client/orders?phone=${encodeURIComponent(phone)}`);
             const data = await res.json();
 

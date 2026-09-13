@@ -51,13 +51,72 @@ async function fetchCloudflareProducts({ category, search } = {}) {
 
     const products = data.products || [];
 
+    function extractVariantsFromText(desc) {
+        const sizeSet = new Set();
+        const colorSet = new Set();
+        let qty = 0;
+        if (!desc || typeof desc !== 'string') return { sizes: [], colors: [], qty: 0 };
+
+        const sizeRegex = /Size\s+([^:,\n\]•]+?)(?::|\s*pcs|\s*,|\s*\])/gi;
+        let m;
+        while ((m = sizeRegex.exec(desc)) !== null) {
+            let s = m[1].trim().replace(/^["']|["']$/g, '');
+            if (s) sizeSet.add(s);
+        }
+
+        const colorRegex1 = /(?:Variant Stock:|,)\s*([A-Za-z\s]+?)\s*•/gi;
+        while ((m = colorRegex1.exec(desc)) !== null) {
+            let c = m[1].trim();
+            if (c && !c.toLowerCase().startsWith('size') && !c.toLowerCase().startsWith('variant')) colorSet.add(c);
+        }
+
+        const colorRegex2 = /Colour\s+([^:,\n\]•]+?)(?::|\s*pcs|\s*,|•|\])/gi;
+        while ((m = colorRegex2.exec(desc)) !== null) {
+            let c = m[1].trim();
+            if (c) colorSet.add(c);
+        }
+
+        const qtyRegex = /(\d+)\s*pcs/gi;
+        while ((m = qtyRegex.exec(desc)) !== null) {
+            qty += parseInt(m[1], 10);
+        }
+
+        return { sizes: Array.from(sizeSet), colors: Array.from(colorSet), qty };
+    }
+
     const formatted = products.map(p => {
         const isVideo = p.media_type === 'video' || Boolean(p.is_video);
         const posterUrl = p.poster_url || p.poster_reference || 'assets/Logo%20Black.png';
-        const videoUrl = isVideo ? (p.video_url || p.media_reference || p.image_url) : null;
-        const mainImg = !isVideo ? (p.image_url || p.media_reference || 'assets/Logo%20Black.png') : posterUrl;
+        
+        let videoUrl = isVideo ? (p.video_url || p.media_reference) : null;
+        // Don't treat a png/jpg image as a video source
+        if (videoUrl && (videoUrl.includes('.png') || videoUrl.includes('.jpg') || videoUrl.includes('.webp') || videoUrl.includes('.jpeg'))) {
+            videoUrl = null;
+        }
+        if (isVideo && !videoUrl && p.description) {
+            const m = p.description.match(/\[Media:\s*(https?:\/\/[^\]\s]+(?:\.mp4|\.webm|\.mov)?)/i);
+            if (m && m[1]) videoUrl = m[1].trim();
+        }
 
-        const stock = p.total_stock !== undefined ? parseInt(p.total_stock) : 10;
+        const mainImg = (!isVideo || !posterUrl || posterUrl.includes('Logo%20Black.png'))
+            ? (p.image_url || p.primary_image_url || 'assets/Logo%20Black.png')
+            : posterUrl;
+
+        const vParsed = extractVariantsFromText(p.description);
+        let sizes = (Array.isArray(p.sizes) && p.sizes.length > 0) ? p.sizes : vParsed.sizes;
+        let colors = (Array.isArray(p.colors) && p.colors.length > 0) ? p.colors : vParsed.colors;
+        let stock = p.total_stock !== undefined ? parseInt(p.total_stock) : 10;
+        if (stock === 0 && vParsed.qty > 0) stock = vParsed.qty;
+
+        const cat = (p.category || 'general').toLowerCase();
+        if (sizes.length === 0) {
+            if (['dresses', 'casual', 'corporate', 'weekend'].includes(cat)) {
+                sizes = ['S', 'M', 'L', 'XL'];
+            } else if (cat === 'shoes') {
+                sizes = ['37', '38', '39', '40', '41'];
+            }
+        }
+
         const priceVal = parseFloat(p.price || p.raw_price || 0);
 
         return {
@@ -67,19 +126,28 @@ async function fetchCloudflareProducts({ category, search } = {}) {
             raw_price: priceVal,
             image: mainImg,
             image_url: mainImg,
-            // Video-First Architecture fields
+            // Video-First Architecture fields (Cloudflare R2)
             media_type: isVideo ? 'video' : 'image',
             is_video: isVideo,
             video_url: videoUrl,
+            video_key: p.video_key || null,
             poster_url: posterUrl,
-            category: (p.category || 'general').toLowerCase(),
+            video_poster_key: p.video_poster_key || null,
+            video_mime_type: p.video_mime_type || null,
+            video_duration_seconds: p.video_duration_seconds || null,
+            media: p.media || [],
+            images: p.images || [],
+            category: cat,
             type: 'product',
             description: p.description || '',
+            clean_description: p.clean_description || (p.description ? p.description.replace(/\[Variant Stock:[^\]]*\]/gi, '').replace(/\[Media:[^\]]*\]/gi, '').trim() : ''),
             sku: p.sku || `AF-${(p.category || 'GE').substring(0, 3).toUpperCase()}-${p.id}`,
             stock,
             total_stock: stock,
             allow_preorder: Boolean(p.allow_preorder),
             is_featured: Boolean(p.is_featured),
+            sizes,
+            colors,
             created_at: p.created_at
         };
     });
@@ -98,6 +166,125 @@ async function fetchCloudflareProduct(id) {
         return null;
     }
     return data.product;
+}
+
+// =====================================================
+// Product Management (Admin CRUD)
+// =====================================================
+
+/**
+ * Creates a new product on Cloudflare D1
+ */
+async function cfCreateProduct(productData, adminToken = '') {
+    const token = adminToken || localStorage.getItem('admin_token') || '';
+    const { ok, data } = await cfFetch('/api/products', {
+        method: 'POST',
+        headers: {
+            'X-Admin-Token': token,
+            'Authorization': token ? `Bearer ${token}` : ''
+        },
+        body: JSON.stringify(productData)
+    });
+    if (!ok || !data?.success) {
+        throw new Error(data?.error || 'Failed to create product');
+    }
+    return data;
+}
+
+/**
+ * Updates an existing product on Cloudflare D1
+ */
+async function cfUpdateProduct(id, productData, adminToken = '') {
+    const token = adminToken || localStorage.getItem('admin_token') || '';
+    const { ok, data } = await cfFetch(`/api/products/${id}`, {
+        method: 'PUT',
+        headers: {
+            'X-Admin-Token': token,
+            'Authorization': token ? `Bearer ${token}` : ''
+        },
+        body: JSON.stringify(productData)
+    });
+    if (!ok || !data?.success) {
+        throw new Error(data?.error || 'Failed to update product');
+    }
+    return data;
+}
+
+/**
+ * Soft-archives a product on Cloudflare D1
+ */
+async function cfDeleteProduct(id, adminToken = '') {
+    const token = adminToken || localStorage.getItem('admin_token') || '';
+    const { ok, data } = await cfFetch(`/api/products/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'X-Admin-Token': token,
+            'Authorization': token ? `Bearer ${token}` : ''
+        }
+    });
+    if (!ok || !data?.success) {
+        throw new Error(data?.error || 'Failed to delete product');
+    }
+    return data;
+}
+
+// =====================================================
+// Cloudflare R2 Direct Media Upload (Images & Videos)
+// =====================================================
+
+/**
+ * Request a presigned PUT URL from Cloudflare Worker for direct R2 upload
+ */
+async function cfRequestUploadUrl(key, contentType, fileSize, adminToken = '') {
+    const token = adminToken || localStorage.getItem('admin_token') || '';
+    const { ok, data } = await cfFetch('/api/media/upload-url', {
+        method: 'POST',
+        headers: {
+            'X-Admin-Token': token,
+            'Authorization': token ? `Bearer ${token}` : ''
+        },
+        body: JSON.stringify({ key, contentType, fileSize })
+    });
+    if (!ok || !data?.success) {
+        throw new Error(data?.error || 'Failed to generate upload URL');
+    }
+    return data; // { success: true, uploadUrl, key, mediaUrl, expiresAt }
+}
+
+/**
+ * Directly upload binary data to Cloudflare R2 using the presigned URL
+ */
+async function cfDirectR2Upload(uploadUrl, file, contentType) {
+    const response = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': contentType
+        },
+        body: file
+    });
+    if (!response.ok) {
+        throw new Error(`R2 upload failed: HTTP ${response.status} ${response.statusText}`);
+    }
+    return true;
+}
+
+/**
+ * Saves media association in D1
+ */
+async function cfSaveMedia(mediaData, adminToken = '') {
+    const token = adminToken || localStorage.getItem('admin_token') || '';
+    const { ok, data } = await cfFetch('/api/media/save', {
+        method: 'POST',
+        headers: {
+            'X-Admin-Token': token,
+            'Authorization': token ? `Bearer ${token}` : ''
+        },
+        body: JSON.stringify(mediaData)
+    });
+    if (!ok || !data?.success) {
+        throw new Error(data?.error || 'Failed to save media metadata');
+    }
+    return data;
 }
 
 // =====================================================
@@ -121,7 +308,7 @@ async function cfCustomerAuth(phone, pin = '', name = '') {
     if (!ok || !data?.success) {
         throw new Error(data?.error || 'Authentication failed');
     }
-    return data.customer;
+    return data;
 }
 
 // =====================================================
@@ -169,8 +356,15 @@ window.fetchSupabaseProducts = fetchCloudflareProducts;
 window.fetchSupabaseSettings = fetchCloudflareSettings;
 window.subscribeToSupabaseRealtime = subscribeToCloudflarePoll;
 window.cfCustomerAuth = cfCustomerAuth;
+window.supabaseClientAuth = cfCustomerAuth;
 window.cfPlaceOrder = cfPlaceOrder;
 window.fetchCloudflareProduct = fetchCloudflareProduct;
+window.cfCreateProduct = cfCreateProduct;
+window.cfUpdateProduct = cfUpdateProduct;
+window.cfDeleteProduct = cfDeleteProduct;
+window.cfRequestUploadUrl = cfRequestUploadUrl;
+window.cfDirectR2Upload = cfDirectR2Upload;
+window.cfSaveMedia = cfSaveMedia;
 window.CF_WORKER_URL = CF_WORKER_URL;
 
 console.log('⚡ Anne\'s Fashion Cloudflare Client initialized with Worker:', CF_WORKER_URL);

@@ -86,252 +86,329 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Helper to extract variants from description
+    function extractVariantsFromText(desc) {
+        const sizeSet = new Set();
+        const colorSet = new Set();
+        let qty = 0;
+        if (!desc || typeof desc !== 'string') return { sizes: [], colors: [], qty: 0 };
+
+        const sizeRegex = /Size\s+([^:,\n\]•]+?)(?::|\s*pcs|\s*,|\s*\])/gi;
+        let m;
+        while ((m = sizeRegex.exec(desc)) !== null) {
+            let s = m[1].trim().replace(/^["']|["']$/g, '');
+            if (s) sizeSet.add(s);
+        }
+
+        const colorRegex1 = /(?:Variant Stock:|,)\s*([A-Za-z\s]+?)\s*•/gi;
+        while ((m = colorRegex1.exec(desc)) !== null) {
+            let c = m[1].trim();
+            if (c && !c.toLowerCase().startsWith('size') && !c.toLowerCase().startsWith('variant')) colorSet.add(c);
+        }
+
+        const colorRegex2 = /Colour\s+([^:,\n\]•]+?)(?::|\s*pcs|\s*,|•|\])/gi;
+        while ((m = colorRegex2.exec(desc)) !== null) {
+            let c = m[1].trim();
+            if (c) colorSet.add(c);
+        }
+
+        const qtyRegex = /(\d+)\s*pcs/gi;
+        while ((m = qtyRegex.exec(desc)) !== null) {
+            qty += parseInt(m[1], 10);
+        }
+
+        return { sizes: Array.from(sizeSet), colors: Array.from(colorSet), qty };
+    }
+
+    function cleanCustomerDescription(desc) {
+        if (!desc) return '';
+        return desc
+            .replace(/\[Variant Stock:[^\]]*\]/gi, '')
+            .replace(/\[Media:[^\]]*\]/gi, '')
+            .trim();
+    }
+
     // 4. Render product data into the page
     function renderProduct(productData) {
-        const product = {
-            id: productData.id,
-            title: productData.title,
-            price: `KSh ${parseFloat(productData.price || productData.raw_price || 0).toLocaleString()}`,
-            raw_price: productData.raw_price || parseFloat(productData.price || 0),
-            image: productData.image_url || productData.image,
-            category: productData.category,
-            description: productData.description,
-            stock: parseInt(productData.total_stock) || 0,
-            allow_preorder: parseInt(productData.allow_preorder) === 1 || Boolean(productData.allow_preorder),
-            sizes: Array.isArray(productData.sizes) ? productData.sizes : [],
-            colors: Array.isArray(productData.colors) ? productData.colors : []
-        };
+        try {
+            const vParsed = extractVariantsFromText(productData.description);
+            let extractedSizes = Array.isArray(productData.sizes) && productData.sizes.length > 0 ? productData.sizes : vParsed.sizes;
+            let extractedColors = Array.isArray(productData.colors) && productData.colors.length > 0 ? productData.colors : vParsed.colors;
+            let stockNum = parseInt(productData.total_stock) || 0;
+            if (stockNum === 0 && vParsed.qty > 0) stockNum = vParsed.qty;
 
-        console.log('Rendering Product with Real Supabase Attributes:', product);
-
-        document.title = `${product.title} | Anne's Fashion Line`;
-
-        const isVideo = productData.media_type === 'video' || Boolean(productData.is_video);
-        const mainImageContainer = document.querySelector('.main-image');
-        const videoSrc = isVideo ? (productData.video_url || productData.media_reference || productData.image_url || product.image) : null;
-        const posterSrc = productData.poster_url || productData.poster_reference || 'assets/Logo%20Black.png';
-        const safeMainImg = (!isVideo && product.image && !product.image.startsWith('content://')) ? product.image : posterSrc;
-
-        function showVideoInMain(vSrc, pSrc) {
-            if (!mainImageContainer) return;
-            mainImageContainer.innerHTML = `
-                <div class="product-video-wrapper" style="position: relative; width: 100%; min-height: 420px; display: flex; align-items: center; justify-content: center; background: #000; border-radius: 8px; overflow: hidden;">
-                    <video id="mainProductVideo" controls autoplay playsinline preload="metadata" poster="${pSrc}" style="width: 100%; max-height: 600px; object-fit: contain;">
-                        <source src="${vSrc}" type="video/mp4">
-                        Your browser does not support HTML5 video.
-                    </video>
-                </div>
-            `;
-        }
-
-        function showImageInMain(iSrc) {
-            if (!mainImageContainer) return;
-            mainImageContainer.innerHTML = `
-                <img id="mainProductImage" src="${iSrc}" alt="${product.title}" onerror="this.onerror=null; this.src='assets/Logo%20Black.png';">
-            `;
-        }
-
-        if (isVideo && videoSrc) {
-            showVideoInMain(videoSrc, posterSrc);
-        } else {
-            showImageInMain(safeMainImg);
-        }
-
-        // Thumbnails & Media Gallery
-        const thumbContainer = document.getElementById('thumbnailContainer');
-        if (thumbContainer) {
-            thumbContainer.innerHTML = '';
-            
-            // Collect all gallery media items
-            const mediaList = [];
-            if (productData.media && Array.isArray(productData.media) && productData.media.length > 0) {
-                productData.media.forEach(m => mediaList.push(m));
-            } else {
-                if (isVideo && videoSrc) {
-                    mediaList.push({ type: 'video', url: videoSrc, poster: posterSrc, is_main: true });
+            const categoryName = (productData.category || 'general').toLowerCase();
+            if (extractedSizes.length === 0) {
+                if (['dresses', 'casual', 'corporate', 'weekend'].includes(categoryName)) {
+                    extractedSizes = ['S', 'M', 'L', 'XL'];
+                } else if (categoryName === 'shoes') {
+                    extractedSizes = ['37', '38', '39', '40', '41'];
                 }
-                const images = (productData.images && productData.images.length > 0)
-                    ? productData.images.map(img => typeof img === 'string' ? img : img.url)
-                    : (safeMainImg ? [safeMainImg] : []);
-                images.forEach(imgUrl => {
-                    if (!mediaList.some(m => m.url === imgUrl)) {
-                        mediaList.push({ type: 'image', url: imgUrl, poster: null, is_main: false });
-                    }
-                });
             }
 
-            mediaList.forEach((mediaItem, index) => {
-                const thumbWrapper = document.createElement('div');
-                thumbWrapper.className = `thumbnail-wrapper ${index === 0 ? 'active' : ''}`;
-                thumbWrapper.style.cssText = 'position: relative; cursor: pointer; display: inline-block; margin: 4px; border-radius: 6px; overflow: hidden; border: 2px solid transparent;';
-                if (index === 0) thumbWrapper.style.borderColor = '#ff3366';
+            const cleanedDesc = cleanCustomerDescription(productData.description);
 
-                const thumbImg = document.createElement('img');
-                const isItemVideo = mediaItem.type === 'video';
-                thumbImg.src = isItemVideo ? (mediaItem.poster || 'assets/Logo%20Black.png') : (mediaItem.url || 'assets/Logo%20Black.png');
-                thumbImg.style.cssText = 'width: 70px; height: 70px; object-fit: cover; display: block;';
-                thumbImg.onerror = function() { this.onerror = null; this.src = 'assets/Logo%20Black.png'; };
-                thumbWrapper.appendChild(thumbImg);
+            const product = {
+                id: productData.id,
+                title: productData.title,
+                price: `KSh ${parseFloat(productData.price || productData.raw_price || 0).toLocaleString()}`,
+                raw_price: productData.raw_price || parseFloat(productData.price || 0),
+                image: productData.image_url || productData.image,
+                category: categoryName,
+                description: cleanedDesc || `Experience the exclusive ${productData.title} from our ${categoryName} collection. Premium luxury and style, curated just for you.`,
+                stock: stockNum,
+                allow_preorder: parseInt(productData.allow_preorder) === 1 || Boolean(productData.allow_preorder),
+                sizes: extractedSizes,
+                colors: extractedColors
+            };
 
-                if (isItemVideo) {
-                    const playBadge = document.createElement('div');
-                    playBadge.innerHTML = '<i class="fas fa-play" style="font-size: 10px; color: #fff;"></i>';
-                    playBadge.style.cssText = 'position: absolute; bottom: 4px; right: 4px; background: rgba(255, 51, 102, 0.9); width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center;';
-                    thumbWrapper.appendChild(playBadge);
+            console.log('Rendering Product:', product);
+            document.title = `${product.title} | Anne's Fashion Line`;
+
+            const isVideo = productData.media_type === 'video' || Boolean(productData.is_video);
+            const mainImageContainer = document.querySelector('.main-image');
+
+            // Find true video URL (avoiding images falsely passed as video)
+            let videoSrc = isVideo ? (productData.video_url || productData.media_reference) : null;
+            if (videoSrc && (videoSrc.includes('.png') || videoSrc.includes('.jpg') || videoSrc.includes('.webp') || videoSrc.includes('.jpeg'))) {
+                videoSrc = null;
+            }
+            if (isVideo && !videoSrc && productData.description) {
+                const mMatch = productData.description.match(/\[Media:\s*(https?:\/\/[^\]\s]+(?:\.mp4|\.webm|\.mov)?)/i);
+                if (mMatch && mMatch[1]) {
+                    videoSrc = mMatch[1].trim();
+                }
+            }
+
+            const posterSrc = productData.poster_url || productData.poster_reference || 'assets/Logo%20Black.png';
+            const safeMainImg = (product.image && !product.image.startsWith('content://') && !product.image.includes('.mp4')) ? product.image : posterSrc;
+
+            function showVideoInMain(vSrc, pSrc) {
+                if (!mainImageContainer) return;
+                mainImageContainer.classList.add('has-video');
+                mainImageContainer.innerHTML = `
+                    <div class="product-video-wrapper" style="position: relative; width: 100%; display: flex; align-items: center; justify-content: center; background: #000; border-radius: 16px; overflow: hidden;">
+                        <video id="mainProductVideo" controls autoplay playsinline preload="metadata" poster="${pSrc}" style="width: 100%; max-height: 65vh; object-fit: contain; display: block; border-radius: 16px;">
+                            <source src="${vSrc}" type="video/mp4">
+                            Your browser does not support HTML5 video.
+                        </video>
+                    </div>
+                `;
+            }
+
+            function showImageInMain(iSrc) {
+                if (!mainImageContainer) return;
+                mainImageContainer.classList.remove('has-video');
+                mainImageContainer.innerHTML = `
+                    <img id="mainProductImage" src="${iSrc}" alt="${product.title}" onerror="this.onerror=null; this.src='assets/Logo%20Black.png';">
+                `;
+            }
+
+            if (isVideo && videoSrc) {
+                showVideoInMain(videoSrc, posterSrc);
+            } else {
+                showImageInMain(safeMainImg);
+            }
+
+            // Thumbnails & Media Gallery
+            const thumbContainer = document.getElementById('thumbnailContainer');
+            if (thumbContainer) {
+                thumbContainer.innerHTML = '';
+                const mediaList = [];
+                if (productData.media && Array.isArray(productData.media) && productData.media.length > 0) {
+                    productData.media.forEach(m => mediaList.push(m));
+                } else {
+                    if (isVideo && videoSrc) {
+                        mediaList.push({ type: 'video', url: videoSrc, poster: posterSrc, is_main: true });
+                    }
+                    const images = (productData.images && productData.images.length > 0)
+                        ? productData.images.map(img => typeof img === 'string' ? img : img.url)
+                        : (safeMainImg ? [safeMainImg] : []);
+                    images.forEach(imgUrl => {
+                        if (imgUrl && !mediaList.some(m => m.url === imgUrl)) {
+                            mediaList.push({ type: 'image', url: imgUrl, poster: null, is_main: false });
+                        }
+                    });
                 }
 
-                thumbWrapper.addEventListener('click', () => {
-                    document.querySelectorAll('.thumbnail-wrapper').forEach(t => {
-                        t.classList.remove('active');
-                        t.style.borderColor = 'transparent';
-                    });
-                    thumbWrapper.classList.add('active');
-                    thumbWrapper.style.borderColor = '#ff3366';
+                mediaList.forEach((mediaItem, index) => {
+                    const thumbWrapper = document.createElement('div');
+                    thumbWrapper.className = `thumbnail-wrapper ${index === 0 ? 'active' : ''}`;
+                    thumbWrapper.style.cssText = 'position: relative; cursor: pointer; display: inline-block; margin: 4px; border-radius: 8px; overflow: hidden; border: 2px solid transparent;';
+                    if (index === 0) thumbWrapper.style.borderColor = 'var(--accent-gold)';
+
+                    const thumbImg = document.createElement('img');
+                    const isItemVideo = mediaItem.type === 'video';
+                    thumbImg.src = isItemVideo ? (mediaItem.poster || 'assets/Logo%20Black.png') : (mediaItem.url || 'assets/Logo%20Black.png');
+                    thumbImg.style.cssText = 'width: 70px; height: 70px; object-fit: cover; display: block; border-radius: 6px;';
+                    thumbImg.onerror = function() { this.onerror = null; this.src = 'assets/Logo%20Black.png'; };
+                    thumbWrapper.appendChild(thumbImg);
 
                     if (isItemVideo) {
-                        showVideoInMain(mediaItem.url, mediaItem.poster || posterSrc);
-                    } else {
-                        showImageInMain(mediaItem.url);
-                    }
-                });
-
-                thumbContainer.appendChild(thumbWrapper);
-            });
-        }
-
-        const titleEl = document.querySelector('.product-title-main');
-        if (titleEl) titleEl.textContent = product.title;
-
-        const priceEl = document.querySelector('.product-price-main');
-        if (priceEl) priceEl.textContent = product.price;
-
-        const descEl = document.querySelector('.product-description');
-        if (descEl) {
-            descEl.textContent = product.description || `Shop the exclusive ${product.title} from our ${product.category} collection. Premium quality and style, curated just for you.`;
-        }
-
-        // Dynamic Sizes from Supabase
-        const sizeContainer = document.getElementById('sizeSelector');
-        const sizeOptionGroup = sizeContainer ? sizeContainer.closest('.option-group') : null;
-        if (sizeContainer) {
-            sizeContainer.innerHTML = '';
-            const validSizes = (product.sizes || []).filter(Boolean);
-            if (validSizes.length > 0) {
-                if (sizeOptionGroup) sizeOptionGroup.style.display = 'block';
-                validSizes.forEach((size, index) => {
-                    const btn = document.createElement('button');
-                    btn.className = `size-btn ${index === 0 ? 'active' : ''}`;
-                    btn.textContent = size;
-                    btn.setAttribute('data-size', size);
-                    btn.addEventListener('click', () => {
-                        sizeContainer.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                    });
-                    sizeContainer.appendChild(btn);
-                });
-            } else {
-                if (sizeOptionGroup) sizeOptionGroup.style.display = 'none';
-            }
-        }
-
-        // Dynamic Colors from Supabase
-        const colorContainer = document.getElementById('colorSelector');
-        const colorOptionGroup = colorContainer ? colorContainer.closest('.option-group') : null;
-        if (colorContainer) {
-            colorContainer.innerHTML = '';
-            const validColors = (product.colors || []).filter(c => c && c.toLowerCase() !== 'default');
-            if (validColors.length > 0) {
-                if (colorOptionGroup) colorOptionGroup.style.display = 'block';
-                validColors.forEach((color, index) => {
-                    const btn = document.createElement('button');
-                    btn.className = `color-btn ${index === 0 ? 'active' : ''}`;
-                    btn.setAttribute('data-color', color);
-                    btn.title = color;
-
-                    const cLower = color.toLowerCase().trim();
-                    const colorMap = {
-                        'burgundy': '#800020',
-                        'nude': '#e0ac69',
-                        'beige': '#f5f5dc',
-                        'navy': '#001f3f',
-                        'gold': '#c9a96e',
-                        'rose gold': '#b76e79',
-                        'silver': '#c0c0c0',
-                        'charcoal': '#36454f'
-                    };
-                    const bg = colorMap[cLower] || cLower;
-                    btn.style.backgroundColor = bg;
-
-                    if (cLower === 'white' || cLower === '#fff' || cLower === '#ffffff' || cLower === 'cream') {
-                        btn.style.border = '2px solid #ccc';
+                        const playBadge = document.createElement('div');
+                        playBadge.innerHTML = '<i class="fas fa-play" style="font-size: 10px; color: #fff;"></i>';
+                        playBadge.style.cssText = 'position: absolute; bottom: 4px; right: 4px; background: rgba(201, 169, 110, 0.9); width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center;';
+                        thumbWrapper.appendChild(playBadge);
                     }
 
-                    btn.addEventListener('click', () => {
-                        colorContainer.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
+                    thumbWrapper.addEventListener('click', () => {
+                        document.querySelectorAll('.thumbnail-wrapper').forEach(t => {
+                            t.classList.remove('active');
+                            t.style.borderColor = 'transparent';
+                        });
+                        thumbWrapper.classList.add('active');
+                        thumbWrapper.style.borderColor = 'var(--accent-gold)';
+
+                        if (isItemVideo) {
+                            showVideoInMain(mediaItem.url, mediaItem.poster || posterSrc);
+                        } else {
+                            showImageInMain(mediaItem.url);
+                        }
                     });
-                    colorContainer.appendChild(btn);
+
+                    thumbContainer.appendChild(thumbWrapper);
                 });
-            } else {
-                if (colorOptionGroup) colorOptionGroup.style.display = 'none';
             }
-        }
 
-        // Breadcrumbs
-        const breadcrumbCategory = document.querySelector('#productBreadcrumb a:nth-child(2)');
-        const breadcrumbTitle = document.querySelector('#productBreadcrumb span');
-        if (breadcrumbCategory) {
-            breadcrumbCategory.textContent = product.category.charAt(0).toUpperCase() + product.category.slice(1);
-            breadcrumbCategory.href = `${product.category}.html`;
-        }
-        if (breadcrumbTitle) breadcrumbTitle.textContent = product.title;
+            const titleEl = document.querySelector('.product-title-main');
+            if (titleEl) titleEl.textContent = product.title;
 
-        // Meta
-        const metaContainer = document.getElementById('productMeta');
-        if (metaContainer) {
-            metaContainer.innerHTML = `
-            <p><strong>SKU:</strong> ${productData.sku || `LK-${product.category.substring(0, 2).toUpperCase()}-${product.id}`}</p>
-            <p><strong>Category:</strong> ${product.category.charAt(0).toUpperCase() + product.category.slice(1)}</p>
-            <p><strong>Stock Status:</strong> ${product.stock > 0 ? `<span style="color:#4CAF50">${product.stock} in stock</span>` : (product.allow_preorder ? '<span style="color:var(--accent-gold)">Available for Pre-order</span>' : '<span style="color:#f44336">Out of Stock</span>')}</p>
-        `;
-        }
+            const priceEl = document.querySelector('.product-price-main');
+            if (priceEl) priceEl.textContent = product.price;
 
-        // Add to Wardrobe button
-        const addBtn = document.querySelector('.btn-add-to-cart');
-        if (addBtn) {
-            const newBtn = addBtn.cloneNode(true);
-            addBtn.parentNode.replaceChild(newBtn, addBtn);
+            const descEl = document.querySelector('.product-description');
+            if (descEl) {
+                descEl.textContent = product.description;
+            }
 
-            if (product.stock <= 0 && !product.allow_preorder) {
-                newBtn.innerHTML = '<i class="fas fa-times-circle"></i> Out of Stock';
-                newBtn.disabled = true;
-                newBtn.style.opacity = '0.5';
-                newBtn.style.cursor = 'not-allowed';
-            } else {
-                if (product.stock <= 0 && product.allow_preorder) {
-                    newBtn.innerHTML = '<i class="fas fa-clock"></i> Pre-order Now';
+            // Sizes
+            const sizeContainer = document.getElementById('sizeSelector');
+            const sizeOptionGroup = sizeContainer ? sizeContainer.closest('.option-group') : null;
+            if (sizeContainer) {
+                sizeContainer.innerHTML = '';
+                const validSizes = (product.sizes || []).filter(Boolean);
+                if (validSizes.length > 0) {
+                    if (sizeOptionGroup) sizeOptionGroup.style.display = 'block';
+                    validSizes.forEach((size, index) => {
+                        const btn = document.createElement('button');
+                        btn.className = `size-btn ${index === 0 ? 'active' : ''}`;
+                        btn.textContent = size;
+                        btn.setAttribute('data-size', size);
+                        btn.addEventListener('click', () => {
+                            sizeContainer.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+                            btn.classList.add('active');
+                        });
+                        sizeContainer.appendChild(btn);
+                    });
+                } else {
+                    if (sizeOptionGroup) sizeOptionGroup.style.display = 'none';
                 }
-                newBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const activeSizeBtn = document.querySelector('#sizeSelector .size-btn.active');
-                    const selectedSize = activeSizeBtn ? (activeSizeBtn.getAttribute('data-size') || activeSizeBtn.textContent.trim()) : null;
-
-                    const activeColorBtn = document.querySelector('#colorSelector .color-btn.active');
-                    const selectedColor = activeColorBtn ? (activeColorBtn.getAttribute('data-color') || activeColorBtn.title || activeColorBtn.textContent.trim()) : null;
-
-                    if (typeof window.addToWardrobe === 'function') {
-                        window.addToWardrobe(product, selectedSize, selectedColor);
-                    } else {
-                        console.log('Add to Wardrobe: ', product.title, 'Size:', selectedSize, 'Color:', selectedColor);
-                    }
-                });
             }
-        }
 
-        // Reveal content
-        if (detailSection) detailSection.style.visibility = 'visible';
+            // Colors
+            const colorContainer = document.getElementById('colorSelector');
+            const colorOptionGroup = colorContainer ? colorContainer.closest('.option-group') : null;
+            if (colorContainer) {
+                colorContainer.innerHTML = '';
+                const validColors = (product.colors || []).filter(c => c && c.toLowerCase() !== 'default');
+                if (validColors.length > 0) {
+                    if (colorOptionGroup) colorOptionGroup.style.display = 'block';
+                    validColors.forEach((color, index) => {
+                        const btn = document.createElement('button');
+                        btn.className = `color-btn ${index === 0 ? 'active' : ''}`;
+                        btn.setAttribute('data-color', color);
+                        btn.title = color;
+
+                        const cLower = color.toLowerCase().trim();
+                        const colorMap = {
+                            'burgundy': '#800020',
+                            'nude': '#e0ac69',
+                            'beige': '#f5f5dc',
+                            'navy': '#001f3f',
+                            'navy blue': '#001f3f',
+                            'royal blue': '#4169e1',
+                            'gold': '#c9a96e',
+                            'rose gold': '#b76e79',
+                            'silver': '#c0c0c0',
+                            'charcoal': '#36454f',
+                            'white': '#ffffff',
+                            'black': '#111111'
+                        };
+                        const bg = colorMap[cLower] || cLower;
+                        btn.style.backgroundColor = bg;
+
+                        if (cLower === 'white' || cLower === '#fff' || cLower === '#ffffff' || cLower === 'cream') {
+                            btn.style.border = '2px solid #ccc';
+                        }
+
+                        btn.addEventListener('click', () => {
+                            colorContainer.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+                            btn.classList.add('active');
+                        });
+                        colorContainer.appendChild(btn);
+                    });
+                } else {
+                    if (colorOptionGroup) colorOptionGroup.style.display = 'none';
+                }
+            }
+
+            // Breadcrumbs
+            const breadcrumbCategory = document.querySelector('#productBreadcrumb a:nth-child(2)');
+            const breadcrumbTitle = document.querySelector('#productBreadcrumb span');
+            if (breadcrumbCategory) {
+                breadcrumbCategory.textContent = product.category.charAt(0).toUpperCase() + product.category.slice(1);
+                breadcrumbCategory.href = `${product.category}.html`;
+            }
+            if (breadcrumbTitle) breadcrumbTitle.textContent = product.title;
+
+            // Meta
+            const metaContainer = document.getElementById('productMeta');
+            if (metaContainer) {
+                metaContainer.innerHTML = `
+                <p><strong>SKU:</strong> ${productData.sku || `AF-${product.category.substring(0, 3).toUpperCase()}-${product.id}`}</p>
+                <p><strong>Category:</strong> ${product.category.charAt(0).toUpperCase() + product.category.slice(1)}</p>
+                <p><strong>Stock Status:</strong> ${product.stock > 0 ? `<span style="color:#4CAF50">${product.stock} in stock</span>` : (product.allow_preorder ? '<span style="color:var(--accent-gold)">Available for Pre-order</span>' : '<span style="color:#f44336">Out of Stock</span>')}</p>
+            `;
+            }
+
+            // Add to Wardrobe button
+            const addBtn = document.querySelector('.btn-add-to-cart');
+            if (addBtn) {
+                const newBtn = addBtn.cloneNode(true);
+                addBtn.parentNode.replaceChild(newBtn, addBtn);
+
+                if (product.stock <= 0 && !product.allow_preorder) {
+                    newBtn.innerHTML = '<i class="fas fa-times-circle"></i> Out of Stock';
+                    newBtn.disabled = true;
+                    newBtn.style.opacity = '0.5';
+                    newBtn.style.cursor = 'not-allowed';
+                } else {
+                    if (product.stock <= 0 && product.allow_preorder) {
+                        newBtn.innerHTML = '<i class="fas fa-clock"></i> Pre-order Now';
+                    }
+                    newBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const activeSizeBtn = document.querySelector('#sizeSelector .size-btn.active');
+                        const selectedSize = activeSizeBtn ? (activeSizeBtn.getAttribute('data-size') || activeSizeBtn.textContent.trim()) : null;
+
+                        const activeColorBtn = document.querySelector('#colorSelector .color-btn.active');
+                        const selectedColor = activeColorBtn ? (activeColorBtn.getAttribute('data-color') || activeColorBtn.title || activeColorBtn.textContent.trim()) : null;
+
+                        if (typeof window.addToWardrobe === 'function') {
+                            window.addToWardrobe(product, selectedSize, selectedColor);
+                        }
+                    });
+                }
+            }
+        } catch (err) {
+            console.error('Error in renderProduct:', err);
+        } finally {
+            // Always ensure product details are visible
+            if (detailSection) detailSection.style.visibility = 'visible';
+        }
     }
+
 
     // 5. Fetch product directly from Cloudflare Worker
     async function fetchProductDetails(id) {

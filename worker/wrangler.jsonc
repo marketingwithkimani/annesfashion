@@ -25,9 +25,6 @@
       "bucket_name": "client-production-backups"
     }
   ],
-  "stream": {
-    "binding": "STREAM"
-  },
   "triggers": {
     "crons": ["0 2 * * *"]
   },

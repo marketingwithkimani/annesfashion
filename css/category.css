@@ -56,6 +56,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    color: var(--text-main);
 }
 
 .filter-toggle:hover {
@@ -77,6 +78,11 @@
     cursor: pointer;
     font-weight: 500;
     transition: all 0.3s;
+}
+
+.sort-select option {
+    background: var(--card-bg);
+    color: var(--text-main);
 }
 
 .sort-select:focus {

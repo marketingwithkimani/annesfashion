@@ -235,6 +235,33 @@ async function loadProducts() {
     showLoading(true);
 
     try {
+        // Try Cloudflare Worker first for live database connection
+        if (typeof window.fetchCloudflareProducts === 'function') {
+            const cfProducts = await window.fetchCloudflareProducts({ search });
+            if (cfProducts && cfProducts.length > 0) {
+                allProducts = cfProducts.map(p => ({
+                    id: p.id,
+                    title: p.title,
+                    price: p.raw_price || p.price,
+                    category: p.category,
+                    sku: p.sku,
+                    image_url: p.image_url || p.image,
+                    total_stock: p.stock || p.total_stock || 0,
+                    description: p.description,
+                    is_featured: p.is_featured ? 1 : 0,
+                    allow_preorder: p.allow_preorder ? 1 : 0,
+                    media_type: p.media_type,
+                    video_url: p.video_url,
+                    video_key: p.video_key,
+                    poster_url: p.poster_url,
+                    images: p.images || []
+                }));
+                displayProducts();
+                showLoading(false);
+                return;
+            }
+        }
+
         const url = search
             ? `${API_BASE}/products/list.php?search=${encodeURIComponent(search)}`
             : `${API_BASE}/products/list.php?active_only=false`;
@@ -247,6 +274,7 @@ async function loadProducts() {
             displayProducts();
         }
     } catch (error) {
+        console.warn('Fallback loading products error:', error);
         showToast('Error loading products');
     } finally {
         showLoading(false);
@@ -362,6 +390,34 @@ async function handleProductSubmit(e) {
     showLoading(true);
 
     try {
+        // 1. Sync to Cloudflare D1 live database if available
+        let cfSuccess = false;
+        if (typeof window.cfCreateProduct === 'function' && typeof window.cfUpdateProduct === 'function') {
+            try {
+                const cfPayload = {
+                    title: productData.title,
+                    description: productData.description,
+                    price: parseFloat(productData.price),
+                    category: productData.category,
+                    image_url: images[0] || null,
+                    images: images,
+                    is_featured: productData.is_featured,
+                    allow_preorder: productData.allow_preorder,
+                    initial_stock: parseInt(productData.initial_stock || 0)
+                };
+
+                if (isEdit) {
+                    await window.cfUpdateProduct(productId, cfPayload, authToken);
+                } else {
+                    await window.cfCreateProduct(cfPayload, authToken);
+                }
+                cfSuccess = true;
+            } catch (cfErr) {
+                console.warn('Cloudflare Worker save attempt warning:', cfErr);
+            }
+        }
+
+        // 2. Also sync to local backend for consistency
         const url = isEdit
             ? `${API_BASE}/products/update.php?id=${productId}`
             : `${API_BASE}/products/create.php`;
@@ -379,12 +435,12 @@ async function handleProductSubmit(e) {
 
         const data = await response.json();
 
-        if (data.success) {
+        if (data.success || cfSuccess) {
             showToast(isEdit ? 'Product updated successfully' : 'Product created successfully');
             closeProductModal();
             loadProducts();
         } else {
-            showToast(`Error: ${data.message}`);
+            showToast(`Error: ${data.message || 'Operation failed'}`);
         }
     } catch (error) {
         showToast('Connection error');
