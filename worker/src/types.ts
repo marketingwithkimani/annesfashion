@@ -36,6 +36,13 @@ export interface Product {
   video_size_bytes: number | null;
   video_duration_seconds: number | null;
   video_poster_key: string | null;   // R2 poster key
+  // Exact size and color attributes (added in migration 0004)
+  sizes?: string | null;
+  colors?: string | null;
+  waist_sizes?: string | null;
+  bust_sizes?: string | null;
+  shoe_sizes?: string | null;
+  total_stock?: number | null;
   is_active: number;
   is_archived: number;
   is_featured: number;

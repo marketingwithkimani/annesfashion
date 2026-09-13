@@ -98,26 +98,85 @@ export async function handleGetUploadUrl(request: Request, env: Env): Promise<Re
     }, { status: 400 });
   }
 
-  // ── Generate presigned PUT URL via R2 S3-compatible API ──
-  // R2 presigned URLs are generated using the S3 presign mechanism
-  // via the account's R2 S3 endpoint + HMAC-SHA256 signing.
-  try {
-    const presignedUrl = await generateR2PresignedUrl(env, key, contentType);
-    const expiresAt = new Date(Date.now() + UPLOAD_URL_TTL * 1000).toISOString();
-    const mediaUrl = getR2MediaUrl(key, env);
+  // ── Generate upload URL ──
+  // If R2 S3 credentials are configured, generate presigned PUT URL
+  if (env.R2_ACCESS_KEY_ID && env.R2_SECRET_ACCESS_KEY) {
+    try {
+      const presignedUrl = await generateR2PresignedUrl(env, key, contentType);
+      const expiresAt = new Date(Date.now() + UPLOAD_URL_TTL * 1000).toISOString();
+      const mediaUrl = getR2MediaUrl(key, env);
 
+      return Response.json({
+        success: true,
+        uploadUrl: presignedUrl,
+        key,
+        mediaUrl,
+        expiresAt,
+      });
+    } catch (err: any) {
+      console.warn('Presigned URL generation failed, falling back to direct Worker upload:', err);
+    }
+  }
+
+  // Robust Native Fallback: Direct streaming upload through Cloudflare Worker
+  // Streams directly into R2 bucket (env.IMAGES) without requiring external S3 API keys
+  const base = env.API_BASE_URL || 'https://api.annesfashion.co.ke';
+  const uploadUrl = `${base}/api/media/direct-upload?key=${encodeURIComponent(key)}&contentType=${encodeURIComponent(contentType)}`;
+  const expiresAt = new Date(Date.now() + UPLOAD_URL_TTL * 1000).toISOString();
+  const mediaUrl = getR2MediaUrl(key, env);
+
+  return Response.json({
+    success: true,
+    uploadUrl,
+    key,
+    mediaUrl,
+    expiresAt,
+  });
+}
+
+/**
+ * PUT/POST /api/media/direct-upload?key=...&contentType=...
+ * Directly streams the file body into the R2 IMAGES bucket using native Worker bindings.
+ * Supports large video files up to 100MB with zero AWS/S3 credential dependency.
+ */
+export async function handleDirectUpload(request: Request, env: Env): Promise<Response> {
+  const url = new URL(request.url);
+  const key = url.searchParams.get('key') || request.headers.get('X-File-Key');
+  const contentType = url.searchParams.get('contentType') || request.headers.get('Content-Type') || 'application/octet-stream';
+
+  if (!key) {
+    return Response.json({ success: false, error: 'key parameter is required' }, { status: 400 });
+  }
+
+  if (!key.startsWith('products/')) {
+    return Response.json({ success: false, error: 'key must start with products/' }, { status: 400 });
+  }
+
+  if (!request.body) {
+    return Response.json({ success: false, error: 'No file body received' }, { status: 400 });
+  }
+
+  try {
+    await env.IMAGES!.put(key, request.body, {
+      httpMetadata: {
+        contentType,
+        cacheControl: 'public, max-age=31536000, immutable',
+      },
+    });
+
+    const mediaUrl = getR2MediaUrl(key, env);
     return Response.json({
       success: true,
-      uploadUrl: presignedUrl,
       key,
       mediaUrl,
-      expiresAt,
-    });
+      url: mediaUrl,
+      message: 'Media uploaded successfully to R2',
+    }, { status: 200 });
   } catch (err: any) {
-    console.error('R2 presign error:', err);
+    console.error('Direct R2 upload error:', err);
     return Response.json({
       success: false,
-      error: err.message || 'Failed to generate upload URL',
+      error: err.message || 'Direct upload to R2 failed',
     }, { status: 500 });
   }
 }

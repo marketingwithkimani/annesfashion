@@ -1,6 +1,7 @@
 import { Env, Product, ProductMedia, ProductVariant, InventoryItem } from './types';
 import {
   handleGetUploadUrl,
+  handleDirectUpload,
   handleServeMedia,
   handleDeleteMedia,
   getR2MediaUrl,
@@ -98,60 +99,57 @@ export default {
       // PRODUCTS — CREATE (POST /api/products)
       // ----------------------------------------------------
       if (path === '/api/products' && method === 'POST') {
-        const body = await request.json() as {
-          title: string;
-          description?: string;
-          price: number;
-          category: string;
-          sku?: string;
-          media_type?: 'image' | 'video';
-          media_reference?: string;  // R2 key or URL
-          poster_reference?: string;
-          // R2 video fields
-          video_key?: string;
-          video_url?: string;
-          video_mime_type?: string;
-          video_size_bytes?: number;
-          video_duration_seconds?: number;
-          video_poster_key?: string;
-          // Image fields
-          image_url?: string;
-          is_featured?: number;
-          allow_preorder?: number;
-          initial_stock?: number;
-          // Per-variant stock (preferred over flat initial_stock)
-          variants?: Array<{ size?: string; color?: string; sku?: string; quantity?: number }>;
-        };
+        const body = await request.json() as any;
 
         if (!body.title || !body.price || !body.category) {
           return errorResponse('title, price, and category are required', 400, request, env);
         }
 
-        const mediaType = body.media_type || (body.video_key ? 'video' : 'image');
-        const mediaRef = body.media_reference || body.video_key || body.image_url || null;
-        const posterRef = body.poster_reference || body.video_poster_key || null;
+        const cleanStr = (val?: any) => (typeof val === 'string' && val !== 'null' && val !== 'undefined' && val.trim() !== '' ? val.trim() : null);
 
-        // Resolve public URL from R2 key if needed
-        const resolvedVideoUrl = body.video_url || (body.video_key ? getR2MediaUrl(body.video_key, env) : null);
-        const resolvedImageUrl = body.image_url || (mediaType === 'image' && mediaRef ? getR2MediaUrl(mediaRef, env) : null);
+        const videoKey = cleanStr(body.video_key);
+        const videoUrl = cleanStr(body.video_url) || (videoKey ? getR2MediaUrl(videoKey, env) : null);
+        const mediaType = body.media_type || (videoKey || videoUrl ? 'video' : 'image');
+        const mediaRef = cleanStr(body.media_reference) || videoKey || cleanStr(body.image_url);
+        const posterRef = cleanStr(body.poster_reference) || cleanStr(body.video_poster_key);
+
+        const resolvedImageUrl = cleanStr(body.image_url) || (mediaType === 'image' && mediaRef ? getR2MediaUrl(mediaRef, env) : null);
+
+        const serializeField = (val: any) => {
+          if (!val) return null;
+          if (typeof val === 'string') return val.trim();
+          if (Array.isArray(val)) return JSON.stringify(val);
+          return String(val);
+        };
+
+        const sizesJson = serializeField(body.sizes);
+        const colorsJson = serializeField(body.colors);
+        const waistSizesJson = serializeField(body.waist_sizes);
+        const bustSizesJson = serializeField(body.bust_sizes);
+        const shoeSizesJson = serializeField(body.shoe_sizes);
+
+        const allExactSizes = extractExactProductSizes(body);
+        const allExactColors = extractExactProductColors(body);
 
         const res = await env.DB.prepare(`
           INSERT INTO products (
             title, description, price, category, sku,
             image_url, media_type, media_reference, poster_reference,
             video_key, video_url, video_mime_type, video_size_bytes, video_duration_seconds, video_poster_key,
+            sizes, colors, waist_sizes, bust_sizes, shoe_sizes, total_stock,
             is_active, is_archived, is_featured, allow_preorder,
             created_at, updated_at
           ) VALUES (
             ?, ?, ?, ?, ?,
             ?, ?, ?, ?,
             ?, ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?, ?,
             1, 0, ?, ?,
             datetime('now'), datetime('now')
           )
         `).bind(
           body.title,
-          body.description || null,
+          cleanStr(body.description),
           body.price,
           body.category,
           body.sku || null,
@@ -159,42 +157,62 @@ export default {
           mediaType,
           mediaRef,
           posterRef,
-          body.video_key || null,
-          resolvedVideoUrl,
-          body.video_mime_type || null,
+          videoKey,
+          videoUrl,
+          cleanStr(body.video_mime_type),
           body.video_size_bytes || null,
           body.video_duration_seconds || null,
-          body.video_poster_key || null,
+          cleanStr(body.video_poster_key),
+          sizesJson,
+          colorsJson,
+          waistSizesJson,
+          bustSizesJson,
+          shoeSizesJson,
+          body.total_stock || body.initial_stock || 0,
           body.is_featured ? 1 : 0,
           body.allow_preorder ? 1 : 0,
         ).run();
 
         const productId = res.meta.last_row_id;
 
-        // ── Seed inventory ──────────────────────────────────────────────────
+        // ── Seed variants & inventory ──────────────────────────────────────────
         if (productId) {
           if (body.variants && Array.isArray(body.variants) && body.variants.length > 0) {
-            // Per-variant: insert product_variants row + inventory row for each
             for (const v of body.variants) {
+              const vSize = v.size || v.waist_size || v.bust_size || v.shoe_size || null;
+              const vColor = v.color || null;
               const varRes = await env.DB.prepare(`
                 INSERT INTO product_variants (product_id, size, color, sku, is_active, created_at)
                 VALUES (?, ?, ?, ?, 1, datetime('now'))
-              `).bind(productId, v.size || null, v.color || null, v.sku || null).run();
+              `).bind(productId, vSize, vColor, v.sku || null).run();
 
               const variantId = varRes.meta.last_row_id;
-              const qty = typeof v.quantity === 'number' ? v.quantity : 0;
+              const qty = typeof v.quantity === 'number' ? v.quantity : (typeof v.stock === 'number' ? v.stock : 0);
 
               await env.DB.prepare(`
                 INSERT OR IGNORE INTO inventory (product_id, variant_id, quantity, reserved_quantity, reorder_point, last_updated)
                 VALUES (?, ?, ?, 0, 5, datetime('now'))
               `).bind(productId, variantId, qty).run();
             }
+          } else if (allExactSizes.length > 0) {
+            const initialPerVariant = Math.max(1, Math.floor((body.initial_stock || body.total_stock || 10) / allExactSizes.length));
+            for (const size of allExactSizes) {
+              const varRes = await env.DB.prepare(`
+                INSERT INTO product_variants (product_id, size, color, sku, is_active, created_at)
+                VALUES (?, ?, NULL, NULL, 1, datetime('now'))
+              `).bind(productId, size).run();
+
+              const variantId = varRes.meta.last_row_id;
+              await env.DB.prepare(`
+                INSERT OR IGNORE INTO inventory (product_id, variant_id, quantity, reserved_quantity, reorder_point, last_updated)
+                VALUES (?, ?, ?, 0, 5, datetime('now'))
+              `).bind(productId, variantId, initialPerVariant).run();
+            }
           } else {
-            // No variants — seed a single flat inventory row
             await env.DB.prepare(`
               INSERT OR IGNORE INTO inventory (product_id, variant_id, quantity, reserved_quantity, reorder_point, last_updated)
               VALUES (?, NULL, ?, 0, 5, datetime('now'))
-            `).bind(productId, body.initial_stock || 0).run();
+            `).bind(productId, body.initial_stock || body.total_stock || 0).run();
           }
         }
 
@@ -217,26 +235,14 @@ export default {
         const id = parseInt(path.split('/')[3]);
         if (isNaN(id)) return errorResponse('Invalid product ID', 400, request, env);
 
-        const body = await request.json() as Partial<{
-          title: string;
-          description: string;
-          price: number;
-          category: string;
-          sku: string;
-          media_type: 'image' | 'video';
-          media_reference: string;
-          poster_reference: string;
-          video_key: string;
-          video_url: string;
-          video_mime_type: string;
-          video_size_bytes: number;
-          video_duration_seconds: number;
-          video_poster_key: string;
-          image_url: string;
-          is_active: number;
-          is_featured: number;
-          allow_preorder: number;
-        }>;
+        const body = await request.json() as any;
+
+        const cleanStr = (val?: any) => (typeof val === 'string' && val !== 'null' && val !== 'undefined' && val.trim() !== '' ? val.trim() : null);
+
+        if ('video_key' in body) body.video_key = cleanStr(body.video_key);
+        if ('video_url' in body) body.video_url = cleanStr(body.video_url);
+        if ('video_mime_type' in body) body.video_mime_type = cleanStr(body.video_mime_type);
+        if ('video_poster_key' in body) body.video_poster_key = cleanStr(body.video_poster_key);
 
         // Resolve URLs from keys
         if (body.video_key && !body.video_url) {
@@ -246,14 +252,28 @@ export default {
           body.image_url = getR2MediaUrl(body.media_reference, env) || undefined;
         }
 
+        const serializeField = (val: any) => {
+          if (!val) return null;
+          if (typeof val === 'string') return val.trim();
+          if (Array.isArray(val)) return JSON.stringify(val);
+          return String(val);
+        };
+
+        if ('sizes' in body) body.sizes = serializeField(body.sizes);
+        if ('colors' in body) body.colors = serializeField(body.colors);
+        if ('waist_sizes' in body) body.waist_sizes = serializeField(body.waist_sizes);
+        if ('bust_sizes' in body) body.bust_sizes = serializeField(body.bust_sizes);
+        if ('shoe_sizes' in body) body.shoe_sizes = serializeField(body.shoe_sizes);
+
         const setClauses: string[] = ['updated_at = datetime(\'now\')'];
         const params: any[] = [];
 
-        const fields: (keyof typeof body)[] = [
+        const fields = [
           'title', 'description', 'price', 'category', 'sku',
           'image_url', 'media_type', 'media_reference', 'poster_reference',
           'video_key', 'video_url', 'video_mime_type', 'video_size_bytes',
           'video_duration_seconds', 'video_poster_key',
+          'sizes', 'colors', 'waist_sizes', 'bust_sizes', 'shoe_sizes', 'total_stock',
           'is_active', 'is_featured', 'allow_preorder',
         ];
 
@@ -307,8 +327,9 @@ export default {
             p.video_key, p.video_url, p.video_mime_type, p.video_size_bytes,
             p.video_duration_seconds, p.video_poster_key,
             p.is_active, p.is_archived, p.is_featured, p.allow_preorder,
+            p.sizes, p.colors, p.waist_sizes, p.bust_sizes, p.shoe_sizes, p.total_stock,
             p.created_at, p.updated_at,
-            COALESCE(SUM(i.quantity), 0) as total_stock
+            COALESCE(SUM(i.quantity), 0) as computed_stock
           FROM products p
           LEFT JOIN inventory i ON p.id = i.product_id
           WHERE p.is_active = 1 AND p.is_archived = 0
@@ -369,30 +390,21 @@ export default {
         `).bind(id).all<ProductMedia>();
 
         const totalStockCalculated = (inventory.results || []).reduce((sum, item) => sum + (item.quantity - item.reserved_quantity), 0);
-        let sizes = Array.from(new Set((variants.results || []).map(v => v.size).filter(Boolean)));
-        let colors = Array.from(new Set((variants.results || []).map(v => v.color).filter(Boolean)));
+        let sizes = extractExactProductSizes({
+          ...product,
+          variants: variants.results || [],
+        });
+        let colors = extractExactProductColors({
+          ...product,
+          variants: variants.results || [],
+        });
 
-        // Fallback to description-encoded variants if product_variants table is empty
         const descVariants = parseVariantsFromDescription(product.description);
-        if (sizes.length === 0 && descVariants.sizes.length > 0) {
-          sizes = descVariants.sizes;
-        }
-        if (colors.length === 0 && descVariants.colors.length > 0) {
-          colors = descVariants.colors;
-        }
         let totalStock = totalStockCalculated;
-        if (totalStock === 0 && descVariants.qty > 0) {
+        if (totalStock === 0 && (product.total_stock || 0) > 0) {
+          totalStock = product.total_stock || 0;
+        } else if (totalStock === 0 && descVariants.qty > 0) {
           totalStock = descVariants.qty;
-        }
-
-        // Category-based standard defaults if no sizes were specified
-        if (sizes.length === 0) {
-          const cat = (product.category || '').toLowerCase();
-          if (['dresses', 'casual', 'corporate', 'weekend'].includes(cat)) {
-            sizes = ['S', 'M', 'L', 'XL'];
-          } else if (cat === 'shoes') {
-            sizes = ['37', '38', '39', '40', '41'];
-          }
         }
 
         const formattedMedia = (media.results || []).map(m => ({
@@ -718,11 +730,15 @@ export default {
 
       // ----------------------------------------------------
       // R2 MEDIA UPLOAD URL (POST /api/media/upload-url)
-      // Admin requests a presigned PUT URL for direct R2 upload.
-      // No media bytes pass through the Worker.
-      // ----------------------------------------------------
+      // Returns direct presigned or direct-upload URL for video & image uploads
       if (path === '/api/media/upload-url' && method === 'POST') {
         return handleGetUploadUrl(request, env);
+      }
+
+      // R2 DIRECT STREAMING UPLOAD (PUT/POST /api/media/direct-upload)
+      // Streams large video files directly into R2 IMAGES bucket
+      if (path === '/api/media/direct-upload' && (method === 'PUT' || method === 'POST')) {
+        return handleDirectUpload(request, env);
       }
 
       // ----------------------------------------------------
@@ -822,6 +838,99 @@ export default {
 // HELPER UTILITIES
 // ========================================================
 
+function extractExactProductSizes(p: any): string[] {
+  const sizeSet = new Set<string>();
+
+  const parseAndAdd = (val: any) => {
+    if (!val) return;
+    if (typeof val === 'string') {
+      const clean = val.trim();
+      if (clean === 'null' || clean === 'undefined' || !clean) return;
+      try {
+        const parsed = JSON.parse(clean);
+        if (Array.isArray(parsed)) {
+          parsed.forEach(s => s && sizeSet.add(String(s).trim()));
+          return;
+        }
+      } catch {}
+      clean.split(',').forEach(s => s && sizeSet.add(String(s).trim()));
+    } else if (Array.isArray(val)) {
+      val.forEach(s => s && sizeSet.add(String(s).trim()));
+    }
+  };
+
+  parseAndAdd(p.waist_sizes);
+  parseAndAdd(p.bust_sizes);
+  parseAndAdd(p.shoe_sizes);
+  parseAndAdd(p.sizes);
+
+  if (Array.isArray(p.variants)) {
+    p.variants.forEach((v: any) => {
+      if (v?.size) sizeSet.add(String(v.size).trim());
+      if (v?.waist_size) sizeSet.add(String(v.waist_size).trim());
+      if (v?.bust_size) sizeSet.add(String(v.bust_size).trim());
+      if (v?.shoe_size) sizeSet.add(String(v.shoe_size).trim());
+    });
+  }
+
+  // Only fall back to description parsing if no exact sizes found from DB columns
+  if (sizeSet.size === 0 && p.description && typeof p.description === 'string' && p.description.includes('Variant Stock:')) {
+    const descVars = parseVariantsFromDescription(p.description);
+    descVars.sizes.forEach(s => sizeSet.add(s));
+  }
+
+  // Deduplicate: if we have '30"' and '30', keep only '30"' (the more specific version)
+  const result = Array.from(sizeSet).filter(Boolean);
+  const seen = new Map<string, string>();
+  for (const s of result) {
+    const base = s.replace(/["'″]/g, '').trim();
+    const existing = seen.get(base);
+    if (!existing || s.length > existing.length) {
+      seen.set(base, s);
+    }
+  }
+  return Array.from(seen.values());
+}
+
+function extractExactProductColors(p: any): string[] {
+  const colorSet = new Set<string>();
+
+  const parseAndAdd = (val: any) => {
+    if (!val) return;
+    if (typeof val === 'string') {
+      const clean = val.trim();
+      if (clean === 'null' || clean === 'undefined' || !clean) return;
+      try {
+        const parsed = JSON.parse(clean);
+        if (Array.isArray(parsed)) {
+          parsed.forEach(c => c && colorSet.add(String(c).trim()));
+          return;
+        }
+      } catch {}
+      clean.split(',').forEach(c => c && colorSet.add(String(c).trim()));
+    } else if (Array.isArray(val)) {
+      val.forEach(c => c && colorSet.add(String(c).trim()));
+    }
+  };
+
+  parseAndAdd(p.colors);
+
+  if (Array.isArray(p.variants)) {
+    p.variants.forEach((v: any) => {
+      if (v?.color && String(v.color).toLowerCase() !== 'default') {
+        colorSet.add(String(v.color).trim());
+      }
+    });
+  }
+
+  if (p.description && typeof p.description === 'string' && p.description.includes('Variant Stock:')) {
+    const descVars = parseVariantsFromDescription(p.description);
+    descVars.colors.forEach(c => colorSet.add(c));
+  }
+
+  return Array.from(colorSet).filter(Boolean);
+}
+
 function parseVariantsFromDescription(desc?: string | null) {
   const sizes = new Set<string>();
   const colors = new Set<string>();
@@ -866,51 +975,48 @@ function cleanCustomerDescription(desc?: string | null): string {
 
 /**
  * Format a product row from D1 into the standard API response shape.
- * Resolves R2 keys → public URLs. No Stream references.
+ * Resolves R2 keys → public URLs. Sanitizes "null" string literals.
  */
 function formatProductForResponse(p: any, env: Env) {
-  const isVideo = p.media_type === 'video';
+  const cleanStr = (val?: any) => (typeof val === 'string' && val !== 'null' && val !== 'undefined' && val.trim() !== '' ? val.trim() : null);
 
-  // Resolve video URL: prefer explicit video_url, else build from video_key, else look in description
-  let videoUrl = p.video_url || getR2MediaUrl(p.video_key, env);
+  const isVideo = p.media_type === 'video';
+  const videoKey = cleanStr(p.video_key);
+  let videoUrl = cleanStr(p.video_url) || (videoKey ? getR2MediaUrl(videoKey, env) : null);
+
   if (isVideo && !videoUrl && p.description) {
     const m = p.description.match(/\[Media:\s*(https?:\/\/[^\]\s]+)/i);
-    if (m && m[1]) videoUrl = m[1].trim();
+    if (m && m[1]) videoUrl = cleanStr(m[1]);
   }
 
-  // Resolve poster URL: prefer video_poster_key, then poster_reference, then image_url
-  const posterUrl = getR2MediaUrl(p.video_poster_key || p.poster_reference, env) || p.image_url || null;
+  const posterRef = cleanStr(p.video_poster_key) || cleanStr(p.poster_reference);
+  const posterUrl = (posterRef ? getR2MediaUrl(posterRef, env) : null) || cleanStr(p.image_url);
 
-  // Primary display image for catalogue cards:
-  // - video product → poster image (NOT the video itself)
-  // - image product → image_url or R2 key resolved URL
   const primaryImageUrl = isVideo
     ? (posterUrl || 'assets/Logo%20Black.png')
-    : (p.image_url || getR2MediaUrl(p.media_reference, env));
+    : (cleanStr(p.image_url) || (cleanStr(p.media_reference) ? getR2MediaUrl(p.media_reference, env) : 'assets/Logo%20Black.png'));
 
-  // Extract variants if present in description
-  const descVars = parseVariantsFromDescription(p.description);
+  const exactSizes = extractExactProductSizes(p);
+  const exactColors = extractExactProductColors(p);
 
   return {
     ...p,
     raw_price: p.price,
     formatted_price: `KSh ${Number(p.price).toLocaleString()}`,
-    is_video: isVideo,
-    // Video
+    is_video: isVideo && Boolean(videoUrl),
     video_url: isVideo ? videoUrl : null,
-    video_key: p.video_key || null,
+    video_key: videoKey,
     video_duration_seconds: p.video_duration_seconds || null,
-    video_mime_type: p.video_mime_type || null,
-    // Poster / thumbnail
+    video_mime_type: cleanStr(p.video_mime_type),
     poster_url: posterUrl,
-    // Primary image for catalogue (always an image, never the raw video URL)
     primary_image_url: primaryImageUrl,
     image_url: primaryImageUrl,
-    // Media reference (R2 key or URL)
-    media_reference: p.media_reference,
-    // Sizes and colors from description if available
-    sizes: descVars.sizes,
-    colors: descVars.colors,
+    media_reference: cleanStr(p.media_reference),
+    sizes: exactSizes,
+    colors: exactColors,
+    waist_sizes: p.waist_sizes || null,
+    bust_sizes: p.bust_sizes || null,
+    shoe_sizes: p.shoe_sizes || null,
     clean_description: cleanCustomerDescription(p.description),
   };
 }

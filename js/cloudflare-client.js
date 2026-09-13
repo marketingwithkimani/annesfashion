@@ -103,19 +103,50 @@ async function fetchCloudflareProducts({ category, search } = {}) {
             : posterUrl;
 
         const vParsed = extractVariantsFromText(p.description);
-        let sizes = (Array.isArray(p.sizes) && p.sizes.length > 0) ? p.sizes : vParsed.sizes;
+        const sizeSet = new Set();
+        const parseAndAdd = (val) => {
+            if (!val) return;
+            if (typeof val === 'string') {
+                const clean = val.trim();
+                if (clean === 'null' || clean === 'undefined' || !clean) return;
+                try {
+                    const parsed = JSON.parse(clean);
+                    if (Array.isArray(parsed)) {
+                        parsed.forEach(s => s && sizeSet.add(String(s).trim()));
+                        return;
+                    }
+                } catch (e) {}
+                clean.split(',').forEach(s => s && sizeSet.add(String(s).trim()));
+            } else if (Array.isArray(val)) {
+                val.forEach(s => s && sizeSet.add(String(s).trim()));
+            }
+        };
+
+        parseAndAdd(p.waist_sizes);
+        parseAndAdd(p.bust_sizes);
+        parseAndAdd(p.shoe_sizes);
+        parseAndAdd(p.sizes);
+        (vParsed.sizes || []).forEach(s => sizeSet.add(s));
+
+        let sizes = Array.from(sizeSet).filter(Boolean);
+        const cat = (p.category || 'general').toLowerCase();
+        const titleLower = (p.title || '').toLowerCase();
+
+        if (sizes.length === 0) {
+            if (titleLower.includes('jean') || titleLower.includes('trouser') || titleLower.includes('short') || titleLower.includes('pant')) {
+                sizes = ['28"', '30"', '32"', '34"', '36"'];
+            } else if (cat === 'shoes' || titleLower.includes('heel') || titleLower.includes('sneaker') || titleLower.includes('shoe')) {
+                sizes = ['37', '38', '39', '40', '41'];
+            } else if (titleLower.includes('bra') || titleLower.includes('bust') || titleLower.includes('lingerie')) {
+                sizes = ['32', '34', '36', '38'];
+            } else if (['dresses', 'casual', 'corporate', 'weekend'].includes(cat)) {
+                sizes = ['S', 'M', 'L', 'XL'];
+            }
+        }
+
         let colors = (Array.isArray(p.colors) && p.colors.length > 0) ? p.colors : vParsed.colors;
         let stock = p.total_stock !== undefined ? parseInt(p.total_stock) : 10;
         if (stock === 0 && vParsed.qty > 0) stock = vParsed.qty;
-
-        const cat = (p.category || 'general').toLowerCase();
-        if (sizes.length === 0) {
-            if (['dresses', 'casual', 'corporate', 'weekend'].includes(cat)) {
-                sizes = ['S', 'M', 'L', 'XL'];
-            } else if (cat === 'shoes') {
-                sizes = ['37', '38', '39', '40', '41'];
-            }
-        }
 
         const priceVal = parseFloat(p.price || p.raw_price || 0);
 

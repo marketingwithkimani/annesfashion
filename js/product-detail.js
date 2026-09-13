@@ -120,6 +120,118 @@ document.addEventListener('DOMContentLoaded', () => {
         return { sizes: Array.from(sizeSet), colors: Array.from(colorSet), qty };
     }
 
+    function extractAllExactSizes(p) {
+        const sizeSet = new Set();
+        const parseAndAdd = (val) => {
+            if (!val) return;
+            if (typeof val === 'string') {
+                const clean = val.trim();
+                if (clean === 'null' || clean === 'undefined' || !clean) return;
+                try {
+                    const parsed = JSON.parse(clean);
+                    if (Array.isArray(parsed)) {
+                        parsed.forEach(s => s && sizeSet.add(String(s).trim()));
+                        return;
+                    }
+                } catch (e) {}
+                clean.split(',').forEach(s => s && sizeSet.add(String(s).trim()));
+            } else if (Array.isArray(val)) {
+                val.forEach(s => s && sizeSet.add(String(s).trim()));
+            }
+        };
+
+        // Check exact size fields from DB or API payload
+        parseAndAdd(p.waist_sizes);
+        parseAndAdd(p.bust_sizes);
+        parseAndAdd(p.shoe_sizes);
+        parseAndAdd(p.sizes);
+
+        if (Array.isArray(p.variants)) {
+            p.variants.forEach(v => {
+                if (v?.size) sizeSet.add(String(v.size).trim());
+                if (v?.waist_size) sizeSet.add(String(v.waist_size).trim());
+                if (v?.bust_size) sizeSet.add(String(v.bust_size).trim());
+                if (v?.shoe_size) sizeSet.add(String(v.shoe_size).trim());
+            });
+        }
+
+        // Only fall back to description parsing if no DB sizes found
+        if (sizeSet.size === 0 && p.description && typeof p.description === 'string' && p.description.includes('Variant Stock:')) {
+            const vParsed = extractVariantsFromText(p.description);
+            vParsed.sizes.forEach(s => sizeSet.add(s));
+        }
+
+        // Deduplicate: if we have '30"' and '30', keep '30"' (the more specific version)
+        const res = Array.from(sizeSet).filter(Boolean);
+        if (res.length > 0) {
+            const seen = new Map();
+            for (const s of res) {
+                const base = s.replace(/["'″]/g, '').trim();
+                const existing = seen.get(base);
+                if (!existing || s.length > existing.length) {
+                    seen.set(base, s);
+                }
+            }
+            return Array.from(seen.values());
+        }
+
+        // Contextual fallback based on product item title / category
+        const titleLower = (p.title || '').toLowerCase();
+        const cat = (p.category || '').toLowerCase();
+
+        if (titleLower.includes('jean') || titleLower.includes('trouser') || titleLower.includes('short') || titleLower.includes('pant')) {
+            return ['28"', '30"', '32"', '34"', '36"'];
+        }
+        if (cat === 'shoes' || titleLower.includes('heel') || titleLower.includes('sneaker') || titleLower.includes('boot') || titleLower.includes('shoe')) {
+            return ['37', '38', '39', '40', '41'];
+        }
+        if (titleLower.includes('bra') || titleLower.includes('bust') || titleLower.includes('lingerie') || titleLower.includes('corset')) {
+            return ['32', '34', '36', '38'];
+        }
+        if (['dresses', 'casual', 'corporate', 'weekend'].includes(cat)) {
+            return ['S', 'M', 'L', 'XL'];
+        }
+        return [];
+    }
+
+    function extractAllExactColors(p) {
+        const colorSet = new Set();
+        const parseAndAdd = (val) => {
+            if (!val) return;
+            if (typeof val === 'string') {
+                const clean = val.trim();
+                if (clean === 'null' || clean === 'undefined' || !clean) return;
+                try {
+                    const parsed = JSON.parse(clean);
+                    if (Array.isArray(parsed)) {
+                        parsed.forEach(c => c && colorSet.add(String(c).trim()));
+                        return;
+                    }
+                } catch (e) {}
+                clean.split(',').forEach(c => c && colorSet.add(String(c).trim()));
+            } else if (Array.isArray(val)) {
+                val.forEach(c => c && colorSet.add(String(c).trim()));
+            }
+        };
+
+        parseAndAdd(p.colors);
+
+        if (Array.isArray(p.variants)) {
+            p.variants.forEach(v => {
+                if (v?.color && String(v.color).toLowerCase() !== 'default') {
+                    colorSet.add(String(v.color).trim());
+                }
+            });
+        }
+
+        if (p.description && typeof p.description === 'string' && p.description.includes('Variant Stock:')) {
+            const vParsed = extractVariantsFromText(p.description);
+            vParsed.colors.forEach(c => colorSet.add(c));
+        }
+
+        return Array.from(colorSet).filter(Boolean);
+    }
+
     function cleanCustomerDescription(desc) {
         if (!desc) return '';
         return desc
@@ -132,20 +244,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderProduct(productData) {
         try {
             const vParsed = extractVariantsFromText(productData.description);
-            let extractedSizes = Array.isArray(productData.sizes) && productData.sizes.length > 0 ? productData.sizes : vParsed.sizes;
-            let extractedColors = Array.isArray(productData.colors) && productData.colors.length > 0 ? productData.colors : vParsed.colors;
+            const exactSizes = extractAllExactSizes(productData);
+            let extractedSizes = exactSizes.length > 0 ? exactSizes : vParsed.sizes;
+            let extractedColors = extractAllExactColors(productData);
             let stockNum = parseInt(productData.total_stock) || 0;
             if (stockNum === 0 && vParsed.qty > 0) stockNum = vParsed.qty;
 
             const categoryName = (productData.category || 'general').toLowerCase();
-            if (extractedSizes.length === 0) {
-                if (['dresses', 'casual', 'corporate', 'weekend'].includes(categoryName)) {
-                    extractedSizes = ['S', 'M', 'L', 'XL'];
-                } else if (categoryName === 'shoes') {
-                    extractedSizes = ['37', '38', '39', '40', '41'];
-                }
-            }
-
             const cleanedDesc = cleanCustomerDescription(productData.description);
 
             const product = {
