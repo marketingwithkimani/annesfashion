@@ -44,12 +44,32 @@ export interface Product {
   shoe_sizes?: string | null;
   total_stock?: number | null;
   is_flash_sale?: number;
+  listing_id?: number | null;
+  item_slot?: number | null;
   is_active: number;
   is_archived: number;
   is_featured: number;
   allow_preorder: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface Listing {
+  id: number;
+  title: string;
+  description: string | null;
+  media_type: 'video' | 'image';
+  video_key: string | null;
+  video_url: string | null;
+  video_poster_key: string | null;
+  poster_url: string | null;
+  video_duration_seconds: number | null;
+  video_size_bytes: number | null;
+  is_featured: number;
+  allow_preorder: number;
+  created_at: string;
+  updated_at: string;
+  items?: Product[];
 }
 
 export interface ProductMedia {

@@ -96,152 +96,146 @@ export default {
       }
 
       // ----------------------------------------------------
+      // LISTINGS (PARENT VIDEO SHOWCASE) — CREATE (POST /api/listings)
+      // ----------------------------------------------------
+      if ((path === '/api/listings' && method === 'POST') ||
+          (path === '/api/products' && method === 'POST' && (await request.clone().json().catch(() => ({})) as any)?.items?.length > 0)) {
+        const body = await request.json() as any;
+        if (!body.title) return errorResponse('Listing title is required', 400, request, env);
+
+        const cleanStr = (val?: any) => (typeof val === 'string' && val !== 'null' && val !== 'undefined' && val.trim() !== '' ? val.trim() : null);
+        const videoKey = cleanStr(body.video_key);
+        const videoUrl = cleanStr(body.video_url) || (videoKey ? getR2MediaUrl(videoKey, env) : null);
+        const posterRef = cleanStr(body.video_poster_key) || cleanStr(body.poster_reference);
+        const posterUrl = cleanStr(body.poster_url) || (posterRef ? getR2MediaUrl(posterRef, env) : null);
+
+        const insListing = await env.DB.prepare(`
+          INSERT INTO listings (
+            title, description, media_type, video_key, video_url, video_poster_key, poster_url,
+            video_duration_seconds, video_size_bytes, is_featured, allow_preorder,
+            created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+          RETURNING id
+        `).bind(
+          body.title,
+          cleanStr(body.description),
+          body.media_type || 'video',
+          videoKey,
+          videoUrl,
+          cleanStr(body.video_poster_key),
+          posterUrl,
+          body.video_duration_seconds || null,
+          body.video_size_bytes || null,
+          body.is_featured ? 1 : 0,
+          body.allow_preorder ? 1 : 0
+        ).first<{ id: number }>();
+
+        const listingId = insListing?.id;
+        if (!listingId) return errorResponse('Failed to create listing', 500, request, env);
+
+        const createdItemIds: number[] = [];
+        const items = Array.isArray(body.items) ? body.items : [];
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          const itemPayload = {
+            ...item,
+            video_key: item.video_key || videoKey,
+            video_url: item.video_url || videoUrl,
+            video_poster_key: item.video_poster_key || body.video_poster_key,
+            poster_reference: item.poster_reference || posterRef,
+            image_url: item.image_url || posterUrl,
+            media_type: item.media_type || body.media_type || 'video',
+          };
+          const slot = item.item_slot || (i + 1);
+          const pId = await insertProductRecord(itemPayload, env, listingId, slot);
+          createdItemIds.push(pId);
+        }
+
+        const siteBase = 'https://www.annesfashion.co.ke';
+        const primaryProductId = createdItemIds[0] || null;
+        const productUrl = primaryProductId ? `${siteBase}/product-detail.html?id=${primaryProductId}` : `${siteBase}/product-detail.html?listing_id=${listingId}`;
+
+        return jsonResponse({
+          success: true,
+          listing_id: listingId,
+          product_id: primaryProductId,
+          product_url: productUrl,
+          item_ids: createdItemIds,
+          message: 'Showcase listing and items created successfully',
+        }, 201, request, env);
+      }
+
+      // ----------------------------------------------------
+      // LISTINGS — GET ALL (GET /api/listings)
+      // ----------------------------------------------------
+      if (path === '/api/listings' && method === 'GET') {
+        const limit = Math.min(parseInt(url.searchParams.get('limit') || '50'), 100);
+        const offset = Math.max(parseInt(url.searchParams.get('offset') || '0'), 0);
+
+        const { results: listings } = await env.DB.prepare(`
+          SELECT * FROM listings ORDER BY created_at DESC LIMIT ? OFFSET ?
+        `).bind(limit, offset).all();
+
+        const enriched = await Promise.all((listings || []).map(async (l: any) => {
+          const { results: items } = await env.DB.prepare(`
+            SELECT * FROM products WHERE listing_id = ? AND is_archived = 0 ORDER BY item_slot ASC
+          `).bind(l.id).all();
+
+          return {
+            ...l,
+            items: (items || []).map(item => formatProductForResponse(item, env)),
+          };
+        }));
+
+        return jsonResponse({ success: true, count: enriched.length, listings: enriched }, 200, request, env);
+      }
+
+      // ----------------------------------------------------
+      // LISTINGS — GET SINGLE (GET /api/listings/:id)
+      // ----------------------------------------------------
+      if (path.match(/^\/api\/listings\/\d+$/) && method === 'GET') {
+        const id = parseInt(path.split('/')[3]);
+        if (isNaN(id)) return errorResponse('Invalid listing ID', 400, request, env);
+
+        const listing = await env.DB.prepare(`SELECT * FROM listings WHERE id = ?`).bind(id).first<any>();
+        if (!listing) return errorResponse('Listing not found', 404, request, env);
+
+        const { results: items } = await env.DB.prepare(`
+          SELECT * FROM products WHERE listing_id = ? AND is_archived = 0 ORDER BY item_slot ASC
+        `).bind(id).all();
+
+        const formattedItems = await Promise.all((items || []).map(async (item: any) => {
+          const variants = await env.DB.prepare(`
+            SELECT pv.id, pv.product_id, pv.size, pv.color, pv.sku, pv.is_active,
+                   COALESCE(i.quantity - i.reserved_quantity, 0) as stock,
+                   COALESCE(i.quantity, 0) as quantity
+            FROM product_variants pv
+            LEFT JOIN inventory i ON pv.id = i.variant_id
+            WHERE pv.product_id = ? AND pv.is_active = 1
+          `).bind(item.id).all<any>();
+
+          return {
+            ...formatProductForResponse(item, env),
+            variants: variants.results || [],
+          };
+        }));
+
+        return jsonResponse({
+          success: true,
+          listing: {
+            ...listing,
+            items: formattedItems,
+          }
+        }, 200, request, env);
+      }
+
+      // ----------------------------------------------------
       // PRODUCTS — CREATE (POST /api/products)
       // ----------------------------------------------------
       if (path === '/api/products' && method === 'POST') {
         const body = await request.json() as any;
+        const productId = await insertProductRecord(body, env, body.listing_id || null, body.item_slot || 1);
 
-        if (!body.title || !body.price || !body.category) {
-          return errorResponse('title, price, and category are required', 400, request, env);
-        }
-
-        const cleanStr = (val?: any) => (typeof val === 'string' && val !== 'null' && val !== 'undefined' && val.trim() !== '' ? val.trim() : null);
-
-        const videoKey = cleanStr(body.video_key);
-        const videoUrl = cleanStr(body.video_url) || (videoKey ? getR2MediaUrl(videoKey, env) : null);
-        const mediaType = body.media_type || (videoKey || videoUrl ? 'video' : 'image');
-        const mediaRef = cleanStr(body.media_reference) || videoKey || cleanStr(body.image_url);
-        const posterRef = cleanStr(body.poster_reference) || cleanStr(body.video_poster_key);
-
-        const resolvedImageUrl = cleanStr(body.image_url) || (mediaType === 'image' && mediaRef ? getR2MediaUrl(mediaRef, env) : null);
-
-        const serializeField = (val: any) => {
-          if (!val) return null;
-          if (typeof val === 'string') return val.trim();
-          if (Array.isArray(val)) return JSON.stringify(val);
-          return String(val);
-        };
-
-        const sizesJson = serializeField(body.sizes);
-        const colorsJson = serializeField(body.colors);
-        const waistSizesJson = serializeField(body.waist_sizes);
-        const bustSizesJson = serializeField(body.bust_sizes);
-        const shoeSizesJson = serializeField(body.shoe_sizes);
-
-        const allExactSizes = extractExactProductSizes(body);
-        const allExactColors = extractExactProductColors(body);
-        const isFlashSale = body.is_flash_sale ? 1 : 0;
-        const totalStockInput = typeof body.total_stock === 'number' ? body.total_stock : (typeof body.initial_stock === 'number' ? body.initial_stock : 10);
-
-        const inserted = await env.DB.prepare(`
-          INSERT INTO products (
-            title, description, price, category, sku,
-            image_url, media_type, media_reference, poster_reference,
-            video_key, video_url, video_mime_type, video_size_bytes, video_duration_seconds, video_poster_key,
-            sizes, colors, waist_sizes, bust_sizes, shoe_sizes, total_stock,
-            is_active, is_archived, is_featured, allow_preorder, is_flash_sale,
-            created_at, updated_at
-          ) VALUES (
-            ?, ?, ?, ?, ?,
-            ?, ?, ?, ?,
-            ?, ?, ?, ?, ?, ?,
-            ?, ?, ?, ?, ?, ?,
-            1, 0, ?, ?, ?,
-            datetime('now'), datetime('now')
-          ) RETURNING id
-        `).bind(
-          body.title,
-          cleanStr(body.description),
-          body.price,
-          body.category,
-          body.sku || null,
-          resolvedImageUrl,
-          mediaType,
-          mediaRef,
-          posterRef,
-          videoKey,
-          videoUrl,
-          cleanStr(body.video_mime_type),
-          body.video_size_bytes || null,
-          body.video_duration_seconds || null,
-          cleanStr(body.video_poster_key),
-          sizesJson,
-          colorsJson,
-          waistSizesJson,
-          bustSizesJson,
-          shoeSizesJson,
-          totalStockInput,
-          body.is_featured ? 1 : 0,
-          body.allow_preorder ? 1 : 0,
-          isFlashSale
-        ).first<{ id: number }>();
-
-        const productId = inserted?.id;
-
-        // ── Seed variants & inventory ──────────────────────────────────────────
-        if (productId) {
-          if (body.variants && Array.isArray(body.variants) && body.variants.length > 0) {
-            for (const v of body.variants) {
-              const vSize = v.size || v.waist_size || v.bust_size || v.shoe_size || null;
-              const vColor = v.color || null;
-              const varRes = await env.DB.prepare(`
-                INSERT INTO product_variants (product_id, size, color, sku, is_active, created_at)
-                VALUES (?, ?, ?, ?, 1, datetime('now'))
-                RETURNING id
-              `).bind(productId, vSize, vColor, v.sku || null).first<{ id: number }>();
-
-              const variantId = varRes?.id;
-              const qty = typeof v.quantity === 'number' ? v.quantity : (typeof v.stock === 'number' ? v.stock : 0);
-
-              if (variantId) {
-                await env.DB.prepare(`
-                  INSERT OR REPLACE INTO inventory (product_id, variant_id, quantity, reserved_quantity, reorder_point, last_updated)
-                  VALUES (?, ?, ?, 0, 5, datetime('now'))
-                `).bind(productId, variantId, qty).run();
-              }
-            }
-          } else if (allExactSizes.length > 0 || allExactColors.length > 0) {
-            const sizesToUse = allExactSizes.length > 0 ? allExactSizes : [null];
-            const colorsToUse = allExactColors.length > 0 ? allExactColors : [null];
-            const totalCombos = sizesToUse.length * colorsToUse.length;
-            const perVariantStock = Math.max(1, Math.floor(totalStockInput / totalCombos));
-
-            for (const s of sizesToUse) {
-              for (const c of colorsToUse) {
-                let specificQty = perVariantStock;
-                if (body.variant_stock && typeof body.variant_stock === 'object') {
-                  const key1 = `${c}_${s}`;
-                  const key2 = `${s}_${c}`;
-                  const key3 = `${s}`;
-                  if (typeof body.variant_stock[key1] === 'number') specificQty = body.variant_stock[key1];
-                  else if (typeof body.variant_stock[key2] === 'number') specificQty = body.variant_stock[key2];
-                  else if (typeof body.variant_stock[key3] === 'number') specificQty = body.variant_stock[key3];
-                }
-
-                const varRes = await env.DB.prepare(`
-                  INSERT INTO product_variants (product_id, size, color, sku, is_active, created_at)
-                  VALUES (?, ?, ?, NULL, 1, datetime('now'))
-                  RETURNING id
-                `).bind(productId, s, c).first<{ id: number }>();
-
-                const variantId = varRes?.id;
-                if (variantId) {
-                  await env.DB.prepare(`
-                    INSERT OR REPLACE INTO inventory (product_id, variant_id, quantity, reserved_quantity, reorder_point, last_updated)
-                    VALUES (?, ?, ?, 0, 5, datetime('now'))
-                  `).bind(productId, variantId, specificQty).run();
-                }
-              }
-            }
-          } else {
-            await env.DB.prepare(`
-              INSERT OR REPLACE INTO inventory (product_id, variant_id, quantity, reserved_quantity, reorder_point, last_updated)
-              VALUES (?, NULL, ?, 0, 5, datetime('now'))
-            `).bind(productId, totalStockInput).run();
-          }
-        }
-
-        // Build shareable product URL (for client to copy & share)
         const siteBase = 'https://www.annesfashion.co.ke';
         const productUrl = `${siteBase}/product-detail.html?id=${productId}`;
 
@@ -1130,3 +1124,154 @@ async function hashPin(pin: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', enc.encode(pin));
   return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
+
+async function insertProductRecord(body: any, env: Env, listingId: number | null = null, itemSlot: number = 1): Promise<number> {
+  if (!body.title || !body.price || !body.category) {
+    throw new Error('title, price, and category are required');
+  }
+
+  const cleanStr = (val?: any) => (typeof val === 'string' && val !== 'null' && val !== 'undefined' && val.trim() !== '' ? val.trim() : null);
+
+  const videoKey = cleanStr(body.video_key);
+  const videoUrl = cleanStr(body.video_url) || (videoKey ? getR2MediaUrl(videoKey, env) : null);
+  const mediaType = body.media_type || (videoKey || videoUrl ? 'video' : 'image');
+  const mediaRef = cleanStr(body.media_reference) || videoKey || cleanStr(body.image_url);
+  const posterRef = cleanStr(body.poster_reference) || cleanStr(body.video_poster_key);
+
+  const resolvedImageUrl = cleanStr(body.image_url) || (mediaType === 'image' && mediaRef ? getR2MediaUrl(mediaRef, env) : null);
+
+  const serializeField = (val: any) => {
+    if (!val) return null;
+    if (typeof val === 'string') return val.trim();
+    if (Array.isArray(val)) return JSON.stringify(val);
+    return String(val);
+  };
+
+  const sizesJson = serializeField(body.sizes);
+  const colorsJson = serializeField(body.colors);
+  const waistSizesJson = serializeField(body.waist_sizes);
+  const bustSizesJson = serializeField(body.bust_sizes);
+  const shoeSizesJson = serializeField(body.shoe_sizes);
+
+  const allExactSizes = extractExactProductSizes(body);
+  const allExactColors = extractExactProductColors(body);
+  const isFlashSale = body.is_flash_sale ? 1 : 0;
+  const totalStockInput = typeof body.total_stock === 'number' ? body.total_stock : (typeof body.initial_stock === 'number' ? body.initial_stock : 10);
+
+  const finalListingId = listingId !== undefined && listingId !== null ? listingId : (body.listing_id || null);
+  const finalItemSlot = itemSlot !== undefined && itemSlot !== null ? itemSlot : (body.item_slot || 1);
+
+  const inserted = await env.DB.prepare(`
+    INSERT INTO products (
+      title, description, price, category, sku,
+      image_url, media_type, media_reference, poster_reference,
+      video_key, video_url, video_mime_type, video_size_bytes, video_duration_seconds, video_poster_key,
+      sizes, colors, waist_sizes, bust_sizes, shoe_sizes, total_stock,
+      is_active, is_archived, is_featured, allow_preorder, is_flash_sale,
+      listing_id, item_slot,
+      created_at, updated_at
+    ) VALUES (
+      ?, ?, ?, ?, ?,
+      ?, ?, ?, ?,
+      ?, ?, ?, ?, ?, ?,
+      ?, ?, ?, ?, ?, ?,
+      1, 0, ?, ?, ?,
+      ?, ?,
+      datetime('now'), datetime('now')
+    ) RETURNING id
+  `).bind(
+    body.title,
+    cleanStr(body.description),
+    body.price,
+    body.category,
+    body.sku || null,
+    resolvedImageUrl,
+    mediaType,
+    mediaRef,
+    posterRef,
+    videoKey,
+    videoUrl,
+    cleanStr(body.video_mime_type),
+    body.video_size_bytes || null,
+    body.video_duration_seconds || null,
+    cleanStr(body.video_poster_key),
+    sizesJson,
+    colorsJson,
+    waistSizesJson,
+    bustSizesJson,
+    shoeSizesJson,
+    totalStockInput,
+    body.is_featured ? 1 : 0,
+    body.allow_preorder ? 1 : 0,
+    isFlashSale,
+    finalListingId,
+    finalItemSlot
+  ).first<{ id: number }>();
+
+  const productId = inserted?.id;
+  if (!productId) throw new Error('Failed to create product record in database');
+
+  // Seed variants & inventory
+  if (body.variants && Array.isArray(body.variants) && body.variants.length > 0) {
+    for (const v of body.variants) {
+      const vSize = v.size || v.waist_size || v.bust_size || v.shoe_size || null;
+      const vColor = v.color || null;
+      const varRes = await env.DB.prepare(`
+        INSERT INTO product_variants (product_id, size, color, sku, is_active, created_at)
+        VALUES (?, ?, ?, ?, 1, datetime('now'))
+        RETURNING id
+      `).bind(productId, vSize, vColor, v.sku || null).first<{ id: number }>();
+
+      const variantId = varRes?.id;
+      const qty = typeof v.quantity === 'number' ? v.quantity : (typeof v.stock === 'number' ? v.stock : 0);
+
+      if (variantId) {
+        await env.DB.prepare(`
+          INSERT OR REPLACE INTO inventory (product_id, variant_id, quantity, reserved_quantity, reorder_point, last_updated)
+          VALUES (?, ?, ?, 0, 5, datetime('now'))
+        `).bind(productId, variantId, qty).run();
+      }
+    }
+  } else if (allExactSizes.length > 0 || allExactColors.length > 0) {
+    const sizesToUse = allExactSizes.length > 0 ? allExactSizes : [null];
+    const colorsToUse = allExactColors.length > 0 ? allExactColors : [null];
+    const totalCombos = sizesToUse.length * colorsToUse.length;
+    const perVariantStock = Math.max(1, Math.floor(totalStockInput / totalCombos));
+
+    for (const s of sizesToUse) {
+      for (const c of colorsToUse) {
+        let specificQty = perVariantStock;
+        if (body.variant_stock && typeof body.variant_stock === 'object') {
+          const key1 = `${c}_${s}`;
+          const key2 = `${s}_${c}`;
+          const key3 = `${s}`;
+          if (typeof body.variant_stock[key1] === 'number') specificQty = body.variant_stock[key1];
+          else if (typeof body.variant_stock[key2] === 'number') specificQty = body.variant_stock[key2];
+          else if (typeof body.variant_stock[key3] === 'number') specificQty = body.variant_stock[key3];
+        }
+
+        const varRes = await env.DB.prepare(`
+          INSERT INTO product_variants (product_id, size, color, sku, is_active, created_at)
+          VALUES (?, ?, ?, NULL, 1, datetime('now'))
+          RETURNING id
+        `).bind(productId, s, c).first<{ id: number }>();
+
+        const variantId = varRes?.id;
+        if (variantId) {
+          await env.DB.prepare(`
+            INSERT OR REPLACE INTO inventory (product_id, variant_id, quantity, reserved_quantity, reorder_point, last_updated)
+            VALUES (?, ?, ?, 0, 5, datetime('now'))
+          `).bind(productId, variantId, specificQty).run();
+        }
+      }
+    }
+  } else {
+    await env.DB.prepare(`
+      INSERT OR REPLACE INTO inventory (product_id, variant_id, quantity, reserved_quantity, reorder_point, last_updated)
+      VALUES (?, NULL, ?, 0, 5, datetime('now'))
+    `).bind(productId, totalStockInput).run();
+  }
+
+  return productId;
+}
+
