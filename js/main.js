@@ -416,8 +416,8 @@ window.renderProductGrid = function (container, items) {
                     </div>
                 </div>
             `;
+            container.appendChild(card);
         }
-        container.appendChild(card);
     });
 };
 

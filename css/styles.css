@@ -529,12 +529,27 @@ section {
     margin-bottom: 12px;
 }
 
+.product-card-outer {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.card-badge-above {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 4px;
+}
+
+.flash-sale-badge-above,
 .preorder-badge-above {
     display: flex;
     justify-content: center;
-    margin-bottom: 8px;
     width: 100%;
 }
+
 
 .section-title {
     font-size: 2.5rem;
