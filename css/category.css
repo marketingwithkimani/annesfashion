@@ -184,6 +184,111 @@
     color: var(--accent-gold);
 }
 
+/* Filter interactive enhancements */
+.filter-toggle {
+    transition: all 0.3s ease;
+}
+
+.filter-toggle.active {
+    background: var(--accent-gold);
+    color: #000;
+    border-color: var(--accent-gold);
+}
+
+.size-filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.size-chip {
+    padding: 6px 14px;
+    border: 1.5px solid var(--border-light);
+    border-radius: 20px;
+    background: var(--secondary-bg);
+    color: var(--text-main);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.size-chip:hover {
+    border-color: var(--accent-gold);
+    transform: translateY(-2px);
+}
+
+.size-chip.active {
+    background: var(--accent-gold);
+    color: #000;
+    border-color: var(--accent-gold);
+    box-shadow: 0 3px 10px rgba(201, 169, 110, 0.3);
+}
+
+.price-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.price-preset-btn {
+    padding: 4px 10px;
+    font-size: 0.78rem;
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.price-preset-btn:hover,
+.price-preset-btn.active {
+    border-color: var(--accent-gold);
+    color: var(--accent-gold);
+    background: rgba(201, 169, 110, 0.1);
+}
+
+.filter-actions-row {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.btn-reset-filters {
+    background: transparent;
+    border: 1.5px solid var(--border-light);
+    color: var(--text-muted);
+    padding: 12px 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-reset-filters:hover {
+    border-color: #f44336;
+    color: #f44336;
+}
+
+/* Product Card Outer Badge */
+.product-card-outer {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+}
+
+.card-badge-above {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .hero-content h1 {
@@ -204,4 +309,12 @@
     .filter-panel {
         grid-template-columns: 1fr;
     }
-}
+
+    .filter-actions-row {
+        flex-direction: column;
+    }
+
+    .filter-actions-row button {
+        width: 100%;
+    }
+}

@@ -301,6 +301,28 @@ window.renderProductGrid = function (container, items) {
 
         if (item.type === 'product') {
             card.className = 'product-card';
+            const isFlashSale = Boolean(item.is_flash_sale);
+            const isPreorder = Boolean(item.allow_preorder);
+
+            let badgeAboveHtml = '';
+            if (isFlashSale) {
+                badgeAboveHtml = `
+                    <div class="card-badge-above flash-sale-badge-above">
+                        <span class="luxury-badge-above" style="background: #e74c3c; color: #fff; border: 1px solid #c0392b; box-shadow: 0 4px 10px rgba(231,76,60,0.3);">
+                            <i class="fas fa-bolt"></i> FLASH SALE
+                        </span>
+                    </div>
+                `;
+            } else if (isPreorder) {
+                badgeAboveHtml = `
+                    <div class="card-badge-above preorder-badge-above">
+                        <span class="luxury-badge-above" style="background: rgba(201, 169, 110, 0.18); color: var(--accent-gold); border: 1px solid rgba(201, 169, 110, 0.4);">
+                            <i class="fas fa-clock"></i> PRE-ORDER
+                        </span>
+                    </div>
+                `;
+            }
+
             const hasRealVideo = (item.media_type === 'video' || Boolean(item.is_video)) && Boolean(item.video_url);
             const isVideo = hasRealVideo;
             let mediaHtml = '';
@@ -367,6 +389,16 @@ window.renderProductGrid = function (container, items) {
                 e.stopPropagation();
                 if (window.addToWardrobe) window.addToWardrobe(item.id);
             });
+
+            if (badgeAboveHtml) {
+                const outerWrapper = document.createElement('div');
+                outerWrapper.className = 'product-card-outer';
+                outerWrapper.innerHTML = badgeAboveHtml;
+                outerWrapper.appendChild(card);
+                container.appendChild(outerWrapper);
+            } else {
+                container.appendChild(card);
+            }
 
         } else if (item.type === 'social') {
             card.className = 'product-card social-insert';

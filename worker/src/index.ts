@@ -130,23 +130,25 @@ export default {
 
         const allExactSizes = extractExactProductSizes(body);
         const allExactColors = extractExactProductColors(body);
+        const isFlashSale = body.is_flash_sale ? 1 : 0;
+        const totalStockInput = typeof body.total_stock === 'number' ? body.total_stock : (typeof body.initial_stock === 'number' ? body.initial_stock : 10);
 
-        const res = await env.DB.prepare(`
+        const inserted = await env.DB.prepare(`
           INSERT INTO products (
             title, description, price, category, sku,
             image_url, media_type, media_reference, poster_reference,
             video_key, video_url, video_mime_type, video_size_bytes, video_duration_seconds, video_poster_key,
             sizes, colors, waist_sizes, bust_sizes, shoe_sizes, total_stock,
-            is_active, is_archived, is_featured, allow_preorder,
+            is_active, is_archived, is_featured, allow_preorder, is_flash_sale,
             created_at, updated_at
           ) VALUES (
             ?, ?, ?, ?, ?,
             ?, ?, ?, ?,
             ?, ?, ?, ?, ?, ?,
             ?, ?, ?, ?, ?, ?,
-            1, 0, ?, ?,
+            1, 0, ?, ?, ?,
             datetime('now'), datetime('now')
-          )
+          ) RETURNING id
         `).bind(
           body.title,
           cleanStr(body.description),
@@ -168,12 +170,13 @@ export default {
           waistSizesJson,
           bustSizesJson,
           shoeSizesJson,
-          body.total_stock || body.initial_stock || 0,
+          totalStockInput,
           body.is_featured ? 1 : 0,
           body.allow_preorder ? 1 : 0,
-        ).run();
+          isFlashSale
+        ).first<{ id: number }>();
 
-        const productId = res.meta.last_row_id;
+        const productId = inserted?.id;
 
         // ── Seed variants & inventory ──────────────────────────────────────────
         if (productId) {
@@ -184,35 +187,57 @@ export default {
               const varRes = await env.DB.prepare(`
                 INSERT INTO product_variants (product_id, size, color, sku, is_active, created_at)
                 VALUES (?, ?, ?, ?, 1, datetime('now'))
-              `).bind(productId, vSize, vColor, v.sku || null).run();
+                RETURNING id
+              `).bind(productId, vSize, vColor, v.sku || null).first<{ id: number }>();
 
-              const variantId = varRes.meta.last_row_id;
+              const variantId = varRes?.id;
               const qty = typeof v.quantity === 'number' ? v.quantity : (typeof v.stock === 'number' ? v.stock : 0);
 
-              await env.DB.prepare(`
-                INSERT OR IGNORE INTO inventory (product_id, variant_id, quantity, reserved_quantity, reorder_point, last_updated)
-                VALUES (?, ?, ?, 0, 5, datetime('now'))
-              `).bind(productId, variantId, qty).run();
+              if (variantId) {
+                await env.DB.prepare(`
+                  INSERT OR REPLACE INTO inventory (product_id, variant_id, quantity, reserved_quantity, reorder_point, last_updated)
+                  VALUES (?, ?, ?, 0, 5, datetime('now'))
+                `).bind(productId, variantId, qty).run();
+              }
             }
-          } else if (allExactSizes.length > 0) {
-            const initialPerVariant = Math.max(1, Math.floor((body.initial_stock || body.total_stock || 10) / allExactSizes.length));
-            for (const size of allExactSizes) {
-              const varRes = await env.DB.prepare(`
-                INSERT INTO product_variants (product_id, size, color, sku, is_active, created_at)
-                VALUES (?, ?, NULL, NULL, 1, datetime('now'))
-              `).bind(productId, size).run();
+          } else if (allExactSizes.length > 0 || allExactColors.length > 0) {
+            const sizesToUse = allExactSizes.length > 0 ? allExactSizes : [null];
+            const colorsToUse = allExactColors.length > 0 ? allExactColors : [null];
+            const totalCombos = sizesToUse.length * colorsToUse.length;
+            const perVariantStock = Math.max(1, Math.floor(totalStockInput / totalCombos));
 
-              const variantId = varRes.meta.last_row_id;
-              await env.DB.prepare(`
-                INSERT OR IGNORE INTO inventory (product_id, variant_id, quantity, reserved_quantity, reorder_point, last_updated)
-                VALUES (?, ?, ?, 0, 5, datetime('now'))
-              `).bind(productId, variantId, initialPerVariant).run();
+            for (const s of sizesToUse) {
+              for (const c of colorsToUse) {
+                let specificQty = perVariantStock;
+                if (body.variant_stock && typeof body.variant_stock === 'object') {
+                  const key1 = `${c}_${s}`;
+                  const key2 = `${s}_${c}`;
+                  const key3 = `${s}`;
+                  if (typeof body.variant_stock[key1] === 'number') specificQty = body.variant_stock[key1];
+                  else if (typeof body.variant_stock[key2] === 'number') specificQty = body.variant_stock[key2];
+                  else if (typeof body.variant_stock[key3] === 'number') specificQty = body.variant_stock[key3];
+                }
+
+                const varRes = await env.DB.prepare(`
+                  INSERT INTO product_variants (product_id, size, color, sku, is_active, created_at)
+                  VALUES (?, ?, ?, NULL, 1, datetime('now'))
+                  RETURNING id
+                `).bind(productId, s, c).first<{ id: number }>();
+
+                const variantId = varRes?.id;
+                if (variantId) {
+                  await env.DB.prepare(`
+                    INSERT OR REPLACE INTO inventory (product_id, variant_id, quantity, reserved_quantity, reorder_point, last_updated)
+                    VALUES (?, ?, ?, 0, 5, datetime('now'))
+                  `).bind(productId, variantId, specificQty).run();
+                }
+              }
             }
           } else {
             await env.DB.prepare(`
-              INSERT OR IGNORE INTO inventory (product_id, variant_id, quantity, reserved_quantity, reorder_point, last_updated)
+              INSERT OR REPLACE INTO inventory (product_id, variant_id, quantity, reserved_quantity, reorder_point, last_updated)
               VALUES (?, NULL, ?, 0, 5, datetime('now'))
-            `).bind(productId, body.initial_stock || body.total_stock || 0).run();
+            `).bind(productId, totalStockInput).run();
           }
         }
 
@@ -326,7 +351,7 @@ export default {
             p.image_url, p.media_type, p.media_reference, p.poster_reference,
             p.video_key, p.video_url, p.video_mime_type, p.video_size_bytes,
             p.video_duration_seconds, p.video_poster_key,
-            p.is_active, p.is_archived, p.is_featured, p.allow_preorder,
+            p.is_active, p.is_archived, p.is_featured, p.allow_preorder, p.is_flash_sale,
             p.sizes, p.colors, p.waist_sizes, p.bust_sizes, p.shoe_sizes, p.total_stock,
             p.created_at, p.updated_at,
             COALESCE(SUM(i.quantity), 0) as computed_stock
@@ -351,7 +376,17 @@ export default {
           params.push(s, s, s);
         }
 
-        query += ` GROUP BY p.id ORDER BY p.created_at DESC LIMIT ? OFFSET ?`;
+        const sortParam = url.searchParams.get('sort');
+        let orderClause = 'ORDER BY p.is_flash_sale DESC, p.allow_preorder DESC, p.created_at DESC';
+        if (sortParam === 'price_asc' || sortParam === 'price-low') {
+          orderClause = 'ORDER BY p.price ASC';
+        } else if (sortParam === 'price_desc' || sortParam === 'price-high') {
+          orderClause = 'ORDER BY p.price DESC';
+        } else if (sortParam === 'newest') {
+          orderClause = 'ORDER BY p.created_at DESC';
+        }
+
+        query += ` GROUP BY p.id ${orderClause} LIMIT ? OFFSET ?`;
         params.push(limit, offset);
 
         const { results } = await env.DB.prepare(query).bind(...params).all();
@@ -375,8 +410,13 @@ export default {
         if (!product) return errorResponse('Product not found', 404, request, env);
 
         const variants = await env.DB.prepare(`
-          SELECT id, size, color, sku, is_active FROM product_variants WHERE product_id = ? AND is_active = 1
-        `).bind(id).all<ProductVariant>();
+          SELECT pv.id, pv.product_id, pv.size, pv.color, pv.sku, pv.is_active,
+                 COALESCE(i.quantity - i.reserved_quantity, 0) as stock,
+                 COALESCE(i.quantity, 0) as quantity
+          FROM product_variants pv
+          LEFT JOIN inventory i ON pv.id = i.variant_id
+          WHERE pv.product_id = ? AND pv.is_active = 1
+        `).bind(id).all<any>();
 
         const inventory = await env.DB.prepare(`
           SELECT id, variant_id, quantity, reserved_quantity, reorder_point FROM inventory WHERE product_id = ?
@@ -505,6 +545,41 @@ export default {
           return errorResponse('Customer phone and at least one item required', 400, request, env);
         }
 
+        // ── 1. Stock Validation Check ─────────────────────────────────────
+        for (const item of body.items) {
+          const prod = await env.DB.prepare(`
+            SELECT id, title, total_stock, allow_preorder FROM products WHERE id = ?
+          `).bind(item.product_id).first<any>();
+
+          if (!prod) {
+            return errorResponse(`Product not found (ID: ${item.product_id})`, 400, request, env);
+          }
+
+          if (prod.allow_preorder === 1) {
+            // Pre-orders bypass normal in-stock limits
+            continue;
+          }
+
+          let availableStock = prod.total_stock !== undefined ? prod.total_stock : 10;
+          if (item.variant_id) {
+            const inv = await env.DB.prepare(`
+              SELECT (quantity - reserved_quantity) as available FROM inventory 
+              WHERE product_id = ? AND variant_id = ?
+            `).bind(item.product_id, item.variant_id).first<any>();
+
+            if (inv && typeof inv.available === 'number') {
+              availableStock = inv.available;
+            }
+          }
+
+          if (item.quantity > availableStock) {
+            return errorResponse(
+              `Sorry babe! Only ${availableStock} left in stock for "${item.title}". Please adjust your quantity to complete your order.`,
+              400, request, env
+            );
+          }
+        }
+
         const itemsTotal = body.items.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
         const deliveryFee = Number(body.delivery_fee || 0);
         const totalAmount = itemsTotal + deliveryFee;
@@ -552,6 +627,14 @@ export default {
               SET quantity = MAX(0, quantity - ?), last_updated = datetime('now')
               WHERE product_id = ? ${item.variant_id ? 'AND variant_id = ?' : ''}
             `).bind(...(item.variant_id ? [item.quantity, item.product_id, item.variant_id] : [item.quantity, item.product_id]))
+          );
+
+          batchStatements.push(
+            env.DB.prepare(`
+              UPDATE products 
+              SET total_stock = MAX(0, total_stock - ?), updated_at = datetime('now')
+              WHERE id = ?
+            `).bind(item.quantity, item.product_id)
           );
 
           batchStatements.push(
@@ -1003,6 +1086,9 @@ function formatProductForResponse(p: any, env: Env) {
     ...p,
     raw_price: p.price,
     formatted_price: `KSh ${Number(p.price).toLocaleString()}`,
+    is_flash_sale: p.is_flash_sale ? 1 : 0,
+    allow_preorder: p.allow_preorder ? 1 : 0,
+    total_stock: p.total_stock !== undefined ? p.total_stock : (p.computed_stock || 0),
     is_video: isVideo && Boolean(videoUrl),
     video_url: isVideo ? videoUrl : null,
     video_key: videoKey,

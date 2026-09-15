@@ -119,7 +119,7 @@
     // ========================================
     // Cart Actions
     // ========================================
-    window.addToWardrobe = function (productOrId, selectedSize, selectedColor) {
+    window.addToWardrobe = function (productOrId, selectedSize, selectedColor, matchedVariant, variantStock) {
         let product = null;
         if (typeof productOrId === 'object' && productOrId !== null) {
             product = productOrId;
@@ -137,6 +137,21 @@
             return;
         }
 
+        let maxStock = 10;
+        let variantId = null;
+        if (matchedVariant) {
+            variantId = matchedVariant.id;
+            if (typeof matchedVariant.stock === 'number') maxStock = matchedVariant.stock;
+        } else if (typeof variantStock === 'number') {
+            maxStock = variantStock;
+        } else if (product && typeof product.stock === 'number') {
+            maxStock = product.stock;
+        } else if (product && typeof product.total_stock === 'number') {
+            maxStock = product.total_stock;
+        }
+
+        const isPreorder = Boolean(product && product.allow_preorder);
+
         let priceNum = 0;
         if (typeof product.raw_price === 'number') {
             priceNum = product.raw_price;
@@ -153,16 +168,31 @@
 
         const existingIndex = cart.findIndex(item => item.id == product.id && item.size === size && (item.color || '') === color);
         if (existingIndex > -1) {
-            cart[existingIndex].quantity = (cart[existingIndex].quantity || 1) + 1;
+            const currentQty = cart[existingIndex].quantity || 1;
+            if (!isPreorder && currentQty + 1 > maxStock) {
+                showBabeToast(`Sorry babe! Only ${maxStock} available in stock for this style ✨`);
+                openCart();
+                return;
+            }
+            cart[existingIndex].quantity = currentQty + 1;
+            cart[existingIndex].max_stock = maxStock;
+            if (variantId) cart[existingIndex].variant_id = variantId;
         } else {
+            if (!isPreorder && maxStock <= 0) {
+                showBabeToast("Sorry babe, this style is currently out of stock! ✨");
+                return;
+            }
             cart.push({
                 id: product.id,
+                variant_id: variantId,
                 title: product.title || 'Fashion Piece',
                 price: priceNum,
                 image_url: imgUrl,
                 size: size,
                 color: color,
-                quantity: 1
+                quantity: 1,
+                max_stock: maxStock,
+                allow_preorder: isPreorder
             });
         }
 
@@ -266,6 +296,12 @@
             b.addEventListener('click', () => {
                 const idx = parseInt(b.getAttribute('data-index'), 10);
                 if (cart[idx]) {
+                    const item = cart[idx];
+                    const max = typeof item.max_stock === 'number' ? item.max_stock : 10;
+                    if (!item.allow_preorder && (item.quantity || 1) >= max) {
+                        showBabeToast(`Sorry babe! Only ${max} available in stock for this style ✨`);
+                        return;
+                    }
                     cart[idx].quantity = (cart[idx].quantity || 1) + 1;
                     saveCart();
                     updateCartBadge();
@@ -814,6 +850,7 @@
             let data = null;
 
             // Send to Cloudflare Worker API first
+            let serverErrorMsg = null;
             try {
                 const workerBase = (typeof CF_WORKER_URL !== 'undefined' ? CF_WORKER_URL : 'https://api.annesfashion.co.ke');
                 const workerRes = await fetch(`${workerBase}/api/client/order`, {
@@ -822,13 +859,17 @@
                     body: JSON.stringify(orderPayload)
                 });
                 const workerJson = await workerRes.json();
-                if (workerJson.success) data = workerJson;
+                if (workerJson.success) {
+                    data = workerJson;
+                } else if (workerJson.error) {
+                    serverErrorMsg = workerJson.error;
+                }
             } catch (wErr) {
                 console.warn('Worker order endpoint fallback:', wErr);
             }
 
-            // Fallback to local PHP API if needed
-            if (!data) {
+            // Fallback to local PHP API if needed and no explicit validation error
+            if (!data && !serverErrorMsg) {
                 const res = await fetch(`${API_BASE}/client/order.php`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -847,6 +888,11 @@
                 checkoutStep = 4;
                 checkoutData.orderResult = data;
                 renderCheckoutStep();
+            } else if (serverErrorMsg) {
+                alert(serverErrorMsg);
+                showBabeToast(serverErrorMsg);
+                closeCheckoutModal();
+                openCart();
             } else {
                 showBabeToast("Order recorded, babe! 🥂");
             }

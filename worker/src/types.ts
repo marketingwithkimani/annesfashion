@@ -43,6 +43,7 @@ export interface Product {
   bust_sizes?: string | null;
   shoe_sizes?: string | null;
   total_stock?: number | null;
+  is_flash_sale?: number;
   is_active: number;
   is_archived: number;
   is_featured: number;
@@ -69,6 +70,9 @@ export interface ProductVariant {
   color: string | null;
   sku: string | null;
   is_active: number;
+  stock?: number;
+  quantity?: number;
+  created_at?: string | null;
 }
 
 export interface InventoryItem {

@@ -387,6 +387,92 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Sizes
+            // Helper to get selected variant and its real-time stock
+            function getSelectedVariant() {
+                const activeSizeBtn = document.querySelector('#sizeSelector .size-btn.active');
+                const selectedSize = activeSizeBtn ? (activeSizeBtn.getAttribute('data-size') || activeSizeBtn.textContent.trim()) : null;
+
+                const activeColorBtn = document.querySelector('#colorSelector .color-btn.active');
+                const selectedColor = activeColorBtn ? (activeColorBtn.getAttribute('data-color') || activeColorBtn.title || activeColorBtn.textContent.trim()) : null;
+
+                if (!product || !Array.isArray(product.variants) || product.variants.length === 0) {
+                    const fallbackStock = (product && product.stock !== undefined) ? product.stock : (product && product.total_stock !== undefined ? product.total_stock : 10);
+                    return { selectedSize, selectedColor, matchedVariant: null, stock: fallbackStock };
+                }
+
+                const cleanS = selectedSize ? String(selectedSize).replace(/["'\\]/g, '').trim().toLowerCase() : null;
+                const cleanC = selectedColor ? String(selectedColor).trim().toLowerCase() : null;
+
+                // 1. Try exact match on both size & color
+                let matched = product.variants.find(v => {
+                    const vS = v.size ? String(v.size).replace(/["'\\]/g, '').trim().toLowerCase() : null;
+                    const vC = v.color ? String(v.color).trim().toLowerCase() : null;
+                    if (cleanS && cleanC) return vS === cleanS && vC === cleanC;
+                    if (cleanS) return vS === cleanS;
+                    if (cleanC) return vC === cleanC;
+                    return false;
+                });
+
+                // 2. Fallback: match by size alone
+                if (!matched && cleanS) {
+                    matched = product.variants.find(v => {
+                        const vS = v.size ? String(v.size).replace(/["'\\]/g, '').trim().toLowerCase() : null;
+                        return vS === cleanS;
+                    });
+                }
+
+                const stock = matched && typeof matched.stock === 'number'
+                    ? matched.stock 
+                    : ((product && product.stock !== undefined) ? product.stock : 10);
+
+                return { selectedSize, selectedColor, matchedVariant: matched, stock };
+            }
+
+            function updateVariantStockUI() {
+                const { selectedSize, selectedColor, matchedVariant, stock } = getSelectedVariant();
+                const stockStatusEl = document.getElementById('variantStockStatus');
+                const addBtn = document.querySelector('.btn-add-to-cart');
+
+                let statusHtml = '';
+                const variantLabel = [selectedColor, selectedSize].filter(Boolean).join(' / ');
+
+                if (stock > 0) {
+                    if (stock <= 3) {
+                        statusHtml = `<span style="color: #e67e22; font-weight: 700;"><i class="fas fa-fire"></i> Only ${stock} left in stock ${variantLabel ? `for ${variantLabel}` : ''}!</span>`;
+                    } else {
+                        statusHtml = `<span style="color: #4CAF50; font-weight: 600;"><i class="fas fa-check-circle"></i> In Stock (${stock} available)</span>`;
+                    }
+                } else {
+                    if (product.allow_preorder) {
+                        statusHtml = `<span style="color: var(--accent-gold); font-weight: 700;"><i class="fas fa-clock"></i> Available for Pre-order</span>`;
+                    } else {
+                        statusHtml = `<span style="color: #f44336; font-weight: 700;"><i class="fas fa-times-circle"></i> Out of Stock ${variantLabel ? `in ${variantLabel}` : ''}</span>`;
+                    }
+                }
+
+                if (stockStatusEl) stockStatusEl.innerHTML = statusHtml;
+
+                if (addBtn) {
+                    if (stock <= 0 && !product.allow_preorder) {
+                        addBtn.innerHTML = '<i class="fas fa-times-circle"></i> Out of Stock';
+                        addBtn.disabled = true;
+                        addBtn.style.opacity = '0.5';
+                        addBtn.style.cursor = 'not-allowed';
+                    } else if (stock <= 0 && product.allow_preorder) {
+                        addBtn.innerHTML = '<i class="fas fa-clock"></i> Pre-order Now';
+                        addBtn.disabled = false;
+                        addBtn.style.opacity = '1';
+                        addBtn.style.cursor = 'pointer';
+                    } else {
+                        addBtn.innerHTML = '<i class="fas fa-shopping-bag"></i> Add to Wardrobe';
+                        addBtn.disabled = false;
+                        addBtn.style.opacity = '1';
+                        addBtn.style.cursor = 'pointer';
+                    }
+                }
+            }
+
+            // Sizes
             const sizeContainer = document.getElementById('sizeSelector');
             const sizeOptionGroup = sizeContainer ? sizeContainer.closest('.option-group') : null;
             if (sizeContainer) {
@@ -402,6 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         btn.addEventListener('click', () => {
                             sizeContainer.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
                             btn.classList.add('active');
+                            updateVariantStockUI();
                         });
                         sizeContainer.appendChild(btn);
                     });
@@ -449,6 +536,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         btn.addEventListener('click', () => {
                             colorContainer.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
                             btn.classList.add('active');
+                            updateVariantStockUI();
                         });
                         colorContainer.appendChild(btn);
                     });
@@ -472,9 +560,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 metaContainer.innerHTML = `
                 <p><strong>SKU:</strong> ${productData.sku || `AF-${product.category.substring(0, 3).toUpperCase()}-${product.id}`}</p>
                 <p><strong>Category:</strong> ${product.category.charAt(0).toUpperCase() + product.category.slice(1)}</p>
-                <p><strong>Stock Status:</strong> ${product.stock > 0 ? `<span style="color:#4CAF50">${product.stock} in stock</span>` : (product.allow_preorder ? '<span style="color:var(--accent-gold)">Available for Pre-order</span>' : '<span style="color:#f44336">Out of Stock</span>')}</p>
+                <p><strong>Stock Status:</strong> <span id="variantStockStatus">Loading stock...</span></p>
             `;
             }
+
+            // Initial stock status render
+            updateVariantStockUI();
 
             // Add to Wardrobe button
             const addBtn = document.querySelector('.btn-add-to-cart');
@@ -482,29 +573,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 const newBtn = addBtn.cloneNode(true);
                 addBtn.parentNode.replaceChild(newBtn, addBtn);
 
-                if (product.stock <= 0 && !product.allow_preorder) {
-                    newBtn.innerHTML = '<i class="fas fa-times-circle"></i> Out of Stock';
-                    newBtn.disabled = true;
-                    newBtn.style.opacity = '0.5';
-                    newBtn.style.cursor = 'not-allowed';
-                } else {
-                    if (product.stock <= 0 && product.allow_preorder) {
-                        newBtn.innerHTML = '<i class="fas fa-clock"></i> Pre-order Now';
-                    }
-                    newBtn.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        const activeSizeBtn = document.querySelector('#sizeSelector .size-btn.active');
-                        const selectedSize = activeSizeBtn ? (activeSizeBtn.getAttribute('data-size') || activeSizeBtn.textContent.trim()) : null;
+                newBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const { selectedSize, selectedColor, matchedVariant, stock } = getSelectedVariant();
 
-                        const activeColorBtn = document.querySelector('#colorSelector .color-btn.active');
-                        const selectedColor = activeColorBtn ? (activeColorBtn.getAttribute('data-color') || activeColorBtn.title || activeColorBtn.textContent.trim()) : null;
-
-                        if (typeof window.addToWardrobe === 'function') {
-                            window.addToWardrobe(product, selectedSize, selectedColor);
+                    if (stock <= 0 && !product.allow_preorder) {
+                        if (typeof showBabeToast === 'function') {
+                            showBabeToast("Sorry babe, this style is currently out of stock! ✨");
                         }
-                    });
-                }
+                        return;
+                    }
+
+                    if (typeof window.addToWardrobe === 'function') {
+                        window.addToWardrobe(product, selectedSize, selectedColor, matchedVariant, stock);
+                    }
+                });
+
+                // Update button state immediately
+                updateVariantStockUI();
             }
         } catch (err) {
             console.error('Error in renderProduct:', err);
