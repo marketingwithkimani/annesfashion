@@ -203,6 +203,9 @@
         showBabeToast("Added to wardrobe, babe! 💕 You're gonna slay ✨");
     };
 
+    window.openCart = openCart;
+    window.closeCart = closeCart;
+
     function saveCart() {
         localStorage.setItem('annes_cart', JSON.stringify(cart));
         localStorage.setItem('cart', JSON.stringify(cart));

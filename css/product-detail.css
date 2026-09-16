@@ -537,12 +537,185 @@
 
 .try-on-disclaimer i {
     color: var(--accent-gold);
-    margin-right: 8px;
+/* ========================================================
+   Multi-Piece Showcase (1 Video -> 1-3 Pieces)
+   ======================================================== */
+.multi-piece-showcase {
+    background: rgba(201, 169, 110, 0.06);
+    border: 1px solid rgba(201, 169, 110, 0.35);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(8px);
 }
 
-/* Related Products */
-.related-products {
-    padding: 60px 0;
+.showcase-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.showcase-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #c9a96e, #967438);
+    color: #0b0b0d;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+.showcase-count {
+    font-size: 0.85rem;
+    color: var(--accent-gold);
+    font-weight: 600;
+}
+
+.showcase-instruction {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    line-height: 1.4;
+}
+
+.pieces-tabs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+}
+
+.piece-tab-card {
+    background: var(--bg-card, #141418);
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.piece-tab-card:hover {
+    border-color: rgba(201, 169, 110, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.piece-tab-card.active {
+    border-color: var(--accent-gold);
+    background: rgba(201, 169, 110, 0.12);
+    box-shadow: 0 0 16px rgba(201, 169, 110, 0.25);
+}
+
+.piece-slot-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.piece-active-check {
+    opacity: 0;
+    transition: opacity 0.2s;
+    color: var(--accent-gold);
+}
+
+.piece-tab-card.active .piece-active-check {
+    opacity: 1;
+}
+
+.piece-tab-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+}
+
+.piece-tab-price {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+}
+
+.piece-tab-meta {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+/* Complete Look / Bundle Buy Card */
+.bundle-buy-card {
+    background: linear-gradient(135deg, rgba(201, 169, 110, 0.12), rgba(20, 20, 24, 0.8));
+    border: 1px dashed rgba(201, 169, 110, 0.5);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-top: 18px;
+    transition: all 0.3s ease;
+}
+
+.bundle-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.bundle-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+.bundle-total-price {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+}
+
+.bundle-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+}
+
+.btn-buy-full-look {
+    width: 100%;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #c9a96e, #a7803d);
+    color: #0b0b0d;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.92rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 14px rgba(201, 169, 110, 0.3);
+}
+
+.btn-buy-full-look:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(201, 169, 110, 0.45);
+    background: linear-gradient(135deg, #d8bc84, #b88f4a);
 }
 
 /* Responsive */

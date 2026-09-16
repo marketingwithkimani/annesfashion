@@ -200,6 +200,18 @@ async function fetchCloudflareProduct(id) {
 }
 
 // =====================================================
+// Listing Detail (Parent Video Showcase with 1-3 Pieces)
+// =====================================================
+async function fetchCloudflareListing(id) {
+    const { ok, data } = await cfFetch(`/api/listings/${id}`);
+    if (!ok || !data?.success) {
+        console.error('[CloudflareClient] Failed to fetch listing detail:', data);
+        return null;
+    }
+    return data.listing;
+}
+
+// =====================================================
 // Product Management (Admin CRUD)
 // =====================================================
 
@@ -390,6 +402,7 @@ window.cfCustomerAuth = cfCustomerAuth;
 window.supabaseClientAuth = cfCustomerAuth;
 window.cfPlaceOrder = cfPlaceOrder;
 window.fetchCloudflareProduct = fetchCloudflareProduct;
+window.fetchCloudflareListing = fetchCloudflareListing;
 window.cfCreateProduct = cfCreateProduct;
 window.cfUpdateProduct = cfUpdateProduct;
 window.cfDeleteProduct = cfDeleteProduct;

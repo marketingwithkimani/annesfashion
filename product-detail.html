@@ -104,6 +104,18 @@
                         <a href="index.html">Home</a> / <a href="#">Category</a> / <span>Product Name</span>
                     </div>
 
+                    <!-- Multi-Piece Showcase Selector (Visible when 1 video showcases 2 or 3 pieces) -->
+                    <div class="multi-piece-showcase" id="multiPieceShowcase" style="display: none;">
+                        <div class="showcase-header">
+                            <span class="showcase-badge"><i class="fas fa-video"></i> Video Showcase Look</span>
+                            <span class="showcase-count" id="showcaseCount">3 Pieces in this video</span>
+                        </div>
+                        <p class="showcase-instruction">Select a piece to customize size, color & add to wardrobe, or shop the entire look below:</p>
+                        <div class="pieces-tabs" id="piecesTabsContainer">
+                            <!-- Dynamic Piece Cards injected here -->
+                        </div>
+                    </div>
+
                     <h1 class="product-title-main">Loading Product...</h1>
                     <div class="product-rating">
                         <i class="fas fa-star"></i>
@@ -145,6 +157,21 @@
                         </button>
                         <button class="btn-share">
                             <i class="fas fa-share-alt"></i>
+                        </button>
+                    </div>
+
+                    <!-- Complete Look / Bundle Buy Card (Visible for multi-piece looks) -->
+                    <div class="bundle-buy-card" id="bundleBuyCard" style="display: none;">
+                        <div class="bundle-header">
+                            <div class="bundle-title">
+                                <i class="fas fa-gem" style="color: var(--accent-gold);"></i>
+                                <strong>Shop The Complete Look</strong>
+                            </div>
+                            <span class="bundle-total-price" id="bundleTotalPrice">KES 0.00</span>
+                        </div>
+                        <p class="bundle-desc">Get all coordinating pieces modeled in this video in one click 💕</p>
+                        <button class="btn-buy-full-look" id="btnBuyFullLook">
+                            <i class="fas fa-magic"></i> Add Complete Look to Wardrobe
                         </button>
                     </div>
 
