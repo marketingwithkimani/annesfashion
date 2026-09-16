@@ -154,6 +154,10 @@ async function fetchPreorders() {
         const isFlashSaleModeOn = (settings['flash_sale_mode'] || 'off').toLowerCase() === 'on';
         const isPreorderModeOn = (settings['pre_order_mode'] || 'off').toLowerCase() === 'on';
 
+        // Store globally so renderProductGrid can conditionally show the preorder badge
+        window.isPreorderModeOn = isPreorderModeOn;
+        window.isFlashSaleModeOn = isFlashSaleModeOn;
+
         if (!isPreorderModeOn && !isFlashSaleModeOn) {
             section.style.display = 'none';
             return;
@@ -313,7 +317,7 @@ window.renderProductGrid = function (container, items) {
                         </span>
                     </div>
                 `;
-            } else if (isPreorder) {
+            } else if (isPreorder && window.isPreorderModeOn) {
                 badgeAboveHtml = `
                     <div class="card-badge-above preorder-badge-above">
                         <span class="luxury-badge-above" style="background: rgba(201, 169, 110, 0.18); color: var(--accent-gold); border: 1px solid rgba(201, 169, 110, 0.4);">
