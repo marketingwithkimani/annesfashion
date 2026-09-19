@@ -244,17 +244,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Multi-Item Showcase State (1 Video -> 1 to 3 Pieces)
     let currentLookItems = [];
+    let currentListingData = null;
     let activePieceIndex = 0;
+    let pieceSelections = {};
     let currentMediaSrc = null;
 
     // 4. Render product or multi-piece look into the page
-    function renderLook(items, defaultActiveIndex = 0) {
+    function renderLook(items, defaultActiveIndex = 0, listing = null) {
         if (!items || items.length === 0) {
             showError();
             return;
         }
 
         currentLookItems = items;
+        currentListingData = listing;
         activePieceIndex = defaultActiveIndex >= 0 && defaultActiveIndex < items.length ? defaultActiveIndex : 0;
 
         const mainItem = currentLookItems[0];
@@ -271,7 +274,16 @@ document.addEventListener('DOMContentLoaded', () => {
         // Multi-Piece Showcase Tabs & Bundle Buying
         if (currentLookItems.length > 1) {
             if (showcaseEl) showcaseEl.style.display = 'block';
-            if (countEl) countEl.textContent = `${currentLookItems.length} Pieces in this Look`;
+            
+            const badgeEl = showcaseEl ? showcaseEl.querySelector('.showcase-badge') : null;
+            if (badgeEl) {
+                const lookName = (currentListingData && currentListingData.title) ? currentListingData.title : 'Coordinated Video Look';
+                badgeEl.innerHTML = `<i class="fas fa-video"></i> ${lookName}`;
+            }
+
+            if (countEl) {
+                countEl.textContent = `${currentLookItems.length} Pieces in this Video`;
+            }
 
             if (tabsContainer) {
                 tabsContainer.innerHTML = currentLookItems.map((item, idx) => {
@@ -282,7 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     return `
                         <div class="piece-tab-card ${isPieceActive ? 'active' : ''}" data-index="${idx}">
                             <div class="piece-slot-badge">
-                                <span>Piece ${slotNum}</span>
+                                <span>Piece ${slotNum} of ${currentLookItems.length}</span>
                                 <i class="fas fa-check-circle piece-active-check"></i>
                             </div>
                             <div class="piece-tab-title" title="${item.title}">${item.title}</div>
@@ -317,17 +329,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (buyFullLookBtn) {
                     const newBuyBtn = buyFullLookBtn.cloneNode(true);
                     buyFullLookBtn.parentNode.replaceChild(newBuyBtn, buyFullLookBtn);
+                    newBuyBtn.innerHTML = `<i class="fas fa-magic"></i> Add Complete Look (${currentLookItems.length} Pieces • KES ${totalBundlePrice.toLocaleString()})`;
 
                     newBuyBtn.addEventListener('click', (e) => {
                         e.preventDefault();
                         if (typeof window.addToWardrobe !== 'function') return;
 
-                        currentLookItems.forEach(piece => {
+                        currentLookItems.forEach((piece, pIdx) => {
+                            const sel = pieceSelections[pIdx];
                             const exactSizes = extractAllExactSizes(piece);
                             const exactColors = extractAllExactColors(piece);
-                            const defSize = exactSizes[0] || piece.size || 'One Size';
-                            const defColor = exactColors[0] || piece.color || '';
-                            window.addToWardrobe(piece, defSize, defColor, null, piece.stock || piece.total_stock || 10);
+                            const defSize = (sel && sel.selectedSize) || exactSizes[0] || piece.size || 'One Size';
+                            const defColor = (sel && sel.selectedColor) || exactColors[0] || piece.color || '';
+                            const defVariant = (sel && sel.matchedVariant) || null;
+                            const defStock = (sel && typeof sel.stock === 'number') ? sel.stock : (piece.stock || piece.total_stock || 10);
+                            window.addToWardrobe(piece, defSize, defColor, defVariant, defStock);
                         });
 
                         if (typeof showBabeToast === 'function') {
@@ -532,7 +548,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     ? matched.stock 
                     : ((product && product.stock !== undefined) ? product.stock : 10);
 
-                return { selectedSize, selectedColor, matchedVariant: matched, stock };
+                const currentSelection = { selectedSize, selectedColor, matchedVariant: matched, stock };
+                pieceSelections[index] = currentSelection;
+
+                return currentSelection;
             }
 
             function updateVariantStockUI() {
@@ -560,14 +579,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (stockStatusEl) stockStatusEl.innerHTML = statusHtml;
 
                 if (addBtn) {
-                    const buttonActionLabel = currentLookItems.length > 1 ? `Add Piece ${index + 1} to Wardrobe` : 'Add to Wardrobe';
+                    const buttonActionLabel = currentLookItems.length > 1 ? `Add ${product.title} to Wardrobe • ${product.price}` : `Add to Wardrobe • ${product.price}`;
                     if (stock <= 0 && !product.allow_preorder) {
                         addBtn.innerHTML = '<i class="fas fa-times-circle"></i> Out of Stock';
                         addBtn.disabled = true;
                         addBtn.style.opacity = '0.5';
                         addBtn.style.cursor = 'not-allowed';
                     } else if (stock <= 0 && product.allow_preorder) {
-                        addBtn.innerHTML = `<i class="fas fa-clock"></i> Pre-order Piece ${index + 1}`;
+                        addBtn.innerHTML = `<i class="fas fa-clock"></i> Pre-order ${product.title}`;
                         addBtn.disabled = false;
                         addBtn.style.opacity = '1';
                         addBtn.style.cursor = 'pointer';
@@ -583,14 +602,36 @@ document.addEventListener('DOMContentLoaded', () => {
             // Sizes
             const sizeContainer = document.getElementById('sizeSelector');
             const sizeOptionGroup = sizeContainer ? sizeContainer.closest('.option-group') : null;
+            if (sizeOptionGroup) {
+                const label = sizeOptionGroup.querySelector('label');
+                if (label) {
+                    const titleLower = (product.title || '').toLowerCase();
+                    const catLower = (product.category || '').toLowerCase();
+                    const hasBust = productData.bust_sizes && (typeof productData.bust_sizes === 'string' ? JSON.parse(productData.bust_sizes || '[]') : productData.bust_sizes).length > 0;
+                    const hasWaist = productData.waist_sizes && (typeof productData.waist_sizes === 'string' ? JSON.parse(productData.waist_sizes || '[]') : productData.waist_sizes).length > 0;
+
+                    if (hasBust || titleLower.includes('top') || titleLower.includes('bra') || titleLower.includes('corset') || titleLower.includes('bust')) {
+                        label.textContent = 'Bust Size:';
+                    } else if (hasWaist || titleLower.includes('jean') || titleLower.includes('skirt') || titleLower.includes('trouser') || titleLower.includes('pant') || titleLower.includes('short')) {
+                        label.textContent = 'Waist Size:';
+                    } else if (catLower === 'shoes' || titleLower.includes('shoe') || titleLower.includes('heel') || titleLower.includes('sneaker')) {
+                        label.textContent = 'Shoe Size:';
+                    } else {
+                        label.textContent = 'Size:';
+                    }
+                }
+            }
+
             if (sizeContainer) {
                 sizeContainer.innerHTML = '';
                 const validSizes = (product.sizes || []).filter(Boolean);
                 if (validSizes.length > 0) {
                     if (sizeOptionGroup) sizeOptionGroup.style.display = 'block';
+                    const activeSavedSize = pieceSelections[index]?.selectedSize;
                     validSizes.forEach((size, sIdx) => {
+                        const isSizeActive = activeSavedSize ? activeSavedSize === size : sIdx === 0;
                         const btn = document.createElement('button');
-                        btn.className = `size-btn ${sIdx === 0 ? 'active' : ''}`;
+                        btn.className = `size-btn ${isSizeActive ? 'active' : ''}`;
                         btn.textContent = size;
                         btn.setAttribute('data-size', size);
                         btn.addEventListener('click', () => {
@@ -613,9 +654,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const validColors = (product.colors || []).filter(c => c && c.toLowerCase() !== 'default');
                 if (validColors.length > 0) {
                     if (colorOptionGroup) colorOptionGroup.style.display = 'block';
+                    const activeSavedColor = pieceSelections[index]?.selectedColor;
                     validColors.forEach((color, cIdx) => {
+                        const isColorActive = activeSavedColor ? activeSavedColor === color : cIdx === 0;
                         const btn = document.createElement('button');
-                        btn.className = `color-btn ${cIdx === 0 ? 'active' : ''}`;
+                        btn.className = `color-btn ${isColorActive ? 'active' : ''}`;
                         btn.setAttribute('data-color', color);
                         btn.title = color;
 
@@ -654,13 +697,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Breadcrumbs
-            const breadcrumbCategory = document.querySelector('#productBreadcrumb a:nth-child(2)');
-            const breadcrumbTitle = document.querySelector('#productBreadcrumb span');
-            if (breadcrumbCategory) {
-                breadcrumbCategory.textContent = product.category.charAt(0).toUpperCase() + product.category.slice(1);
-                breadcrumbCategory.href = `${product.category}.html`;
+            const breadcrumbEl = document.getElementById('productBreadcrumb');
+            if (breadcrumbEl) {
+                const catCap = product.category.charAt(0).toUpperCase() + product.category.slice(1);
+                let crumbHtml = `<a href="index.html">Home</a> / <a href="${product.category}.html">${catCap}</a>`;
+                if (currentListingData && currentListingData.title) {
+                    crumbHtml += ` / <span>${currentListingData.title}</span>`;
+                }
+                crumbHtml += ` / <span style="color: var(--accent-gold);">${product.title}</span>`;
+                breadcrumbEl.innerHTML = crumbHtml;
             }
-            if (breadcrumbTitle) breadcrumbTitle.textContent = product.title;
 
             // Meta
             const metaContainer = document.getElementById('productMeta');
@@ -712,6 +758,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchProductDetails(id, listingIdParam) {
         let mainProduct = null;
         let lookItems = [];
+        let listingData = null;
 
         try {
             // 1. If listing_id is specified in URL
@@ -720,6 +767,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (listing && Array.isArray(listing.items) && listing.items.length > 0) {
                     lookItems = listing.items;
                     mainProduct = listing.items[0];
+                    listingData = listing;
                     if (listing.video_url) {
                         mainProduct.video_url = listing.video_url;
                         mainProduct.media_type = 'video';
@@ -754,6 +802,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const listing = await window.fetchCloudflareListing(mainProduct.listing_id);
                     if (listing && Array.isArray(listing.items) && listing.items.length > 0) {
                         lookItems = listing.items;
+                        listingData = listing;
                     }
                 } catch (lErr) {
                     console.warn('Listing fetch notice:', lErr);
@@ -778,7 +827,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const initialIdx = id ? lookItems.findIndex(it => it.id == id) : 0;
-            renderLook(lookItems, initialIdx >= 0 ? initialIdx : 0);
+            renderLook(lookItems, initialIdx >= 0 ? initialIdx : 0, listingData);
             loadRelatedProducts(mainProduct.id);
 
         } catch (error) {

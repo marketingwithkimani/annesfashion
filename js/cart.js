@@ -205,6 +205,8 @@
 
     window.openCart = openCart;
     window.closeCart = closeCart;
+    window.updateCartBadge = updateCartBadge;
+    window.showBabeToast = showBabeToast;
 
     function saveCart() {
         localStorage.setItem('annes_cart', JSON.stringify(cart));

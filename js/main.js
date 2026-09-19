@@ -487,7 +487,11 @@ function showNotification(message) {
 // Observers & Effects
 // ========================================
 document.addEventListener('DOMContentLoaded', () => {
-    updateCartBadge();
+    if (typeof updateCartBadge === 'function') {
+        updateCartBadge();
+    } else if (typeof window.updateCartBadge === 'function') {
+        window.updateCartBadge();
+    }
     refreshGrids();
 
     // Intersection Observer for animations

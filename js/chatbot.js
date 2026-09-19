@@ -169,6 +169,11 @@ STRICT BUSINESS RULES:
                 })
             });
 
+            if (!response.ok) {
+                this.loadLocalHistory();
+                return;
+            }
+
             const data = await response.json();
 
             if (data.success && data.data) {
@@ -581,10 +586,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const hasSeenBot = localStorage.getItem('annes_bot_seen');
     if (!hasSeenBot) {
         setTimeout(() => {
-            if (!window.fashionBot.isOpen) {
+            // Only auto-open on desktop; never cover mobile screens automatically
+            if (!window.fashionBot.isOpen && window.innerWidth > 768) {
                 window.fashionBot.open('first_visit');
-                localStorage.setItem('annes_bot_seen', 'true');
             }
-        }, 3000);
+            localStorage.setItem('annes_bot_seen', 'true');
+        }, 3500);
     }
 });
