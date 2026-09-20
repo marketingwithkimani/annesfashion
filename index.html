@@ -11,7 +11,9 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Alex+Brush&family=Pinyon+Script&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Alex+Brush&family=Pinyon+Script&display=swap"
+        rel="stylesheet">
 
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -271,49 +273,57 @@
             <div class="category-bubbles-row" id="categoryBubblesRow">
                 <a href="casual.html" class="category-bubble" id="catBubbleCasual">
                     <div class="bubble-img-wrap">
-                        <img src="assets/categories/cat-clothes.jpg" alt="Clothes" onerror="this.src='assets/categories/cat-casual.jpg'">
+                        <img src="assets/categories/cat-clothes.jpg" alt="Clothes"
+                            onerror="this.src='assets/categories/cat-casual.jpg'">
                     </div>
-                    <span class="bubble-label">Clothes</span>
+                    <span class="bubble-label">Casual</span>
                 </a>
                 <a href="dresses.html" class="category-bubble" id="catBubbleDresses">
                     <div class="bubble-img-wrap">
-                        <img src="assets/categories/cat-dresses.jpg" alt="Dresses" onerror="this.src='assets/Logo%20Black.png'">
+                        <img src="assets/categories/cat-dresses.jpg" alt="Dresses"
+                            onerror="this.src='assets/Logo%20Black.png'">
                     </div>
                     <span class="bubble-label">Dresses</span>
                 </a>
                 <a href="corporate.html" class="category-bubble" id="catBubbleCorporate">
                     <div class="bubble-img-wrap">
-                        <img src="assets/categories/cat-corporate.jpg" alt="Corporate" onerror="this.src='assets/Logo%20Black.png'">
+                        <img src="assets/categories/cat-corporate.jpg" alt="Corporate"
+                            onerror="this.src='assets/Logo%20Black.png'">
                     </div>
                     <span class="bubble-label">Corporate</span>
                 </a>
                 <a href="weekend.html" class="category-bubble" id="catBubbleWeekend">
                     <div class="bubble-img-wrap">
-                        <img src="assets/categories/cat-weekend.jpg" alt="Weekend" onerror="this.src='assets/Logo%20Black.png'">
+                        <img src="assets/categories/cat-weekend.jpg" alt="Weekend"
+                            onerror="this.src='assets/Logo%20Black.png'">
                     </div>
                     <span class="bubble-label">Weekend</span>
                 </a>
                 <a href="makeup.html" class="category-bubble" id="catBubbleMakeup">
                     <div class="bubble-img-wrap">
-                        <img src="assets/categories/cat-beauty.jpg" alt="Beauty" onerror="this.src='assets/Logo%20Black.png'">
+                        <img src="assets/categories/cat-beauty.jpg" alt="Beauty"
+                            onerror="this.src='assets/Logo%20Black.png'">
                     </div>
                     <span class="bubble-label">Beauty</span>
                 </a>
                 <a href="shoes.html" class="category-bubble" id="catBubbleShoes">
                     <div class="bubble-img-wrap">
-                        <img src="assets/categories/cat-shoes.jpg" alt="Shoes" onerror="this.src='assets/Logo%20Black.png'">
+                        <img src="assets/categories/cat-shoes.jpg" alt="Shoes"
+                            onerror="this.src='assets/Logo%20Black.png'">
                     </div>
                     <span class="bubble-label">Shoes</span>
                 </a>
                 <a href="wigs.html" class="category-bubble" id="catBubbleWigs">
                     <div class="bubble-img-wrap">
-                        <img src="assets/categories/cat-wigs.jpg" alt="Wigs &amp; Hair" onerror="this.src='assets/Logo%20Black.png'">
+                        <img src="assets/categories/cat-wigs.jpg" alt="Wigs &amp; Hair"
+                            onerror="this.src='assets/Logo%20Black.png'">
                     </div>
                     <span class="bubble-label">Wigs &amp; Hair</span>
                 </a>
                 <a href="beauty.html" class="category-bubble" id="catBubbleSkincare">
                     <div class="bubble-img-wrap">
-                        <img src="assets/categories/cat-skincare.jpg" alt="Skincare" onerror="this.src='assets/Logo%20Black.png'">
+                        <img src="assets/categories/cat-skincare.jpg" alt="Skincare"
+                            onerror="this.src='assets/Logo%20Black.png'">
                     </div>
                     <span class="bubble-label">Skincare</span>
                 </a>
@@ -326,6 +336,7 @@
             padding: 28px 0 10px;
             background: var(--primary-bg);
         }
+
         .category-bubbles-row {
             display: flex;
             gap: 18px;
@@ -334,7 +345,11 @@
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
         }
-        .category-bubbles-row::-webkit-scrollbar { display: none; }
+
+        .category-bubbles-row::-webkit-scrollbar {
+            display: none;
+        }
+
         .category-bubble {
             display: flex;
             flex-direction: column;
@@ -344,27 +359,34 @@
             flex-shrink: 0;
             transition: transform 0.25s ease;
         }
-        .category-bubble:hover { transform: translateY(-4px); }
+
+        .category-bubble:hover {
+            transform: translateY(-4px);
+        }
+
         .bubble-img-wrap {
             width: 76px;
             height: 76px;
             border-radius: 50%;
             overflow: hidden;
             border: 3px solid rgba(201, 169, 110, 0.45);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
             transition: border-color 0.25s, box-shadow 0.25s;
             background: var(--card-bg);
         }
+
         .category-bubble:hover .bubble-img-wrap {
             border-color: var(--accent-gold);
-            box-shadow: 0 0 0 3px rgba(201,169,110,0.3), 0 6px 20px rgba(0,0,0,0.25);
+            box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);
         }
+
         .bubble-img-wrap img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
         }
+
         .bubble-label {
             font-size: 0.78rem;
             font-weight: 700;
@@ -373,18 +395,31 @@
             white-space: nowrap;
             letter-spacing: 0.3px;
         }
+
         @media (max-width: 768px) {
-            .bubble-img-wrap { width: 62px; height: 62px; }
-            .bubble-label { font-size: 0.72rem; }
-            .category-bubbles-row { gap: 12px; }
+            .bubble-img-wrap {
+                width: 62px;
+                height: 62px;
+            }
+
+            .bubble-label {
+                font-size: 0.72rem;
+            }
+
+            .category-bubbles-row {
+                gap: 12px;
+            }
         }
     </style>
 
     <!-- Hot Selling Closet Section -->
-    <section class="products-section hot-closet-section" id="hotClosetSection" style="background: linear-gradient(135deg, rgba(201,169,110,0.05), var(--primary-bg)); padding: 36px 0;">
+    <section class="products-section hot-closet-section" id="hotClosetSection"
+        style="background: linear-gradient(135deg, rgba(201,169,110,0.05), var(--primary-bg)); padding: 36px 0;">
         <div class="container">
             <div class="section-header" style="margin-bottom: 20px;">
-                <span class="luxury-badge" style="background: linear-gradient(135deg, #c9a96e, #8c6420); color: #0b0b0d; padding: 4px 14px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 10px;"><i class="fas fa-fire"></i> Hot Picks</span>
+                <span class="luxury-badge"
+                    style="background: linear-gradient(135deg, #c9a96e, #8c6420); color: #0b0b0d; padding: 4px 14px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 10px;"><i
+                        class="fas fa-fire"></i> Hot Picks</span>
                 <h2 class="section-title" style="font-size: 1.55rem;">Hot Selling Closet 🔥</h2>
                 <p class="section-subtitle">The pieces everyone's grabbing right now</p>
             </div>
@@ -401,6 +436,7 @@
             position: relative;
             overflow: hidden;
         }
+
         .hot-closet-section .products-grid-mini {
             display: grid;
             grid-auto-flow: column;
@@ -412,16 +448,29 @@
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
         }
-        .hot-closet-section .products-grid-mini::-webkit-scrollbar { display: none; }
+
+        .hot-closet-section .products-grid-mini::-webkit-scrollbar {
+            display: none;
+        }
+
         @media (max-width: 1200px) {
-            .hot-closet-section .products-grid-mini { grid-auto-columns: calc(100% / 5 - 14px); }
+            .hot-closet-section .products-grid-mini {
+                grid-auto-columns: calc(100% / 5 - 14px);
+            }
         }
+
         @media (max-width: 900px) {
-            .hot-closet-section .products-grid-mini { grid-auto-columns: calc(100% / 3 - 10px); }
+            .hot-closet-section .products-grid-mini {
+                grid-auto-columns: calc(100% / 3 - 10px);
+            }
         }
+
         @media (max-width: 600px) {
-            .hot-closet-section .products-grid-mini { grid-auto-columns: calc(100% / 2.2 - 8px); }
+            .hot-closet-section .products-grid-mini {
+                grid-auto-columns: calc(100% / 2.2 - 8px);
+            }
         }
+
         .hot-closet-section .product-card {
             border-radius: 18px;
             overflow: hidden;
@@ -432,13 +481,21 @@
             flex-direction: column;
             transition: transform 0.3s ease;
         }
-        .hot-closet-section .product-card:hover { transform: translateY(-5px); }
+
+        .hot-closet-section .product-card:hover {
+            transform: translateY(-5px);
+        }
+
         .hot-closet-section .product-media {
             height: 200px;
             border-radius: 18px 18px 0 0;
             overflow: hidden;
         }
-        .hot-closet-section .product-info { padding: 10px; }
+
+        .hot-closet-section .product-info {
+            padding: 10px;
+        }
+
         .hot-closet-section .product-title {
             font-size: 0.85rem;
             margin-bottom: 5px;
@@ -446,10 +503,12 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
         .hot-closet-section .product-price {
             font-size: 0.8rem;
             margin-bottom: 8px;
         }
+
         .hot-closet-section .btn-add-cart {
             padding: 6px 10px;
             font-size: 0.7rem;
