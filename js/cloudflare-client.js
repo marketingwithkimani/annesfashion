@@ -129,7 +129,20 @@ async function fetchCloudflareProducts({ category, search } = {}) {
         (vParsed.sizes || []).forEach(s => sizeSet.add(s));
 
         let sizes = Array.from(sizeSet).filter(Boolean);
-        const cat = (p.category || 'general').toLowerCase();
+        // Normalize category names to match page URL keys
+        const catRaw = (p.category || 'general').toLowerCase().trim();
+        const catMap = {
+            'casualwear': 'casual', 'casual wear': 'casual', 'casual-wear': 'casual', 'clothes': 'casual', 'clothing': 'casual',
+            'jackets': 'casual', 'jacket': 'casual', 'tops': 'casual', 'top': 'casual', 'trousers': 'casual', 'trouser': 'casual', 'pants': 'casual', 'jeans': 'casual',
+            'corporatewear': 'corporate', 'corporate wear': 'corporate', 'corporate-wear': 'corporate',
+            'officewear': 'corporate', 'office wear': 'corporate', 'office': 'corporate',
+            'weekendwear': 'weekend', 'weekend wear': 'weekend', 'lifestyle': 'weekend',
+            'dresswear': 'dresses', 'dress': 'dresses',
+            'beauty': 'makeup', 'beautymakeup': 'makeup', 'beauty & makeup': 'makeup', 'skincare': 'makeup',
+            'hair': 'wigs', 'hairwigs': 'wigs', 'wig': 'wigs', 'wigs & hair': 'wigs',
+            'shoe': 'shoes', 'shoes & sneakers': 'shoes', 'footwear': 'shoes', 'heels': 'shoes', 'sneakers': 'shoes'
+        };
+        const cat = catMap[catRaw] || catRaw;
         const titleLower = (p.title || '').toLowerCase();
 
         if (sizes.length === 0) {

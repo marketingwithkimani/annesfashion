@@ -1,2 +1,6 @@
 RewriteEngine On
+RewriteRule ^casualwear\.html$ casual.html [R=301,L,QSA]
+RewriteRule ^corporatewear\.html$ corporate.html [R=301,L,QSA]
+RewriteRule ^weekendwear\.html$ weekend.html [R=301,L,QSA]
+RewriteRule ^dresswear\.html$ dresses.html [R=301,L,QSA]
 RewriteRule ^backend/api/(.*)$ api/$1 [L,QSA]

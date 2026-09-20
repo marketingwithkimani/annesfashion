@@ -9,6 +9,61 @@
     let currentMaxPrice = 50000;
     let currentAvailability = 'all'; // 'all', 'in-stock', 'flash-sale', 'pre-order'
     let currentSort = 'featured';
+    let activeSubcategory = 'all';
+
+    // Subcategory definitions per main category
+    const subcategoryMap = {
+        casual: [
+            { key: 'tops', label: 'Tops & Blouses', keywords: ['top', 'blouse', 'shirt', 't-shirt', 'crop', 'cami'] },
+            { key: 'bottoms', label: 'Bottoms', keywords: ['jean', 'trouser', 'pant', 'short', 'skirt', 'legging'] },
+            { key: 'sets', label: 'Sets & Co-ords', keywords: ['set', 'co-ord', 'coord', 'matching', 'two-piece', '2-piece'] },
+            { key: 'jumpsuits', label: 'Jumpsuits', keywords: ['jumpsuit', 'playsuit', 'romper'] },
+            { key: 'sweaters', label: 'Sweaters & Hoodies', keywords: ['sweater', 'hoodie', 'sweatshirt', 'pullover', 'knit'] },
+        ],
+        corporate: [
+            { key: 'blazers', label: 'Blazers & Suits', keywords: ['blazer', 'suit', 'jacket', 'coat'] },
+            { key: 'skirts', label: 'Pencil Skirts', keywords: ['pencil', 'skirt'] },
+            { key: 'trousers', label: 'Trousers & Pants', keywords: ['trouser', 'pant', 'slacks'] },
+            { key: 'blouses', label: 'Blouses & Shirts', keywords: ['blouse', 'shirt', 'top'] },
+            { key: 'dresses', label: 'Office Dresses', keywords: ['dress', 'midi', 'sheath'] },
+        ],
+        weekend: [
+            { key: 'going-out', label: 'Going Out', keywords: ['going out', 'party', 'club', 'night'] },
+            { key: 'lounge', label: 'Lounge & Relax', keywords: ['lounge', 'relax', 'comfy', 'lazy'] },
+            { key: 'vacation', label: 'Vacation & Beach', keywords: ['vacation', 'beach', 'summer', 'resort'] },
+            { key: 'active', label: 'Active & Sports', keywords: ['gym', 'yoga', 'sport', 'active', 'workout', 'exercise'] },
+        ],
+        dresses: [
+            { key: 'midi', label: 'Midi Dresses', keywords: ['midi'] },
+            { key: 'maxi', label: 'Maxi Dresses', keywords: ['maxi', 'long'] },
+            { key: 'mini', label: 'Mini Dresses', keywords: ['mini', 'short'] },
+            { key: 'cocktail', label: 'Cocktail & Party', keywords: ['cocktail', 'party', 'gala', 'evening'] },
+            { key: 'casual', label: 'Casual Dresses', keywords: ['casual', 'day', 'floral', 'sundress'] },
+            { key: 'bodycon', label: 'Bodycon', keywords: ['bodycon', 'fitted', 'tight', 'figure-hugging'] },
+        ],
+        shoes: [
+            { key: 'heels', label: 'Heels', keywords: ['heel', 'stiletto', 'pump', 'wedge'] },
+            { key: 'flats', label: 'Flats & Sandals', keywords: ['flat', 'sandal', 'ballet', 'mule', 'flip'] },
+            { key: 'sneakers', label: 'Sneakers', keywords: ['sneaker', 'trainer', 'running', 'sport shoe'] },
+            { key: 'boots', label: 'Boots', keywords: ['boot', 'ankle boot', 'knee-high'] },
+            { key: 'loafers', label: 'Loafers & Mules', keywords: ['loafer', 'mule', 'slip-on'] },
+        ],
+        makeup: [
+            { key: 'lips', label: 'Lips', keywords: ['lip', 'lipstick', 'gloss', 'liner', 'lip kit'] },
+            { key: 'eyes', label: 'Eyes', keywords: ['mascara', 'eyeliner', 'eyeshadow', 'brow', 'lash'] },
+            { key: 'face', label: 'Face & Foundation', keywords: ['foundation', 'concealer', 'powder', 'blush', 'contour', 'highlighter'] },
+            { key: 'skincare', label: 'Skincare', keywords: ['serum', 'moisturizer', 'cream', 'toner', 'cleanser', 'sunscreen', 'spf'] },
+            { key: 'kits', label: 'Beauty Kits', keywords: ['kit', 'set', 'bundle', 'collection'] },
+        ],
+        wigs: [
+            { key: 'straight', label: 'Straight', keywords: ['straight', 'silky', 'sleek'] },
+            { key: 'curly', label: 'Curly & Wavy', keywords: ['curly', 'wavy', 'afro', 'coily'] },
+            { key: 'short', label: 'Short Styles', keywords: ['bob', 'short', 'pixie'] },
+            { key: 'long', label: 'Long Wigs', keywords: ['long', '24inch', '26inch', '28inch', '30inch'] },
+            { key: 'braids', label: 'Braids & Locs', keywords: ['braid', 'loc', 'twist', 'dread'] },
+            { key: 'coloured', label: 'Coloured Wigs', keywords: ['blonde', 'burgundy', 'ombre', 'coloured', 'colored', 'highlight'] },
+        ],
+    };
 
     function getCategoryFromUrl() {
         const currentUrl = window.location.href.toLowerCase();
@@ -43,9 +98,92 @@
         });
     }
 
+    function renderSubcategoryBar() {
+        const subcats = subcategoryMap[currentCategory];
+        if (!subcats || subcats.length === 0) return;
+
+        // Inject subcategory bar before the products grid section if not already present
+        let barEl = document.getElementById('subcategoryBar');
+        if (!barEl) {
+            barEl = document.createElement('section');
+            barEl.id = 'subcategoryBar';
+            barEl.className = 'subcategory-bar-section';
+
+            const style = document.createElement('style');
+            style.textContent = `
+                .subcategory-bar-section {
+                    padding: 16px 0 4px;
+                    background: var(--secondary-bg);
+                    border-bottom: 1px solid var(--border-light);
+                }
+                .subcategory-pills {
+                    display: flex;
+                    gap: 10px;
+                    overflow-x: auto;
+                    padding: 4px 0 10px;
+                    -webkit-overflow-scrolling: touch;
+                    scrollbar-width: none;
+                }
+                .subcategory-pills::-webkit-scrollbar { display: none; }
+                .subcat-pill {
+                    flex-shrink: 0;
+                    padding: 8px 18px;
+                    border-radius: 50px;
+                    border: 1.5px solid var(--border-light);
+                    background: var(--card-bg);
+                    color: var(--text-main);
+                    font-size: 0.82rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    white-space: nowrap;
+                }
+                .subcat-pill:hover {
+                    border-color: var(--accent-gold);
+                    color: var(--accent-gold);
+                    transform: translateY(-1px);
+                }
+                .subcat-pill.active {
+                    background: var(--accent-gold);
+                    color: #000;
+                    border-color: var(--accent-gold);
+                    box-shadow: 0 4px 12px rgba(201,169,110,0.35);
+                }
+            `;
+            document.head.appendChild(style);
+
+            // Insert before the products section
+            const prodSection = document.querySelector('.products-section');
+            if (prodSection) {
+                prodSection.parentNode.insertBefore(barEl, prodSection);
+            }
+        }
+
+        barEl.innerHTML = `
+            <div class="container">
+                <div class="subcategory-pills" id="subcategoryPills">
+                    <button class="subcat-pill active" data-subcat="all">All ${currentCategory.charAt(0).toUpperCase() + currentCategory.slice(1)}</button>
+                    ${subcats.map(s => `<button class="subcat-pill" data-subcat="${s.key}">${s.label}</button>`).join('')}
+                </div>
+            </div>
+        `;
+
+        barEl.querySelectorAll('.subcat-pill').forEach(btn => {
+            btn.addEventListener('click', () => {
+                barEl.querySelectorAll('.subcat-pill').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                activeSubcategory = btn.getAttribute('data-subcat');
+                applyFilterAndSort();
+            });
+        });
+    }
+
     function setupFilterPanelUI(sizes) {
         const panel = document.getElementById('filterPanel');
         if (!panel) return;
+
+        // Start hidden
+        panel.style.display = 'none';
 
         // Build dynamic filter groups inside panel
         let sizeFilterHtml = '';
@@ -79,7 +217,7 @@
             </div>
 
             <div class="filter-group">
-                <h4>Collection & Availability</h4>
+                <h4>Collection &amp; Availability</h4>
                 <div class="checkbox-group" id="availabilityFilters">
                     <label><input type="radio" name="availFilter" value="all" ${currentAvailability === 'all' ? 'checked' : ''}> All Collections</label>
                     <label><input type="radio" name="availFilter" value="flash-sale" ${currentAvailability === 'flash-sale' ? 'checked' : ''}> <span style="color:#e74c3c; font-weight:700;">⚡ Flash Sale Only</span></label>
@@ -174,12 +312,17 @@
                 currentMinPrice = 0;
                 currentMaxPrice = 50000;
                 currentAvailability = 'all';
+                activeSubcategory = 'all';
                 panel.querySelectorAll('.size-chip').forEach(b => b.classList.remove('active'));
                 panel.querySelectorAll('.price-preset-btn').forEach(b => b.classList.remove('active'));
                 if (minIn) minIn.value = 0;
                 if (maxIn) maxIn.value = 50000;
                 const allRadio = panel.querySelector('input[name="availFilter"][value="all"]');
                 if (allRadio) allRadio.checked = true;
+                // Reset subcategory pills
+                document.querySelectorAll('.subcat-pill').forEach(p => p.classList.remove('active'));
+                const allPill = document.querySelector('.subcat-pill[data-subcat="all"]');
+                if (allPill) allPill.classList.add('active');
                 applyFilterAndSort();
             });
         }
@@ -213,6 +356,18 @@
         if (!categoryGrid) return;
 
         let filtered = categoryProducts.filter(item => {
+            // 0. Subcategory check
+            if (activeSubcategory !== 'all') {
+                const subcats = subcategoryMap[currentCategory] || [];
+                const subcat = subcats.find(s => s.key === activeSubcategory);
+                if (subcat) {
+                    const titleLower = (item.title || '').toLowerCase();
+                    const descLower = (item.description || '').toLowerCase();
+                    const matches = subcat.keywords.some(kw => titleLower.includes(kw) || descLower.includes(kw));
+                    if (!matches) return false;
+                }
+            }
+
             // 1. Price check
             const price = parseFloat(item.raw_price || (item.price ? String(item.price).replace(/[^0-9.]/g, '') : 0)) || 0;
             if (price < currentMinPrice || price > currentMaxPrice) return false;
@@ -312,6 +467,9 @@
 
         categoryProducts = sourceData.filter(item => item.category === currentCategory);
 
+        // Render subcategory bar
+        renderSubcategoryBar();
+
         // Setup filter toggle button
         const toggleBtn = document.getElementById('filterToggle');
         if (toggleBtn) {
@@ -352,3 +510,4 @@
     window.initCategoryPage = initCategoryPage;
     window.applyCategoryFilterAndSort = applyFilterAndSort;
 })();
+

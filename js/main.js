@@ -138,6 +138,7 @@ function refreshGrids() {
 
     document.dispatchEvent(new CustomEvent('productsLoaded', { detail: productsData }));
     fetchPreorders();
+    fetchHotCloset();
 }
 
 async function fetchPreorders() {
@@ -259,7 +260,98 @@ function startPreorderAutoScroll() {
     grid.onmouseleave = startPreorderAutoScroll;
 }
 
-// 1. Define Social Videos Globally
+// Wardrobe functionality handled via js/cart.js
+
+// ========================================
+// Hot Selling Closet
+// ========================================
+async function fetchHotCloset() {
+    const section = document.getElementById('hotClosetSection');
+    const grid = document.getElementById('hotClosetGrid');
+    if (!section || !grid) return;
+
+    try {
+        // Pick up to 10 products: flash sale first, then featured, then by stock
+        const hot = [...productsData]
+            .filter(p => p.type === 'product')
+            .sort((a, b) => {
+                const scoreA = (a.is_flash_sale ? 4 : 0) + (a.is_featured ? 2 : 0) + (a.allow_preorder ? 1 : 0);
+                const scoreB = (b.is_flash_sale ? 4 : 0) + (b.is_featured ? 2 : 0) + (b.allow_preorder ? 1 : 0);
+                if (scoreB !== scoreA) return scoreB - scoreA;
+                return (b.total_stock || 0) - (a.total_stock || 0);
+            })
+            .slice(0, 10);
+
+        if (hot.length === 0) {
+            section.style.display = 'none';
+            return;
+        }
+
+        section.style.display = 'block';
+        grid.innerHTML = '';
+
+        hot.forEach(p => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'hot-closet-card-wrapper';
+            wrapper.style.cssText = 'display: flex; flex-direction: column; gap: 0; flex-shrink: 0;';
+
+            const hasRealVideo = (p.media_type === 'video' || Boolean(p.is_video)) && Boolean(p.video_url);
+            const imgSrc = hasRealVideo ? (p.poster_url || 'assets/Logo%20Black.png') : (p.image || p.image_url || 'assets/Logo%20Black.png');
+
+            wrapper.innerHTML = `
+                <div class="product-card" style="border-radius: 18px; overflow: hidden; position: relative;">
+                    <div class="product-media" style="border-radius: 18px 18px 0 0; overflow: hidden; position: relative;">
+                        <img src="${imgSrc}" alt="${p.title}" loading="lazy" onerror="this.onerror=null; this.src='assets/Logo%20Black.png';" style="width:100%;height:100%;object-fit:cover;">
+                        ${hasRealVideo ? `<span style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.7);color:#fff;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:600;display:flex;align-items:center;gap:4px;backdrop-filter:blur(4px);"><i class="fas fa-play" style="font-size:8px;color:var(--accent-gold);"></i>VIDEO</span>` : ''}
+                        ${p.is_flash_sale ? `<span style="position:absolute;top:8px;right:8px;background:#e74c3c;color:#fff;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;"><i class="fas fa-bolt"></i> SALE</span>` : ''}
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">${p.title}</h3>
+                        <p class="product-price">${p.price}</p>
+                        <button class="btn-add-cart">
+                            <i class="fas fa-shopping-bag"></i> Add to Wardrobe
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            const card = wrapper.querySelector('.product-card');
+            card.addEventListener('click', (e) => {
+                if (!e.target.closest('.btn-add-cart')) {
+                    window.location.href = `product-detail.html?id=${p.id}`;
+                }
+            });
+            card.querySelector('.btn-add-cart').addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (window.addToWardrobe) window.addToWardrobe(p.id);
+            });
+            grid.appendChild(wrapper);
+        });
+
+        startHotClosetAutoScroll();
+    } catch (error) {
+        console.error('Error loading hot closet:', error);
+    }
+}
+
+let hotClosetScrollInterval;
+function startHotClosetAutoScroll() {
+    const grid = document.getElementById('hotClosetGrid');
+    if (!grid) return;
+    if (hotClosetScrollInterval) clearInterval(hotClosetScrollInterval);
+    hotClosetScrollInterval = setInterval(() => {
+        const isAtEnd = grid.scrollLeft + grid.clientWidth >= grid.scrollWidth - 50;
+        if (isAtEnd) {
+            grid.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+            grid.scrollBy({ left: grid.clientWidth * 0.8, behavior: 'smooth' });
+        }
+    }, 4000);
+    grid.onmouseenter = () => clearInterval(hotClosetScrollInterval);
+    grid.onmouseleave = startHotClosetAutoScroll;
+}
+
+
 window.socialVideos = [
     { type: 'social', videoUrl: 'assets/instagram/videos/Lifestyle Casual.mp4', likes: '1.2K', comments: '234' },
     { type: 'social', videoUrl: 'assets/instagram/videos/Weekend Lifestyle.mp4', likes: '890', comments: '156' },

@@ -299,7 +299,9 @@ export default {
         for (const field of fields) {
           if (field in body) {
             setClauses.push(`${field} = ?`);
-            params.push((body as any)[field] ?? null);
+            let val = (body as any)[field] ?? null;
+            if (field === 'category' && val) val = normalizeCategory(val);
+            params.push(val);
           }
         }
 
@@ -356,8 +358,10 @@ export default {
         const params: any[] = [];
 
         if (category && category !== 'all') {
-          query += ` AND p.category = ?`;
-          params.push(category);
+          const aliases = getCategoryAliases(category);
+          const placeholders = aliases.map(() => '?').join(', ');
+          query += ` AND (LOWER(TRIM(p.category)) IN (${placeholders}))`;
+          params.push(...aliases.map(a => a.toLowerCase().trim()));
         }
 
         if (featured === '1' || featured === 'true') {
@@ -915,6 +919,69 @@ export default {
 // HELPER UTILITIES
 // ========================================================
 
+function normalizeCategory(raw?: string | null): string {
+  if (!raw) return 'general';
+  const clean = raw.toLowerCase().trim().replace(/[-_]/g, ' ');
+  const map: Record<string, string> = {
+    'casualwear': 'casual',
+    'casual wear': 'casual',
+    'casual-wear': 'casual',
+    'clothes': 'casual',
+    'clothing': 'casual',
+    'jackets': 'casual',
+    'jacket': 'casual',
+    'tops': 'casual',
+    'top': 'casual',
+    'trousers': 'casual',
+    'trouser': 'casual',
+    'pants': 'casual',
+    'jeans': 'casual',
+    'corporatewear': 'corporate',
+    'corporate wear': 'corporate',
+    'corporate-wear': 'corporate',
+    'officewear': 'corporate',
+    'office wear': 'corporate',
+    'office': 'corporate',
+    'weekendwear': 'weekend',
+    'weekend wear': 'weekend',
+    'lifestyle': 'weekend',
+    'dresswear': 'dresses',
+    'dress': 'dresses',
+    'dresses': 'dresses',
+    'beauty': 'makeup',
+    'beautymakeup': 'makeup',
+    'beauty & makeup': 'makeup',
+    'skincare': 'makeup',
+    'hair': 'wigs',
+    'hairwigs': 'wigs',
+    'wig': 'wigs',
+    'wigs': 'wigs',
+    'wigs & hair': 'wigs',
+    'shoe': 'shoes',
+    'shoes': 'shoes',
+    'shoes & sneakers': 'shoes',
+    'footwear': 'shoes',
+    'heels': 'shoes',
+    'sneakers': 'shoes',
+  };
+  return map[clean] || clean;
+}
+
+function getCategoryAliases(cat: string): string[] {
+  const norm = normalizeCategory(cat);
+  const aliasMap: Record<string, string[]> = {
+    'casual': ['casual', 'casualwear', 'casual wear', 'casual-wear', 'clothes', 'clothing', 'jackets', 'tops', 'trousers', 'pants', 'jeans'],
+    'corporate': ['corporate', 'corporatewear', 'corporate wear', 'corporate-wear', 'officewear', 'office wear', 'office'],
+    'weekend': ['weekend', 'weekendwear', 'weekend wear', 'lifestyle'],
+    'dresses': ['dresses', 'dress', 'dresswear'],
+    'makeup': ['makeup', 'beauty', 'beautymakeup', 'beauty & makeup', 'skincare'],
+    'wigs': ['wigs', 'wig', 'hair', 'hairwigs', 'wigs & hair'],
+    'shoes': ['shoes', 'shoe', 'shoes & sneakers', 'footwear', 'heels', 'sneakers'],
+  };
+  const list = aliasMap[norm] || [norm, cat];
+  return Array.from(new Set([norm, cat.toLowerCase().trim(), ...list]));
+}
+
 function extractExactProductSizes(p: any): string[] {
   const sizeSet = new Set<string>();
 
@@ -1078,6 +1145,7 @@ function formatProductForResponse(p: any, env: Env) {
 
   return {
     ...p,
+    category: normalizeCategory(p.category),
     raw_price: p.price,
     formatted_price: `KSh ${Number(p.price).toLocaleString()}`,
     is_flash_sale: p.is_flash_sale ? 1 : 0,
@@ -1183,7 +1251,7 @@ async function insertProductRecord(body: any, env: Env, listingId: number | null
     body.title,
     cleanStr(body.description),
     body.price,
-    body.category,
+    normalizeCategory(body.category),
     body.sku || null,
     resolvedImageUrl,
     mediaType,
