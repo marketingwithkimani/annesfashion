@@ -608,20 +608,23 @@ document.addEventListener('DOMContentLoaded', () => {
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase().trim();
+            const grid = document.getElementById('productsGrid');
             if (!query) {
-                // Re-render full grid if search cleared
-                const grid = document.getElementById('productsGrid');
+                // Re-render full grid (with social videos mixed in) if search cleared
                 if (grid && productsData.length > 0) {
                     const mixedItems = window.mixContent(productsData, window.socialVideos);
                     window.renderProductGrid(grid, mixedItems);
                 }
                 return;
             }
-            const filtered = productsData.filter(p =>
-                p.title.toLowerCase().includes(query) ||
-                (p.category && p.category.toLowerCase().includes(query))
-            );
-            const grid = document.getElementById('productsGrid');
+            // Filter, then ensure each item has type:'product' so renderProductGrid
+            // doesn't skip them (raw Supabase rows don't carry that property).
+            const filtered = productsData
+                .filter(p =>
+                    (p.title && p.title.toLowerCase().includes(query)) ||
+                    (p.category && p.category.toLowerCase().includes(query))
+                )
+                .map(p => ({ ...p, type: 'product' }));
             if (grid) {
                 window.renderProductGrid(grid, filtered);
             }
