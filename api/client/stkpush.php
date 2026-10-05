@@ -41,7 +41,7 @@ try {
     $payheroPayload = [
         'amount' => $amount,
         'phone_number' => $phone,
-        'channel_id' => 13627,
+        'channel_id' => (int)(getenv('PAYHERO_CHANNEL_ID') ?: ($_ENV['PAYHERO_CHANNEL_ID'] ?? 13627)),
         'provider' => 'm-pesa',
         'external_reference' => $orderRef
     ];
@@ -51,7 +51,7 @@ try {
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payheroPayload));
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Authorization: Basic a0tXcTZOanFqUjdPTGJGZVdESzI6dERrWkVxMkcwaHNCekVtZm5ZTmd4Sjc1Wjk4bG9PRE1lakxMdFMyQQ==',
+        'Authorization: ' . (getenv('PAYHERO_BASIC_AUTH') ?: ($_ENV['PAYHERO_BASIC_AUTH'] ?? '')),
         'Content-Type: application/json'
     ]);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);

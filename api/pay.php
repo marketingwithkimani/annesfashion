@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
@@ -12,6 +12,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['error' => 'Method not allowed']);
+    exit;
+}
+
+// Load .env file if available
+$envFile = __DIR__ . '/../.env';
+if (file_exists($envFile)) {
+    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if (empty($line) || strpos($line, '#') === 0) continue;
+        if (strpos($line, '=') !== false) {
+            list($name, $value) = explode('=', $line, 2);
+            $name = trim($name);
+            $value = trim($value);
+            if (!getenv($name)) {
+                putenv($name=$value);
+                $_ENV[$name] = $value;
+            }
+        }
+    }
+}
+
+// Get credentials securely from environment variables
+$basicAuth = getenv('PAYHERO_BASIC_AUTH') ?: ($_ENV['PAYHERO_BASIC_AUTH'] ?? null);
+$channelId = (int)(getenv('PAYHERO_CHANNEL_ID') ?: ($_ENV['PAYHERO_CHANNEL_ID'] ?? 13627));
+
+if (empty($basicAuth)) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Payment gateway authentication is not configured in environment variables']);
     exit;
 }
 
@@ -40,7 +69,7 @@ if (strpos($cleanPhone, '0') === 0) {
 $payload = [
     'amount' => (int)$amount,
     'phone_number' => $cleanPhone,
-    'channel_id' => 13627,
+    'channel_id' => $channelId,
     'provider' => 'm-pesa',
     'external_reference' => 'ORD-' . round(microtime(true) * 1000)
 ];
@@ -50,7 +79,7 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    'Authorization: Basic a0tXcTZOanFqUjdPTGJGZVdESzI6dERrWkVxMkcwaHNCekVtZm5ZTmd4Sjc1Wjk4bG9PRE1lakxMdFMyQQ==',
+    'Authorization: ' . $basicAuth,
     'Content-Type: application/json'
 ]);
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
