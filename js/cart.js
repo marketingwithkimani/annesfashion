@@ -752,7 +752,7 @@
         checkoutData.transaction_reference = 'ORD-' + Date.now();
 
         try {
-            const res = await fetch(`${API_BASE}/pay`, {
+            let res = await fetch(`${API_BASE}/pay`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -761,21 +761,39 @@
                 })
             });
 
-            const result = await res.json();
-            if (result.success || result.status === "QUEUED") {
+            // Fallback to /pay.php if /pay is not recognized
+            if (res.status === 404) {
+                res = await fetch(`${API_BASE}/pay.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phone: phone,
+                        amount: grandTotal
+                    })
+                });
+            }
+
+            let result = {};
+            try {
+                result = await res.json();
+            } catch (jsonErr) {
+                throw new Error(`Server returned HTTP ${res.status}`);
+            }
+
+            if (res.ok && (result.success || result.status === "QUEUED")) {
                 if (result.reference || result.CheckoutRequestID) {
                     checkoutData.transaction_reference = result.reference || result.CheckoutRequestID;
                 }
                 showWaitingStkScreen(phone, grandTotal, checkoutData.transaction_reference);
             } else {
-                const errMsg = result.error_message || result.error || "Payment failed, please try again.";
-                showBabeToast(`Payment failed: ${errMsg}`);
+                const errMsg = result.error_message || result.error || result.message || `Payment service returned status ${res.status}`;
+                showBabeToast(`Payment error: ${errMsg}`);
                 btn.disabled = false;
                 btn.innerHTML = `<i class="fas fa-paper-plane"></i> Pay KES ${grandTotal.toLocaleString()} with M-Pesa 📲`;
             }
         } catch (e) {
             console.error('STK push error:', e);
-            showBabeToast("Unable to reach payment service. Please try again.");
+            showBabeToast(`Unable to reach payment service (${e.message}). Please try again.`);
             btn.disabled = false;
             btn.innerHTML = `<i class="fas fa-paper-plane"></i> Pay KES ${grandTotal.toLocaleString()} with M-Pesa 📲`;
         }
