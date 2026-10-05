@@ -867,37 +867,163 @@
         const content = document.getElementById('checkoutStepContent');
         if (!content) return;
 
-        let secondsLeft = 5;
+        let attempts = 0;
+        const maxAttempts = 35; // 35 * 2.5s = ~87 seconds
 
         content.innerHTML = `
-            <div class="stk-waiting-animation" style="padding: 16px 0;">
-                <div class="stk-phone-pulse" style="width: 76px; height: 76px; font-size: 2.2rem; margin-bottom: 14px;">
+            <div class="stk-waiting-animation" style="padding: 20px 0; text-align: center;">
+                <div class="stk-phone-pulse" style="width: 76px; height: 76px; font-size: 2.2rem; margin: 0 auto 16px auto; display: flex; align-items: center; justify-content: center; background: rgba(16, 185, 129, 0.15); border-radius: 50%; color: #10b981;">
                     <i class="fas fa-mobile-screen-button"></i>
                 </div>
-                <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 6px;">
-                    Check your phone screen, babe! 📲
+                <h3 style="font-size: 1.2rem; font-weight: 700; color: #fff; margin-bottom: 8px;">
+                    M-Pesa Prompt Sent! 📲
                 </h3>
-                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">
-                    Enter your M-Pesa PIN for <strong>KES ${total.toLocaleString()}</strong> on <strong>${phone}</strong>.
+                <p style="font-size: 0.9rem; color: #d1d5db; line-height: 1.5; max-width: 320px; margin: 0 auto 12px auto;">
+                    Please check your phone (<strong>${phone}</strong>) and enter your M-Pesa PIN for <strong>KES ${Number(total).toLocaleString()}</strong>.
                 </p>
-                <div class="stk-countdown" id="stkCountdownTimer" style="margin-top: 10px; font-size: 0.95rem;">
-                    Awaiting PIN: ${secondsLeft}s...
+                <div class="stk-countdown" id="stkCountdownTimer" style="margin-top: 10px; font-size: 0.85rem; color: #9ca3af; display: inline-flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-spinner fa-spin" style="color: #10b981;"></i>
+                    <span id="stkStatusText">Awaiting PIN entry...</span>
+                </div>
+                <div style="margin-top: 24px;">
+                    <button type="button" id="btnCancelStk" style="margin: 0 auto; display: inline-block; padding: 8px 18px; font-size: 0.85rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; cursor: pointer;">
+                        Cancel Payment
+                    </button>
                 </div>
             </div>
         `;
 
         if (stkInterval) clearInterval(stkInterval);
 
-        stkInterval = setInterval(async () => {
-            secondsLeft--;
-            const timerEl = document.getElementById('stkCountdownTimer');
-            if (timerEl) timerEl.textContent = `Awaiting PIN: ${secondsLeft}s...`;
+        const cancelBtn = document.getElementById('btnCancelStk');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => {
+                if (stkInterval) clearInterval(stkInterval);
+                showBabeToast("Payment cancelled. You can retry whenever you're ready!");
+                checkoutStep = 3;
+                renderCheckoutStep();
+            });
+        }
 
-            if (secondsLeft <= 0) {
-                clearInterval(stkInterval);
-                await completeOrderSubmission(txRef);
+        async function checkTransactionStatus(reference) {
+            // 1. Try local status route
+            try {
+                const res = await fetch(`${API_BASE}/status.php?reference=${encodeURIComponent(reference)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.status) return data;
+                }
+            } catch (e) {}
+
+            // 2. Direct PayHero CORS fallback
+            try {
+                const directRes = await fetch(`https://backend.payhero.co.ke/api/v2/transaction-status?reference=${encodeURIComponent(reference)}`, {
+                    headers: {
+                        'Authorization': 'Basic a0tXcTZOanFqUjdPTGJGZVdESzI6dERrWkVxMkcwaHNCekVtZm5ZTmd4Sjc1Wjk4bG9PRE1lakxMdFMyQQ=='
+                    }
+                });
+                if (directRes.ok) {
+                    return await directRes.json();
+                }
+            } catch (err) {
+                console.warn('Status poll error:', err);
             }
-        }, 1000);
+            return null;
+        }
+
+        stkInterval = setInterval(async () => {
+            attempts++;
+            const statusTextEl = document.getElementById('stkStatusText');
+            if (statusTextEl) {
+                statusTextEl.textContent = `Awaiting PIN entry (${attempts * 2}s)...`;
+            }
+
+            const data = await checkTransactionStatus(txRef);
+            if (data && data.status) {
+                const status = String(data.status).toUpperCase();
+
+                // SUCCESS: User entered their PIN and payment was received!
+                if (status === 'SUCCESS') {
+                    clearInterval(stkInterval);
+                    const mpesaReceipt = data.third_party_reference || data.provider_reference || data.payment_reference || txRef;
+                    checkoutData.mpesa_receipt = mpesaReceipt;
+                    checkoutData.transaction_reference = mpesaReceipt;
+
+                    if (statusTextEl) {
+                        statusTextEl.innerHTML = '<span style="color:#10b981; font-weight:600;"><i class="fas fa-check-circle"></i> Payment Confirmed!</span>';
+                    }
+
+                    // ONLY NOW IS ORDER COMPLETED AND MARKED AS PAID
+                    await completeOrderSubmission(mpesaReceipt);
+                    return;
+                }
+
+                // FAILED: User cancelled prompt or entered wrong PIN
+                if (status === 'FAILED') {
+                    clearInterval(stkInterval);
+                    const content = document.getElementById('checkoutStepContent');
+                    if (content) {
+                        content.innerHTML = `
+                            <div style="text-align: center; padding: 24px 0;">
+                                <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(239, 68, 68, 0.15); color: #ef4444; font-size: 2rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                                    <i class="fas fa-times-circle"></i>
+                                </div>
+                                <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 8px;">
+                                    Payment Not Completed
+                                </h3>
+                                <p style="font-size: 0.85rem; color: #9ca3af; line-height: 1.5; max-width: 320px; margin: 0 auto 20px auto;">
+                                    The M-Pesa transaction was cancelled or not authorized. No funds were deducted.
+                                </p>
+                                <button type="button" id="btnRetryPayment" style="margin: 0 auto; display: inline-block; padding: 12px 24px; font-size: 0.95rem; font-weight: 700; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 10px; color: #fff; cursor: pointer;">
+                                    <i class="fas fa-redo"></i> Retry M-Pesa Payment
+                                </button>
+                            </div>
+                        `;
+                        const retryBtn = document.getElementById('btnRetryPayment');
+                        if (retryBtn) {
+                            retryBtn.addEventListener('click', () => {
+                                checkoutStep = 3;
+                                renderCheckoutStep();
+                            });
+                        }
+                    }
+                    showBabeToast("Payment cancelled or not completed.");
+                    return;
+                }
+            }
+
+            // TIMEOUT: No PIN entered within ~85 seconds
+            if (attempts >= maxAttempts) {
+                clearInterval(stkInterval);
+                const content = document.getElementById('checkoutStepContent');
+                if (content) {
+                    content.innerHTML = `
+                        <div style="text-align: center; padding: 24px 0;">
+                            <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(245, 158, 11, 0.15); color: #f59e0b; font-size: 2rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 8px;">
+                                Payment Request Timed Out
+                            </h3>
+                            <p style="font-size: 0.85rem; color: #9ca3af; line-height: 1.5; max-width: 320px; margin: 0 auto 20px auto;">
+                                We did not receive PIN confirmation in time. If you completed payment, please check your M-Pesa SMS.
+                            </p>
+                            <button type="button" id="btnRetryTimeout" style="margin: 0 auto; display: inline-block; padding: 12px 24px; font-size: 0.95rem; font-weight: 700; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 10px; color: #fff; cursor: pointer;">
+                                <i class="fas fa-redo"></i> Try Again
+                            </button>
+                        </div>
+                    `;
+                    const retryTimeoutBtn = document.getElementById('btnRetryTimeout');
+                    if (retryTimeoutBtn) {
+                        retryTimeoutBtn.addEventListener('click', () => {
+                            checkoutStep = 3;
+                            renderCheckoutStep();
+                        });
+                    }
+                }
+                showBabeToast("Payment prompt timed out.");
+            }
+        }, 2500);
     }
 
     async function completeOrderSubmission(txRef) {
