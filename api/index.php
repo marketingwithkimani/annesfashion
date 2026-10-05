@@ -6,8 +6,8 @@
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-// Strip leading /backend/api/ or /api/
-$path = preg_replace('#^/(backend/)?api/#', '', $uri);
+// Strip leading subdirectory prefix, /backend/api/ or /api/
+$path = preg_replace('#^/.*?api/#', '', $uri);
 $path = trim($path, '/');
 
 // If root API endpoint

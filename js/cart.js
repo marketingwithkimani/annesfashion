@@ -744,32 +744,62 @@
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Contacting Safaricom...';
 
-        const total = getCartTotal();
+        const itemsTotal = getCartTotal();
+        const deliveryFee = Number(checkoutData.delivery_fee || 0);
+        const grandTotal = itemsTotal + deliveryFee;
 
         checkoutData.mpesa_phone = phone;
-        checkoutData.transaction_reference = 'MPESA-' + Math.random().toString(36).substring(2, 9).toUpperCase();
+        checkoutData.transaction_reference = 'ORD-' + Date.now();
 
         try {
-            const res = await fetch(`${API_BASE}/client/stkpush.php`, {
+            const res = await fetch(`${API_BASE}/pay`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     phone: phone,
-                    amount: total,
-                    order_ref: 'ANNES-' + Date.now().toString().slice(-4)
+                    amount: grandTotal
                 })
             });
 
-            const data = await res.json();
-            if (data && data.success && data.data && data.data.transaction_reference) {
-                checkoutData.transaction_reference = data.data.transaction_reference;
+            const result = await res.json();
+            if (result.success || result.status === "QUEUED") {
+                if (result.reference || result.CheckoutRequestID) {
+                    checkoutData.transaction_reference = result.reference || result.CheckoutRequestID;
+                }
+                showWaitingStkScreen(phone, grandTotal, checkoutData.transaction_reference);
+            } else {
+                const errMsg = result.error_message || result.error || "Payment failed, please try again.";
+                showBabeToast(`Payment failed: ${errMsg}`);
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fas fa-paper-plane"></i> Pay KES ${grandTotal.toLocaleString()} with M-Pesa 📲`;
             }
         } catch (e) {
-            console.log('STK push API call skipped or static env fallback');
+            console.error('STK push error:', e);
+            showBabeToast("Unable to reach payment service. Please try again.");
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fas fa-paper-plane"></i> Pay KES ${grandTotal.toLocaleString()} with M-Pesa 📲`;
         }
-
-        showWaitingStkScreen(phone, total, checkoutData.transaction_reference);
     }
+
+    // Standalone helper as specified in PayHero integration guide
+    window.payWithMpesa = async function (phoneNumber, totalAmount) {
+        const endpoint = `${API_BASE}/pay`;
+        const res = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                phone: phoneNumber,
+                amount: totalAmount
+            })
+        });
+        const result = await res.json();
+        if (result.success || result.status === "QUEUED") {
+            alert("STK Push sent to your phone! Please enter your PIN.");
+        } else {
+            alert("Payment failed: " + (result.error_message || result.error || "Please try again"));
+        }
+        return result;
+    };
 
     function showWaitingStkScreen(phone, total, txRef) {
         const content = document.getElementById('checkoutStepContent');

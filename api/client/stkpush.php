@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // =====================================================
 // M-Pesa STK Push API (Kenyan Babe Experience)
 // Anne's Fashion Line
@@ -36,64 +36,37 @@ if (strpos($rawPhone, '254') === 0 && strlen($rawPhone) === 12) {
 $amount = max(1, (int)round((float)$data['amount']));
 $orderRef = !empty($data['order_ref']) ? preg_replace('/[^a-zA-Z0-9_-]/', '', $data['order_ref']) : 'ANNES-' . rand(1000, 9999);
 
-// Check if Daraja credentials exist in environment
-$consumerKey = getenv('MPESA_CONSUMER_KEY');
-$consumerSecret = getenv('MPESA_CONSUMER_SECRET');
-$passkey = getenv('MPESA_PASSKEY');
-$shortcode = getenv('MPESA_SHORTCODE');
+// Call PayHero M-Pesa STK Push
+try {
+    $payheroPayload = [
+        'amount' => $amount,
+        'phone_number' => $phone,
+        'channel_id' => 13627,
+        'provider' => 'm-pesa',
+        'external_reference' => $orderRef
+    ];
 
-$checkoutRequestId = 'ws_CO_' . date('dmYHis') . rand(1000, 9999);
+    $ch = curl_init('https://backend.payhero.co.ke/api/v2/payments');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payheroPayload));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Authorization: Basic a0tXcTZOanFqUjdPTGJGZVdESzI6dERrWkVxMkcwaHNCekVtZm5ZTmd4Sjc1Wjk4bG9PRE1lakxMdFMyQQ==',
+        'Content-Type: application/json'
+    ]);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+    $payheroRes = json_decode(curl_exec($ch), true);
+    curl_close($ch);
 
-// If live credentials present, make real Daraja call
-if ($consumerKey && $consumerSecret && $passkey && $shortcode) {
-    try {
-        $env = getenv('MPESA_ENV') === 'production' ? 'api' : 'sandbox';
-        $authUrl = "https://{$env}.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
-        
-        $ch = curl_init($authUrl);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Basic ' . base64_encode("{$consumerKey}:{$consumerSecret}")]);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $authRes = json_decode(curl_exec($ch), true);
-        curl_close($ch);
-        
-        if (!empty($authRes['access_token'])) {
-            $token = $authRes['access_token'];
-            $timestamp = date('YmdHis');
-            $password = base64_encode($shortcode . $passkey . $timestamp);
-            $stkUrl = "https://{$env}.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
-            
-            $stkPayload = [
-                'BusinessShortCode' => $shortcode,
-                'Password' => $password,
-                'Timestamp' => $timestamp,
-                'TransactionType' => 'CustomerPayBillOnline',
-                'Amount' => $amount,
-                'PartyA' => $phone,
-                'PartyB' => $shortcode,
-                'PhoneNumber' => $phone,
-                'CallBackURL' => (isset($_SERVER['HTTPS']) ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . '/api/client/mpesa_callback.php',
-                'AccountReference' => "Anne's Fashion",
-                'TransactionDesc' => "Wardrobe Order {$orderRef}"
-            ];
-            
-            $ch = curl_init($stkUrl);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $token,
-                'Content-Type: application/json'
-            ]);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($stkPayload));
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            $stkRes = json_decode(curl_exec($ch), true);
-            curl_close($ch);
-            
-            if (!empty($stkRes['CheckoutRequestID'])) {
-                $checkoutRequestId = $stkRes['CheckoutRequestID'];
-            }
-        }
-    } catch (Throwable $e) {
-        error_log("[STK Push] Daraja request error: " . $e->getMessage());
+    if (!empty($payheroRes['CheckoutRequestID'])) {
+        $checkoutRequestId = $payheroRes['CheckoutRequestID'];
     }
+    if (!empty($payheroRes['reference'])) {
+        $fakeRef = $payheroRes['reference'];
+    }
+} catch (Throwable $e) {
+    error_log("[STK Push] PayHero request error: " . $e->getMessage());
 }
 
 // Generate realistic simulated M-Pesa transaction reference (e.g. QDF8HJ4K)
