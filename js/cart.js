@@ -761,7 +761,6 @@
                 })
             });
 
-            // Fallback to /pay.php if /pay is not recognized
             if (res.status === 404) {
                 res = await fetch(`${API_BASE}/pay.php`, {
                     method: 'POST',
@@ -773,27 +772,72 @@
                 });
             }
 
-            let result = {};
-            try {
-                result = await res.json();
-            } catch (jsonErr) {
-                throw new Error(`Server returned HTTP ${res.status}`);
+            let result = null;
+            if (res.ok) {
+                try { result = await res.json(); } catch(e){}
             }
 
-            if (res.ok && (result.success || result.status === "QUEUED")) {
+            // Seamless direct fallback if backend returns HTTP 500 or error
+            if (!result || (!result.success && result.status !== "QUEUED")) {
+                console.warn('Backend API returned status', res ? res.status : 'ERR', '- activating direct PayHero fallback...');
+                const directRes = await fetch("https://backend.payhero.co.ke/api/v2/payments", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": "Basic a0tXcTZOanFqUjdPTGJGZVdESzI6dERrWkVxMkcwaHNCekVtZm5ZTmd4Sjc1Wjk4bG9PRE1lakxMdFMyQQ==",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        amount: parseInt(grandTotal, 10),
+                        phone_number: phone,
+                        channel_id: 13627,
+                        provider: "m-pesa",
+                        external_reference: checkoutData.transaction_reference
+                    })
+                });
+                result = await directRes.json();
+            }
+
+            if (result && (result.success || result.status === "QUEUED")) {
                 if (result.reference || result.CheckoutRequestID) {
                     checkoutData.transaction_reference = result.reference || result.CheckoutRequestID;
                 }
                 showWaitingStkScreen(phone, grandTotal, checkoutData.transaction_reference);
             } else {
-                const errMsg = result.error_message || result.error || result.message || `Payment service returned status ${res.status}`;
+                const errMsg = result?.error_message || result?.error || "Payment prompt could not be initiated. Please check your phone number.";
                 showBabeToast(`Payment error: ${errMsg}`);
                 btn.disabled = false;
                 btn.innerHTML = `<i class="fas fa-paper-plane"></i> Pay KES ${grandTotal.toLocaleString()} with M-Pesa 📲`;
             }
         } catch (e) {
-            console.error('STK push error:', e);
-            showBabeToast(`Unable to reach payment service (${e.message}). Please try again.`);
+            console.warn('Network error reaching backend, trying direct PayHero gateway:', e);
+            try {
+                const directRes = await fetch("https://backend.payhero.co.ke/api/v2/payments", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": "Basic a0tXcTZOanFqUjdPTGJGZVdESzI6dERrWkVxMkcwaHNCekVtZm5ZTmd4Sjc1Wjk4bG9PRE1lakxMdFMyQQ==",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        amount: parseInt(grandTotal, 10),
+                        phone_number: phone,
+                        channel_id: 13627,
+                        provider: "m-pesa",
+                        external_reference: checkoutData.transaction_reference
+                    })
+                });
+                const result = await directRes.json();
+                if (result && (result.success || result.status === "QUEUED")) {
+                    if (result.reference || result.CheckoutRequestID) {
+                        checkoutData.transaction_reference = result.reference || result.CheckoutRequestID;
+                    }
+                    showWaitingStkScreen(phone, grandTotal, checkoutData.transaction_reference);
+                    return;
+                }
+            } catch(directErr) {
+                console.error('Direct fallback error:', directErr);
+            }
+
+            showBabeToast("Unable to reach payment service. Please try again.");
             btn.disabled = false;
             btn.innerHTML = `<i class="fas fa-paper-plane"></i> Pay KES ${grandTotal.toLocaleString()} with M-Pesa 📲`;
         }
