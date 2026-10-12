@@ -23,11 +23,8 @@ async function cfFetch(path, options = {}) {
     try {
         const res = await fetch(url, {
             ...options,
-            cache: 'no-cache',
             headers: {
                 'Content-Type': 'application/json',
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache',
                 ...(options.headers || {})
             }
         });
@@ -48,13 +45,38 @@ async function fetchCloudflareProducts({ category, search } = {}) {
     if (search) params.set('search', search);
 
     const qs = params.toString() ? `?${params}` : '';
+    let products = [];
     const { ok, data } = await cfFetch(`/api/products${qs}`);
-    if (!ok || !data?.success) {
-        console.error('[CloudflareClient] Failed to fetch products:', data);
-        return [];
-    }
+    if (ok && data?.success && Array.isArray(data.products)) {
+        products = data.products;
+    } else {
+        console.warn('[CloudflareClient] Worker fetch unavailable or empty, trying fallback sources...', data);
+        // Try local backend if accessible
+        try {
+            const localRes = await fetch(`api/products/list.php${qs}`);
+            if (localRes.ok) {
+                const localData = await localRes.json();
+                if (localData?.success && Array.isArray(localData.data)) {
+                    products = localData.data;
+                }
+            }
+        } catch (e) {}
 
-    const products = data.products || [];
+        // If still empty, use localStorage cache
+        if (products.length === 0) {
+            try {
+                const cached = localStorage.getItem('annes_products_cache');
+                if (cached) {
+                    const parsed = JSON.parse(cached);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        window.productsData = parsed;
+                        return parsed;
+                    }
+                }
+            } catch (e) {}
+            return [];
+        }
+    }
 
     function extractVariantsFromText(desc) {
         const sizeSet = new Set();
@@ -216,6 +238,10 @@ async function fetchCloudflareProducts({ category, search } = {}) {
         if (timeB !== timeA) return timeB - timeA;
         return (b.id || 0) - (a.id || 0);
     });
+
+    try {
+        localStorage.setItem('annes_products_cache', JSON.stringify(formatted));
+    } catch (e) {}
 
     window.productsData = formatted;
     return formatted;

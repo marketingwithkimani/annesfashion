@@ -14,7 +14,7 @@ function corsHeaders(request: Request, env?: Env): HeadersInit {
   return {
     'Access-Control-Allow-Origin': origin,
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With, X-Admin-Token',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With, X-Admin-Token, Cache-Control, Pragma',
     'Access-Control-Max-Age': '86400',
   };
 }

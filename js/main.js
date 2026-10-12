@@ -107,6 +107,18 @@ if (heroCarousel && heroSlides.length > 0 && dotsContainer) {
 // ========================================
 
 var productsData = window.productsData || [];
+if (productsData.length === 0) {
+    try {
+        const cached = localStorage.getItem('annes_products_cache');
+        if (cached) {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                productsData = parsed;
+                window.productsData = parsed;
+            }
+        }
+    } catch (e) {}
+}
 
 async function fetchRealTimeProducts() {
     try {
@@ -134,9 +146,18 @@ function refreshGrids() {
     const grid = document.getElementById('productsGrid');
     const rail = document.getElementById('socialRail');
 
-    if (grid && productsData.length > 0) {
-        const mixedItems = window.mixContent(productsData, window.socialVideos);
-        window.renderProductGrid(grid, mixedItems);
+    if (grid) {
+        if (productsData && productsData.length > 0) {
+            const mixedItems = window.mixContent(productsData, window.socialVideos);
+            window.renderProductGrid(grid, mixedItems);
+        } else {
+            grid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--accent-gold);">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 15px; display: block;"></i>
+                    <p style="font-size: 1.05rem; letter-spacing: 0.5px; color: var(--text-muted);">Curating newest boutique pieces...</p>
+                </div>
+            `;
+        }
     }
     if (rail) {
         renderSocialRail();
@@ -561,34 +582,10 @@ window.renderProductGrid = function (container, items) {
     });
 };
 
-// Declare socialRail before the function definition uses it at call time
-const socialRail = document.getElementById('socialRail');
-
-// Initial fetch & Realtime Listener
-fetchRealTimeProducts().then(() => {
-    if (typeof subscribeToSupabaseRealtime === 'function') {
-        subscribeToSupabaseRealtime(
-            () => refreshGrids(),
-            () => fetchPreorders()
-        );
-    }
-});
-
-// Periodic background polling (every 25s) so new uploads automatically reflect on the homepage
-setInterval(() => {
-    fetchRealTimeProducts();
-}, 25000);
-
-// Auto-refresh as soon as the user returns to this browser tab
-document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-        fetchRealTimeProducts();
-    }
-});
-
 function renderSocialRail() {
-    if (!socialRail) return;
-    socialRail.innerHTML = '';
+    const rail = document.getElementById('socialRail');
+    if (!rail) return;
+    rail.innerHTML = '';
 
     const videoProducts = (productsData || []).filter(p => (p.media_type === 'video' || Boolean(p.is_video)) && Boolean(p.video_url));
     const railItems = [];
@@ -632,9 +629,34 @@ function renderSocialRail() {
                 window.location.href = `product-detail.html?id=${item.id}`;
             });
         }
-        socialRail.appendChild(card);
+        rail.appendChild(card);
     });
 }
+
+// Initial render from existing/cached products (all functions are now defined!)
+refreshGrids();
+
+// Initial fetch & Realtime Listener
+fetchRealTimeProducts().then(() => {
+    if (typeof subscribeToSupabaseRealtime === 'function') {
+        subscribeToSupabaseRealtime(
+            () => refreshGrids(),
+            () => fetchPreorders()
+        );
+    }
+});
+
+// Periodic background polling (every 25s) so new uploads automatically reflect on the homepage
+setInterval(() => {
+    fetchRealTimeProducts();
+}, 25000);
+
+// Auto-refresh as soon as the user returns to this browser tab
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+        fetchRealTimeProducts();
+    }
+});
 
 // Wardrobe functionality handled via js/cart.js
 

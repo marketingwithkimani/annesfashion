@@ -257,16 +257,21 @@ video {
 .side-nav {
     position: fixed;
     top: 0;
-    left: -300px;
-    width: 300px;
+    left: -320px;
+    width: 320px;
+    max-width: 85vw;
     height: 100vh;
+    height: 100dvh;
     background: var(--primary-bg);
     z-index: 1001;
-    transition: left 0.4s ease-in-out;
-    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.1);
-    padding: 30px;
+    transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.25);
+    padding: 24px 20px;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
 }
 
 .side-nav.open {
@@ -277,36 +282,92 @@ video {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 40px;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(201, 169, 110, 0.2);
+    flex-shrink: 0;
 }
 
 .close-nav {
     background: none;
     border: none;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     color: var(--text-main);
     cursor: pointer;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: color 0.2s, background 0.2s;
+}
+
+.close-nav:hover {
+    color: var(--accent-gold);
+    background: var(--secondary-bg);
+}
+
+.nav-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+    flex: 1 1 auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding-bottom: 30px;
+}
+
+/* Custom smooth scrollbar for side menu */
+.side-nav::-webkit-scrollbar,
+.nav-menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.side-nav::-webkit-scrollbar-track,
+.nav-menu::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.side-nav::-webkit-scrollbar-thumb,
+.nav-menu::-webkit-scrollbar-thumb {
+    background: rgba(201, 169, 110, 0.35);
+    border-radius: 10px;
+}
+
+.side-nav::-webkit-scrollbar-thumb:hover,
+.nav-menu::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-gold);
 }
 
 .nav-menu li {
-    margin-bottom: 20px;
+    margin-bottom: 6px;
 }
 
 .nav-menu a {
-    font-size: 1.1rem;
+    font-size: 0.98rem;
     font-weight: 500;
     display: flex;
     align-items: center;
-    gap: 15px;
-    padding: 10px;
+    gap: 14px;
+    padding: 10px 14px;
     border-radius: 8px;
-    transition: background 0.2s;
+    color: var(--text-main);
+    transition: all 0.2s ease;
+}
+
+.nav-menu a i {
+    width: 20px;
+    text-align: center;
+    font-size: 1rem;
+    color: var(--accent-gold);
 }
 
 .nav-menu a:hover,
 .nav-menu a.active {
     background: var(--secondary-bg);
     color: var(--accent-gold);
+    transform: translateX(4px);
 }
 
 /* Hero Section: Split Layout (CRITICAL REQUIREMENT) */
