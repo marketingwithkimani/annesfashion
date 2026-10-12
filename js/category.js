@@ -11,63 +11,144 @@
     let currentSort = 'featured';
     let activeSubcategory = 'all';
 
-    // Subcategory definitions per main category
+    // Subcategory definitions per main category (synced with Android App)
     const subcategoryMap = {
-        casual: [
-            { key: 'tops', label: 'Tops & Blouses', keywords: ['top', 'blouse', 'shirt', 't-shirt', 'crop', 'cami'] },
-            { key: 'bottoms', label: 'Bottoms', keywords: ['jean', 'trouser', 'pant', 'short', 'skirt', 'legging'] },
-            { key: 'sets', label: 'Sets & Co-ords', keywords: ['set', 'co-ord', 'coord', 'matching', 'two-piece', '2-piece'] },
-            { key: 'jumpsuits', label: 'Jumpsuits', keywords: ['jumpsuit', 'playsuit', 'romper'] },
-            { key: 'sweaters', label: 'Sweaters & Hoodies', keywords: ['sweater', 'hoodie', 'sweatshirt', 'pullover', 'knit'] },
-        ],
-        corporate: [
-            { key: 'blazers', label: 'Blazers & Suits', keywords: ['blazer', 'suit', 'jacket', 'coat'] },
-            { key: 'skirts', label: 'Pencil Skirts', keywords: ['pencil', 'skirt'] },
-            { key: 'trousers', label: 'Trousers & Pants', keywords: ['trouser', 'pant', 'slacks'] },
-            { key: 'blouses', label: 'Blouses & Shirts', keywords: ['blouse', 'shirt', 'top'] },
-            { key: 'dresses', label: 'Office Dresses', keywords: ['dress', 'midi', 'sheath'] },
-        ],
-        weekend: [
-            { key: 'going-out', label: 'Going Out', keywords: ['going out', 'party', 'club', 'night'] },
-            { key: 'lounge', label: 'Lounge & Relax', keywords: ['lounge', 'relax', 'comfy', 'lazy'] },
-            { key: 'vacation', label: 'Vacation & Beach', keywords: ['vacation', 'beach', 'summer', 'resort'] },
-            { key: 'active', label: 'Active & Sports', keywords: ['gym', 'yoga', 'sport', 'active', 'workout', 'exercise'] },
-        ],
         dresses: [
+            { key: 'skater', label: 'Skater Dress', keywords: ['skater', 'flare', 'a-line', 'flared'] },
+            { key: 'bodycon', label: 'Body Con', keywords: ['body con', 'bodycon', 'fitted', 'tight', 'figure-hugging'] },
+            { key: 'party', label: 'Party Dresses', keywords: ['party', 'club', 'celebration', 'night out'] },
+            { key: 'maxi', label: 'Maxi Dresses', keywords: ['maxi', 'long', 'floor length'] },
+            { key: 'event', label: 'Event Dresses', keywords: ['event', 'gala', 'occasion', 'ceremony', 'formal'] },
+            { key: 'elegant', label: 'Elegant Dresses', keywords: ['elegant', 'royal', 'classy', 'sophisticated', 'silk'] },
+            { key: 'kipenzi', label: 'Kipenzi Dresses', keywords: ['kipenzi', 'signature', 'favorite', 'bestseller'] },
+            { key: 'dresstop', label: 'Dress Top', keywords: ['dress top', 'shirt dress', 'tunic'] },
+            { key: 'floral', label: 'Floral Dresses', keywords: ['floral', 'flower', 'print', 'bloom'] },
+            { key: 'datenight', label: 'Date Night', keywords: ['date night', 'romantic', 'dinner', 'datenight'] },
             { key: 'midi', label: 'Midi Dresses', keywords: ['midi'] },
-            { key: 'maxi', label: 'Maxi Dresses', keywords: ['maxi', 'long'] },
             { key: 'mini', label: 'Mini Dresses', keywords: ['mini', 'short'] },
-            { key: 'cocktail', label: 'Cocktail & Party', keywords: ['cocktail', 'party', 'gala', 'evening'] },
-            { key: 'casual', label: 'Casual Dresses', keywords: ['casual', 'day', 'floral', 'sundress'] },
-            { key: 'bodycon', label: 'Bodycon', keywords: ['bodycon', 'fitted', 'tight', 'figure-hugging'] },
         ],
-        shoes: [
-            { key: 'heels', label: 'Heels', keywords: ['heel', 'stiletto', 'pump', 'wedge'] },
-            { key: 'flats', label: 'Flats & Sandals', keywords: ['flat', 'sandal', 'ballet', 'mule', 'flip'] },
-            { key: 'sneakers', label: 'Sneakers', keywords: ['sneaker', 'trainer', 'running', 'sport shoe'] },
-            { key: 'boots', label: 'Boots', keywords: ['boot', 'ankle boot', 'knee-high'] },
-            { key: 'loafers', label: 'Loafers & Mules', keywords: ['loafer', 'mule', 'slip-on'] },
+        sweaters: [
+            { key: 'longsweaters', label: 'Long Sweaters', keywords: ['long sweater', 'cardigan', 'duster', 'knit cardigan'] },
+            { key: 'kimono', label: 'Kimono/Miyaki', keywords: ['kimono', 'miyaki', 'cape', 'wrap'] },
+            { key: 'trench', label: 'Trench Coats', keywords: ['trench', 'trench coat', 'overcoat', 'coat'] },
+            { key: 'miyaki', label: 'Miyaki Pleated', keywords: ['miyaki', 'issey', 'pleated', 'plisse'] },
+            { key: 'denimjackets', label: 'Denim Jackets', keywords: ['denim jacket', 'jean jacket', 'denim'] },
+            { key: 'jackets', label: 'Jackets & Outerwear', keywords: ['jacket', 'bomber', 'biker', 'outerwear'] },
+            { key: 'blazers', label: 'Blazers', keywords: ['blazer', 'suit jacket', 'tailored jacket'] },
         ],
-        makeup: [
+        trousers: [
+            { key: 'types', label: 'Trousers & Slacks', keywords: ['trouser', 'slacks', 'tailored', 'work pant', 'pant'] },
+            { key: 'leggings', label: 'Leggings', keywords: ['legging', 'tights', 'stretchy'] },
+            { key: 'mummyjeans', label: 'Mummy Jeans', keywords: ['mom jean', 'mummy jean', 'mom fit', 'high rise jean'] },
+            { key: 'skinnyjeans', label: 'Skinny Jeans', keywords: ['skinny', 'skinny jean', 'slim fit', 'slim jean'] },
+            { key: 'palazzos', label: 'Palazzos & Wide Leg', keywords: ['palazzo', 'wide leg', 'flare pant', 'wide-leg'] },
+            { key: 'bblbiker', label: 'BBL Biker', keywords: ['biker', 'bbl', 'biker short', 'cycling short'] },
+            { key: 'jeans', label: 'Jeans & Denim', keywords: ['jean', 'denim', 'denim pants'] },
+            { key: 'shorts', label: 'Shorts', keywords: ['short', 'hot pants', 'denim short'] },
+        ],
+        jumpsuits: [
+            { key: 'twopiece', label: 'Jumpsuits / 2 Piece', keywords: ['jumpsuit', '2 piece', 'two-piece', '2-piece', 'playsuit', 'romper'] },
+            { key: 'sets', label: 'Matching Sets', keywords: ['matching set', 'co-ord', 'coord', 'set', 'matching'] },
+            { key: 'loungewear', label: 'Loungewear', keywords: ['lounge', 'loungewear', 'comfy', 'sleepwear', 'pajama', 'tracksuit'] },
+            { key: 'vacation', label: 'Vacation & Resort', keywords: ['vacation', 'resort', 'beach', 'summer', 'holiday'] },
+        ],
+        accessories: [
+            { key: 'fedoras', label: 'Fedoras & Hats', keywords: ['fedora', 'hat', 'cap', 'beret'] },
+            { key: 'chains', label: 'Chains & Necklaces', keywords: ['chain', 'necklace', 'choker', 'pendant'] },
+            { key: 'belts', label: 'Belts & Corsets', keywords: ['belt', 'corset belt', 'waist belt', 'buckle'] },
+            { key: 'sunglasses', label: 'Sun Glasses & Shades', keywords: ['sunglass', 'sun glasses', 'shades', 'eyewear', 'glass'] },
+            { key: 'brooch', label: 'Brooches & Pins', keywords: ['brooch', 'pin', 'badge'] },
+            { key: 'watches', label: 'Watches & Rings', keywords: ['watch', 'ring', 'bracelet', 'bangle', 'jewelry'] },
+            { key: 'socks', label: 'Socks & Stockings', keywords: ['sock', 'ankle sock', 'crew sock'] },
+            { key: 'gloves', label: 'Gloves', keywords: ['glove', 'mitt', 'handwear'] },
+        ],
+        innerwear: [
+            { key: 'innerwear', label: 'Inner Wear & Shapewear', keywords: ['innerwear', 'inner wear', 'shapewear', 'bodysuit', 'camisole', 'slip'] },
+            { key: 'bra', label: 'Bras & Bralettes', keywords: ['bra', 'bralette', 'push up', 'sports bra'] },
+            { key: 'stockings', label: 'Stockings & Tights', keywords: ['stocking', 'fishnet', 'pantyhose', 'thigh high', 'tights'] },
+            { key: 'boobtapes', label: 'Boob Tapes & Covers', keywords: ['boob tape', 'nipple cover', 'breast tape', 'lift tape', 'tape'] },
+        ],
+        beauty: [
+            { key: 'collagen', label: 'Collagen Powder', keywords: ['collagen', 'collagen powder', 'glow'] },
+            { key: 'probiotics', label: 'Women Probiotics', keywords: ['probiotic', 'women probiotic', 'gut health', 'probiotics'] },
+            { key: 'coffee', label: 'Slim Green Coffee', keywords: ['green coffee', 'slim coffee', 'slimming', 'coffee'] },
+            { key: 'gummies', label: 'Beauty Gummies', keywords: ['gummy', 'gummies', 'hair gummies', 'skin gummies'] },
+            { key: 'bodywash', label: 'Body Wash US', keywords: ['body wash', 'shower gel', 'body wash us'] },
+            { key: 'bodyoil', label: 'Body Oil & Lotion', keywords: ['body oil', 'body lotion', 'moisturizer', 'lotion', 'butter'] },
+            { key: 'bodymist', label: 'Body Mist & Sprays', keywords: ['body mist', 'mist', 'fragrance mist', 'body spray'] },
+            { key: 'sunscreen', label: 'Sunscreen & SPF', keywords: ['sunscreen', 'spf', 'sunblock', 'sun screen'] },
+            { key: 'turmeric', label: 'Asantee/Turmeric Soap', keywords: ['asantee', 'turmeric', 'face soap', 'turmeric soap', 'herbal soap'] },
+            { key: 'contactlens', label: 'Contact Lenses', keywords: ['contact lens', 'contacts', 'lens', 'eye lens'] },
+            { key: 'perfumes', label: 'Perfumes & Scents', keywords: ['perfume', 'cologne', 'eau de parfum', 'fragrance', 'scent'] },
             { key: 'lips', label: 'Lips', keywords: ['lip', 'lipstick', 'gloss', 'liner', 'lip kit'] },
             { key: 'eyes', label: 'Eyes', keywords: ['mascara', 'eyeliner', 'eyeshadow', 'brow', 'lash'] },
             { key: 'face', label: 'Face & Foundation', keywords: ['foundation', 'concealer', 'powder', 'blush', 'contour', 'highlighter'] },
-            { key: 'skincare', label: 'Skincare', keywords: ['serum', 'moisturizer', 'cream', 'toner', 'cleanser', 'sunscreen', 'spf'] },
+            { key: 'skincare', label: 'Skincare', keywords: ['serum', 'moisturizer', 'cream', 'toner', 'cleanser'] },
+        ],
+        makeup: [
+            { key: 'collagen', label: 'Collagen Powder', keywords: ['collagen', 'collagen powder', 'glow'] },
+            { key: 'probiotics', label: 'Women Probiotics', keywords: ['probiotic', 'women probiotic', 'gut health'] },
+            { key: 'coffee', label: 'Slim Green Coffee', keywords: ['green coffee', 'slim coffee', 'slimming'] },
+            { key: 'gummies', label: 'Beauty Gummies', keywords: ['gummy', 'gummies', 'hair gummies'] },
+            { key: 'bodywash', label: 'Body Wash US', keywords: ['body wash', 'shower gel'] },
+            { key: 'bodyoil', label: 'Body Oil & Lotion', keywords: ['body oil', 'body lotion', 'moisturizer', 'lotion'] },
+            { key: 'bodymist', label: 'Body Mist', keywords: ['body mist', 'mist', 'fragrance mist'] },
+            { key: 'sunscreen', label: 'Sunscreen & SPF', keywords: ['sunscreen', 'spf', 'sunblock'] },
+            { key: 'turmeric', label: 'Turmeric Face Care', keywords: ['asantee', 'turmeric', 'face soap'] },
+            { key: 'contactlens', label: 'Contact Lenses', keywords: ['contact lens', 'contacts', 'lens'] },
+            { key: 'perfumes', label: 'Perfumes', keywords: ['perfume', 'cologne', 'scent'] },
+            { key: 'lips', label: 'Lips', keywords: ['lip', 'lipstick', 'gloss', 'liner'] },
+            { key: 'eyes', label: 'Eyes', keywords: ['mascara', 'eyeliner', 'eyeshadow', 'brow', 'lash'] },
+            { key: 'face', label: 'Face & Foundation', keywords: ['foundation', 'concealer', 'powder', 'blush'] },
+            { key: 'skincare', label: 'Skincare', keywords: ['serum', 'moisturizer', 'cream', 'toner', 'cleanser'] },
             { key: 'kits', label: 'Beauty Kits', keywords: ['kit', 'set', 'bundle', 'collection'] },
         ],
+        casual: [
+            { key: 'tops', label: 'Tops & Blouses', keywords: ['top', 'blouse', 'shirt', 'crop', 'cami'] },
+            { key: 'tshirts', label: 'T-Shirts & Tees', keywords: ['t-shirt', 'tshirt', 'tee', 'graphic'] },
+            { key: 'trousers', label: 'Trousers & Pants', keywords: ['trouser', 'pant', 'jean', 'bottom', 'short'] },
+            { key: 'bottoms', label: 'Bottoms', keywords: ['jean', 'trouser', 'pant', 'short', 'skirt', 'legging'] },
+            { key: 'sweaters', label: 'Sweaters & Hoodies', keywords: ['sweater', 'hoodie', 'sweatshirt', 'pullover', 'knit'] },
+        ],
+        corporate: [
+            { key: 'suits', label: 'Suits & Sets', keywords: ['suit', 'pant suit', 'skirt suit', 'tuxedo'] },
+            { key: 'blazers', label: 'Blazers', keywords: ['blazer', 'jacket', 'coat'] },
+            { key: 'pencildresses', label: 'Pencil & Office Dresses', keywords: ['pencil', 'pencil dress', 'sheath', 'office dress', 'midi'] },
+            { key: 'blouses', label: 'Blouses & Shirts', keywords: ['blouse', 'shirt', 'top', 'formal'] },
+            { key: 'trousers', label: 'Corporate Trousers', keywords: ['trouser', 'pant', 'slacks', 'formal pant'] },
+            { key: 'skirts', label: 'Pencil Skirts', keywords: ['pencil skirt', 'skirt'] },
+        ],
+        shoes: [
+            { key: 'heels', label: 'Heels & Pumps', keywords: ['heel', 'stiletto', 'pump', 'wedge', 'block heel'] },
+            { key: 'sneakers', label: 'Sneakers & Kicks', keywords: ['sneaker', 'trainer', 'running', 'sport shoe', 'kicks'] },
+            { key: 'flats', label: 'Flats & Loafers', keywords: ['flat', 'loafer', 'mule', 'ballet', 'slip-on'] },
+            { key: 'boots', label: 'Boots', keywords: ['boot', 'ankle boot', 'knee-high', 'combat'] },
+            { key: 'sandals', label: 'Sandals & Slides', keywords: ['sandal', 'slide', 'flip', 'mule'] },
+        ],
         wigs: [
-            { key: 'straight', label: 'Straight', keywords: ['straight', 'silky', 'sleek'] },
+            { key: 'humanhair', label: 'Human Hair Wigs', keywords: ['human hair', 'virgin hair', 'raw hair', 'bone straight', 'human'] },
+            { key: 'braided', label: 'Braided Wigs & Locs', keywords: ['braid', 'braided', 'loc', 'twist', 'cornrow', 'knotless'] },
+            { key: 'bundles', label: 'Bundles & Closures', keywords: ['bundle', 'closure', 'frontal', 'weave', 'weft'] },
+            { key: 'hairaccessories', label: 'Hair Accessories', keywords: ['hair accessory', 'clip', 'headband', 'bonnet', 'wig cap', 'melt band'] },
+            { key: 'straight', label: 'Straight Styles', keywords: ['straight', 'silky', 'sleek'] },
             { key: 'curly', label: 'Curly & Wavy', keywords: ['curly', 'wavy', 'afro', 'coily'] },
-            { key: 'short', label: 'Short Styles', keywords: ['bob', 'short', 'pixie'] },
-            { key: 'long', label: 'Long Wigs', keywords: ['long', '24inch', '26inch', '28inch', '30inch'] },
-            { key: 'braids', label: 'Braids & Locs', keywords: ['braid', 'loc', 'twist', 'dread'] },
+            { key: 'short', label: 'Short Styles & Bobs', keywords: ['bob', 'short', 'pixie'] },
             { key: 'coloured', label: 'Coloured Wigs', keywords: ['blonde', 'burgundy', 'ombre', 'coloured', 'colored', 'highlight'] },
+        ],
+        weekend: [
+            { key: 'going-out', label: 'Going Out & Club', keywords: ['going out', 'party', 'club', 'night'] },
+            { key: 'lounge', label: 'Lounge & Relax', keywords: ['lounge', 'relax', 'comfy', 'lazy'] },
+            { key: 'vacation', label: 'Vacation & Beach', keywords: ['vacation', 'beach', 'summer', 'resort'] },
+            { key: 'active', label: 'Active & Sports', keywords: ['gym', 'yoga', 'sport', 'active', 'workout', 'exercise'] },
         ],
     };
 
     function getCategoryFromUrl() {
         const currentUrl = window.location.href.toLowerCase();
-        const categories = ['dresses', 'casual', 'corporate', 'shoes', 'wigs', 'makeup', 'weekend', 'beauty'];
+        const categories = [
+            'dresses', 'sweaters', 'trousers', 'jumpsuits', 'accessories', 'innerwear',
+            'casual', 'corporate', 'shoes', 'wigs', 'makeup', 'weekend', 'beauty'
+        ];
         for (const cat of categories) {
             if (currentUrl.includes(cat)) {
                 return cat;
@@ -361,10 +442,16 @@
                 const subcats = subcategoryMap[currentCategory] || [];
                 const subcat = subcats.find(s => s.key === activeSubcategory);
                 if (subcat) {
+                    const itemSub = (item.subcategory || '').toLowerCase().trim();
+                    const subKey = subcat.key.toLowerCase().trim();
+                    const subLabel = subcat.label.toLowerCase().trim();
+                    const directMatch = itemSub && (itemSub === subKey || itemSub === subLabel || itemSub.includes(subKey) || subLabel.includes(itemSub));
+
                     const titleLower = (item.title || '').toLowerCase();
                     const descLower = (item.description || '').toLowerCase();
-                    const matches = subcat.keywords.some(kw => titleLower.includes(kw) || descLower.includes(kw));
-                    if (!matches) return false;
+                    const keywordMatch = subcat.keywords && subcat.keywords.some(kw => titleLower.includes(kw) || descLower.includes(kw));
+
+                    if (!directMatch && !keywordMatch) return false;
                 }
             }
 
@@ -465,7 +552,22 @@
             ? window.productsData
             : (typeof productsData !== 'undefined' ? productsData : []);
 
-        categoryProducts = sourceData.filter(item => item.category === currentCategory);
+        categoryProducts = sourceData.filter(item => {
+            const itemCat = (item.category || '').toLowerCase().trim();
+            if (itemCat === currentCategory) return true;
+            if (currentCategory === 'beauty' && (itemCat === 'makeup' || itemCat.includes('beauty') || itemCat.includes('wellness'))) return true;
+            if (currentCategory === 'makeup' && (itemCat === 'beauty' || itemCat.includes('makeup') || itemCat.includes('wellness'))) return true;
+            if (currentCategory === 'sweaters' && (itemCat.includes('sweater') || itemCat.includes('outer') || itemCat.includes('jacket') || itemCat.includes('blazer') || itemCat.includes('kimono') || itemCat.includes('trench'))) return true;
+            if (currentCategory === 'trousers' && (itemCat.includes('trouser') || itemCat.includes('bottom') || itemCat.includes('jean') || itemCat.includes('pant') || itemCat.includes('palazzo') || itemCat.includes('short') || itemCat.includes('legging'))) return true;
+            if (currentCategory === 'jumpsuits' && (itemCat.includes('jumpsuit') || itemCat.includes('set') || itemCat.includes('coord') || itemCat.includes('lounge'))) return true;
+            if (currentCategory === 'accessories' && (itemCat.includes('access') || itemCat.includes('belt') || itemCat.includes('glass') || itemCat.includes('watch') || itemCat.includes('ring') || itemCat.includes('brooch') || itemCat.includes('fedora') || itemCat.includes('hat'))) return true;
+            if (currentCategory === 'innerwear' && (itemCat.includes('inner') || itemCat.includes('bra') || itemCat.includes('stocking') || itemCat.includes('tape'))) return true;
+            if (currentCategory === 'casual' && (itemCat === 'casualwear' || itemCat === 'casual wear' || itemCat === 'clothes' || itemCat === 'tops' || itemCat === 't-shirt')) return true;
+            if (currentCategory === 'corporate' && (itemCat === 'corporatewear' || itemCat === 'corporate wear' || itemCat === 'suits' || itemCat === 'office')) return true;
+            if (currentCategory === 'shoes' && (itemCat.includes('shoe') || itemCat.includes('heel') || itemCat.includes('sneak') || itemCat.includes('boot') || itemCat.includes('sandal') || itemCat.includes('flat') || itemCat.includes('loafer'))) return true;
+            if (currentCategory === 'wigs' && (itemCat.includes('wig') || itemCat.includes('hair'))) return true;
+            return false;
+        });
 
         // Render subcategory bar
         renderSubcategoryBar();

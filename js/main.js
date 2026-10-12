@@ -114,11 +114,17 @@ async function fetchRealTimeProducts() {
             const data = await fetchSupabaseProducts();
             if (data && data.length > 0) {
                 productsData = data;
+                productsData.sort((a, b) => {
+                    const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
+                    const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
+                    if (timeB !== timeA) return timeB - timeA;
+                    return (b.id || 0) - (a.id || 0);
+                });
                 window.productsData = productsData;
             }
         }
     } catch (error) {
-        console.error('Error fetching real-time products from Supabase:', error);
+        console.error('Error fetching real-time products from Cloudflare/Supabase:', error);
     } finally {
         refreshGrids();
     }
@@ -135,10 +141,30 @@ function refreshGrids() {
     if (rail) {
         renderSocialRail();
     }
+    updateHeroVerticalVideos();
 
     document.dispatchEvent(new CustomEvent('productsLoaded', { detail: productsData }));
     fetchPreorders();
     fetchHotCloset();
+}
+
+function updateHeroVerticalVideos() {
+    const verticalCarousel = document.getElementById('verticalCarousel');
+    if (!verticalCarousel) return;
+    const videoProducts = (productsData || []).filter(p => (p.media_type === 'video' || Boolean(p.is_video)) && Boolean(p.video_url));
+    if (videoProducts.length === 0) return;
+
+    const topVideos = videoProducts.slice(0, 2);
+    verticalCarousel.innerHTML = topVideos.map(vp => `
+        <div class="vertical-slide" style="cursor: pointer;" onclick="window.location.href='product-detail.html?id=${vp.id}'">
+            <video autoplay muted loop playsinline>
+                <source src="${vp.video_url}" type="video/mp4">
+            </video>
+            <div class="video-label">
+                <i class="fas fa-play-circle"></i> ${vp.title}
+            </div>
+        </div>
+    `).join('');
 }
 
 async function fetchPreorders() {
@@ -362,20 +388,38 @@ window.socialVideos = [
 ];
 
 // 2. Global Mixing Function (2 Products : 1 Video)
+window.HOMEPAGE_VIDEO_CAP = 6; // Maximum video players displayed on the homepage feed
+
+// 2. Global Mixing Function (New Uploads First + Video Cap management)
 window.mixContent = function (products, videos) {
-    const productsOnly = products.filter(p => p.type === 'product');
+    const productsOnly = (products || []).filter(p => p.type === 'product');
+    // Ensure newest uploads come first
+    productsOnly.sort((a, b) => {
+        const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
+        if (timeB !== timeA) return timeB - timeA;
+        return (b.id || 0) - (a.id || 0);
+    });
+
     let mixedContent = [];
-    let videoIndex = 0;
+    let currentVideoCount = 0;
 
     for (let i = 0; i < productsOnly.length; i++) {
-        mixedContent.push(productsOnly[i]);
+        const p = Object.assign({}, productsOnly[i]);
+        const isRealVideo = (p.media_type === 'video' || Boolean(p.is_video)) && Boolean(p.video_url);
 
-        // Insert video after every 2nd product (index 1, 3, 5...)
-        if ((i + 1) % 2 === 0) {
-            const video = videos[videoIndex % videos.length];
-            mixedContent.push(video);
-            videoIndex++;
+        if (isRealVideo) {
+            if (currentVideoCount < window.HOMEPAGE_VIDEO_CAP) {
+                currentVideoCount++;
+                p.display_as_image = false; // Active video product player
+            } else {
+                // When cap is reached, older videos remove their video player
+                // and display cleanly as high-res images so old videos remove themselves!
+                p.display_as_image = true;
+            }
         }
+
+        mixedContent.push(p);
     }
     return mixedContent;
 };
@@ -420,13 +464,13 @@ window.renderProductGrid = function (container, items) {
             }
 
             const hasRealVideo = (item.media_type === 'video' || Boolean(item.is_video)) && Boolean(item.video_url);
-            const isVideo = hasRealVideo;
+            const isVideo = hasRealVideo && !item.display_as_image;
             let mediaHtml = '';
 
             if (isVideo) {
                 const posterSrc = item.poster_url || (item.image && !item.image.includes('.mp4') ? item.image : 'assets/Logo%20Black.png');
                 const videoSrc = item.video_url;
-                
+
                 mediaHtml = `
                     <div class="product-media video-container" style="position: relative; overflow: hidden; width: 100%; height: 100%;">
                         <img src="${posterSrc}" alt="${item.title}" class="product-poster" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; display: block;" onerror="this.onerror=null; this.src='assets/Logo%20Black.png';">
@@ -530,12 +574,48 @@ fetchRealTimeProducts().then(() => {
     }
 });
 
+// Periodic background polling (every 25s) so new uploads automatically reflect on the homepage
+setInterval(() => {
+    fetchRealTimeProducts();
+}, 25000);
+
+// Auto-refresh as soon as the user returns to this browser tab
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+        fetchRealTimeProducts();
+    }
+});
+
 function renderSocialRail() {
     if (!socialRail) return;
     socialRail.innerHTML = '';
-    window.socialVideos.slice(0, 8).forEach(item => {
+
+    const videoProducts = (productsData || []).filter(p => (p.media_type === 'video' || Boolean(p.is_video)) && Boolean(p.video_url));
+    const railItems = [];
+
+    // Prioritize newest uploaded real product videos up to 6
+    videoProducts.slice(0, 6).forEach(vp => {
+        railItems.push({
+            type: 'product_video',
+            id: vp.id,
+            title: vp.title,
+            videoUrl: vp.video_url,
+            posterUrl: vp.poster_url || vp.image,
+            likes: '1.8K',
+            comments: '240'
+        });
+    });
+
+    // Only show fallback social videos if NO real product videos have been uploaded yet
+    // As soon as real videos are uploaded, old placeholder videos remove themselves!
+    if (railItems.length === 0 && window.socialVideos) {
+        window.socialVideos.slice(0, 6).forEach(sv => railItems.push(sv));
+    }
+
+    railItems.forEach(item => {
         const card = document.createElement('div');
         card.className = 'social-video-card';
+        card.style.cursor = item.id ? 'pointer' : 'default';
         card.innerHTML = `
             <video autoplay muted loop playsinline>
                 <source src="${item.videoUrl}" type="video/mp4">
@@ -547,10 +627,14 @@ function renderSocialRail() {
                 </div>
             </div>
         `;
+        if (item.id) {
+            card.addEventListener('click', () => {
+                window.location.href = `product-detail.html?id=${item.id}`;
+            });
+        }
         socialRail.appendChild(card);
     });
 }
-renderSocialRail();
 
 // Wardrobe functionality handled via js/cart.js
 

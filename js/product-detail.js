@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (titleLower.includes('bra') || titleLower.includes('bust') || titleLower.includes('lingerie') || titleLower.includes('corset')) {
             return ['32', '34', '36', '38'];
         }
-        if (['dresses', 'casual', 'corporate', 'weekend'].includes(cat)) {
+        if (['dresses', 'casual', 'corporate', 'weekend', 'sweaters', 'trousers', 'jumpsuits', 'innerwear'].includes(cat)) {
             return ['S', 'M', 'L', 'XL'];
         }
         return [];
@@ -700,7 +700,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const breadcrumbEl = document.getElementById('productBreadcrumb');
             if (breadcrumbEl) {
                 const catCap = product.category.charAt(0).toUpperCase() + product.category.slice(1);
-                let crumbHtml = `<a href="index.html">Home</a> / <a href="${product.category}.html">${catCap}</a>`;
+                const targetPage = (typeof window.getCategoryPage === 'function')
+                    ? window.getCategoryPage(product.category)
+                    : `${product.category}.html`;
+                let crumbHtml = `<a href="index.html">Home</a> / <a href="${targetPage}">${catCap}</a>`;
                 if (currentListingData && currentListingData.title) {
                     crumbHtml += ` / <span>${currentListingData.title}</span>`;
                 }
@@ -711,9 +714,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // Meta
             const metaContainer = document.getElementById('productMeta');
             if (metaContainer) {
+                const subcatHtml = product.subcategory ? `<p><strong>Subcategory:</strong> ${product.subcategory}</p>` : '';
                 metaContainer.innerHTML = `
                     <p><strong>SKU:</strong> ${productData.sku || `AF-${product.category.substring(0, 3).toUpperCase()}-${product.id}`}</p>
                     <p><strong>Category:</strong> ${product.category.charAt(0).toUpperCase() + product.category.slice(1)}</p>
+                    ${subcatHtml}
                     <p><strong>Stock Status:</strong> <span id="variantStockStatus">Loading stock...</span></p>
                 `;
             }

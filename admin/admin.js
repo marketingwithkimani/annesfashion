@@ -327,6 +327,8 @@ function openProductModal(productId = null) {
         document.getElementById('productDescription').value = product.description || '';
         document.getElementById('productPrice').value = product.price;
         document.getElementById('productCategory').value = product.category;
+        const subcatInput = document.getElementById('productSubcategory');
+        if (subcatInput) subcatInput.value = product.subcategory || '';
 
         // Handle images
         const images = product.images || [];
@@ -351,6 +353,8 @@ function openProductModal(productId = null) {
     } else {
         // Add mode
         document.getElementById('modalTitle').textContent = 'Add New Product';
+        const subcatInput = document.getElementById('productSubcategory');
+        if (subcatInput) subcatInput.value = '';
         document.getElementById('productStock').disabled = false;
     }
 
@@ -372,12 +376,14 @@ async function handleProductSubmit(e) {
     const isEdit = !!productId;
 
     const images = Array.from(document.querySelectorAll('.image-preview-item')).map(item => item.dataset.url);
+    const subcatInput = document.getElementById('productSubcategory');
 
     const productData = {
         title: document.getElementById('productTitle').value,
         description: document.getElementById('productDescription').value,
         price: document.getElementById('productPrice').value,
         category: document.getElementById('productCategory').value,
+        subcategory: subcatInput ? subcatInput.value.trim() : '',
         images: images,
         is_featured: document.getElementById('productFeatured').checked ? 1 : 0,
         allow_preorder: document.getElementById('productAllowPreOrder').checked ? 1 : 0
@@ -399,6 +405,7 @@ async function handleProductSubmit(e) {
                     description: productData.description,
                     price: parseFloat(productData.price),
                     category: productData.category,
+                    subcategory: productData.subcategory || undefined,
                     image_url: images[0] || null,
                     images: images,
                     is_featured: productData.is_featured,

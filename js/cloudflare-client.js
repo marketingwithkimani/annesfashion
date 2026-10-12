@@ -15,14 +15,19 @@ const CF_WORKER_URL = (function () {
     return 'https://api.annesfashion.co.ke';
 })();
 
-// Helper fetch wrapper
+// Helper fetch wrapper with cache-busting to ensure real-time product updates
 async function cfFetch(path, options = {}) {
-    const url = `${CF_WORKER_URL}${path}`;
+    const isGet = !options.method || options.method.toUpperCase() === 'GET';
+    const sep = path.includes('?') ? '&' : '?';
+    const url = isGet ? `${CF_WORKER_URL}${path}${sep}_t=${Date.now()}` : `${CF_WORKER_URL}${path}`;
     try {
         const res = await fetch(url, {
             ...options,
+            cache: 'no-cache',
             headers: {
                 'Content-Type': 'application/json',
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
                 ...(options.headers || {})
             }
         });
@@ -133,14 +138,19 @@ async function fetchCloudflareProducts({ category, search } = {}) {
         const catRaw = (p.category || 'general').toLowerCase().trim();
         const catMap = {
             'casualwear': 'casual', 'casual wear': 'casual', 'casual-wear': 'casual', 'clothes': 'casual', 'clothing': 'casual',
-            'jackets': 'casual', 'jacket': 'casual', 'tops': 'casual', 'top': 'casual', 'trousers': 'casual', 'trouser': 'casual', 'pants': 'casual', 'jeans': 'casual',
+            'tops': 'casual', 'top': 'casual', 't-shirts': 'casual', 't-shirt': 'casual',
             'corporatewear': 'corporate', 'corporate wear': 'corporate', 'corporate-wear': 'corporate',
-            'officewear': 'corporate', 'office wear': 'corporate', 'office': 'corporate',
+            'officewear': 'corporate', 'office wear': 'corporate', 'office': 'corporate', 'suits': 'corporate', 'suit': 'corporate',
             'weekendwear': 'weekend', 'weekend wear': 'weekend', 'lifestyle': 'weekend',
-            'dresswear': 'dresses', 'dress': 'dresses',
-            'beauty': 'makeup', 'beautymakeup': 'makeup', 'beauty & makeup': 'makeup', 'skincare': 'makeup',
-            'hair': 'wigs', 'hairwigs': 'wigs', 'wig': 'wigs', 'wigs & hair': 'wigs',
-            'shoe': 'shoes', 'shoes & sneakers': 'shoes', 'footwear': 'shoes', 'heels': 'shoes', 'sneakers': 'shoes'
+            'dresswear': 'dresses', 'dress': 'dresses', 'dresses': 'dresses',
+            'sweaters & outerwear': 'sweaters', 'sweaters-outerwear': 'sweaters', 'sweaters': 'sweaters', 'sweater': 'sweaters', 'outerwear': 'sweaters',
+            'trousers & bottoms': 'trousers', 'trousers-bottoms': 'trousers', 'trousers': 'trousers', 'trouser': 'trousers', 'bottoms': 'trousers', 'bottom': 'trousers', 'pants': 'trousers', 'jeans': 'trousers', 'jean': 'trousers',
+            'jumpsuits & sets': 'jumpsuits', 'jumpsuits-sets': 'jumpsuits', 'jumpsuits': 'jumpsuits', 'jumpsuit': 'jumpsuits', 'matching sets': 'jumpsuits', 'sets': 'jumpsuits', 'set': 'jumpsuits', 'co-ord': 'jumpsuits', 'co-ords': 'jumpsuits', 'loungewear': 'jumpsuits',
+            'accessories': 'accessories', 'accessory': 'accessories', 'belts': 'accessories', 'sunglasses': 'accessories',
+            'innerwear': 'innerwear', 'inner wear': 'innerwear', 'bra': 'innerwear', 'stockings': 'innerwear', 'boob tapes': 'innerwear',
+            'beauty products': 'beauty', 'beauty / women\'s wellness': 'beauty', 'women\'s wellness': 'beauty', 'wellness': 'beauty', 'beauty': 'beauty', 'makeup': 'beauty', 'beautymakeup': 'beauty', 'beauty & makeup': 'beauty', 'skincare': 'beauty',
+            'hair': 'wigs', 'hairwigs': 'wigs', 'wig': 'wigs', 'wigs & hair': 'wigs', 'wigs': 'wigs',
+            'shoe': 'shoes', 'shoes & sneakers': 'shoes', 'footwear': 'shoes', 'heels': 'shoes', 'sneakers': 'shoes', 'shoes': 'shoes'
         };
         const cat = catMap[catRaw] || catRaw;
         const titleLower = (p.title || '').toLowerCase();
@@ -152,7 +162,7 @@ async function fetchCloudflareProducts({ category, search } = {}) {
                 sizes = ['37', '38', '39', '40', '41'];
             } else if (titleLower.includes('bra') || titleLower.includes('bust') || titleLower.includes('lingerie')) {
                 sizes = ['32', '34', '36', '38'];
-            } else if (['dresses', 'casual', 'corporate', 'weekend'].includes(cat)) {
+            } else if (['dresses', 'casual', 'corporate', 'weekend', 'sweaters', 'trousers', 'jumpsuits', 'innerwear'].includes(cat)) {
                 sizes = ['S', 'M', 'L', 'XL'];
             }
         }
@@ -182,6 +192,8 @@ async function fetchCloudflareProducts({ category, search } = {}) {
             media: p.media || [],
             images: p.images || [],
             category: cat,
+            raw_category: p.category || '',
+            subcategory: p.subcategory || null,
             type: 'product',
             description: p.description || '',
             clean_description: p.clean_description || (p.description ? p.description.replace(/\[Variant Stock:[^\]]*\]/gi, '').replace(/\[Media:[^\]]*\]/gi, '').trim() : ''),
@@ -190,15 +202,42 @@ async function fetchCloudflareProducts({ category, search } = {}) {
             total_stock: stock,
             allow_preorder: Boolean(p.allow_preorder),
             is_featured: Boolean(p.is_featured),
+            is_flash_sale: Boolean(p.is_flash_sale),
             sizes,
             colors,
             created_at: p.created_at
         };
     });
 
+    // Ensure products are always sorted strictly newest first so new uploads appear first on homepage
+    formatted.sort((a, b) => {
+        const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
+        if (timeB !== timeA) return timeB - timeA;
+        return (b.id || 0) - (a.id || 0);
+    });
+
     window.productsData = formatted;
     return formatted;
 }
+
+// Global category URL resolver: ensures no product ever links to a 404
+window.getCategoryPage = function (cat) {
+    if (!cat) return 'casual.html';
+    const c = String(cat).toLowerCase().trim();
+    if (c.includes('dress')) return 'dresses.html';
+    if (c.includes('corp') || c.includes('office') || c.includes('suit')) return 'corporate.html';
+    if (c.includes('week') || c.includes('life')) return 'weekend.html';
+    if (c.includes('shoe') || c.includes('heel') || c.includes('sneak') || c.includes('boot') || c.includes('sandal') || c.includes('flat')) return 'shoes.html';
+    if (c.includes('wig') || c.includes('hair')) return 'wigs.html';
+    if (c.includes('beauty') || c.includes('makeup') || c.includes('skin') || c.includes('wellness')) return 'beauty.html';
+    if (c.includes('sweater') || c.includes('outer') || c.includes('jacket') || c.includes('coat') || c.includes('blazer') || c.includes('kimono') || c.includes('miyaki')) return 'sweaters.html';
+    if (c.includes('trouser') || c.includes('jean') || c.includes('bottom') || c.includes('pant') || c.includes('palazzo') || c.includes('short') || c.includes('legging')) return 'trousers.html';
+    if (c.includes('jumpsuit') || c.includes('set') || c.includes('coord') || c.includes('co-ord') || c.includes('lounge')) return 'jumpsuits.html';
+    if (c.includes('access') || c.includes('belt') || c.includes('glass') || c.includes('watch') || c.includes('ring') || c.includes('brooch') || c.includes('fedora') || c.includes('chain')) return 'accessories.html';
+    if (c.includes('inner') || c.includes('bra') || c.includes('stocking') || c.includes('tape')) return 'innerwear.html';
+    return 'casual.html';
+};
 
 // =====================================================
 // Single Product Detail

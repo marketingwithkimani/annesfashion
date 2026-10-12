@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Shop luxury jumpsuits, 2-piece sets, matching sets, loungewear & resort collections at Anne's Fashion Line">
+    <title>Jumpsuits & Sets | Anne's Fashion Line</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/category.css">
+    <link rel="stylesheet" href="css/cart.css">
+    <link rel="stylesheet" href="css/chatbot.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container-fluid">
+            <nav class="navbar">
+                <div class="nav-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <a href="index.html" class="logo">
+                        <img id="brandLogo" src="assets/Logo%20Black.png" alt="Anne's Fashion Line"
+                            class="brand-logo-img">
+                        <div class="logo-text-container">
+                            <span class="brand-name">Anne's</span>
+                            <span class="brand-line">Fashion Line</span>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="nav-center">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search jumpsuits, 2-piece sets, matching sets...">
+                    </div>
+                </div>
+
+                <div class="nav-right">
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <a href="#" class="nav-icon">
+                        <i class="fas fa-heart"></i>
+                        <span class="badge">0</span>
+                    </a>
+                    <a href="#" class="nav-icon" id="cartIcon">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span class="badge" id="cartBadge">0</span>
+                    </a>
+                    <a href="#" class="nav-icon">
+                        <i class="fas fa-user"></i>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Side Navigation -->
+    <aside class="side-nav" id="sideNav">
+        <div class="side-nav-header">
+            <h3>Collections</h3>
+            <button class="close-nav" id="closeNav">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <ul class="nav-menu">
+            <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="dresses.html"><i class="fas fa-user-tie"></i> Dresses</a></li>
+            <li><a href="casual.html"><i class="fas fa-tshirt"></i> Casual Wear</a></li>
+            <li><a href="corporate.html"><i class="fas fa-briefcase"></i> Corporate Wear</a></li>
+            <li><a href="sweaters.html"><i class="fas fa-vest"></i> Sweaters & Outerwear</a></li>
+            <li><a href="trousers.html"><i class="fas fa-socks"></i> Trousers & Bottoms</a></li>
+            <li><a href="jumpsuits.html" class="active"><i class="fas fa-layer-group"></i> Jumpsuits & Sets</a></li>
+            <li><a href="accessories.html"><i class="fas fa-gem"></i> Accessories</a></li>
+            <li><a href="innerwear.html"><i class="fas fa-heart"></i> Innerwear</a></li>
+            <li><a href="shoes.html"><i class="fas fa-shoe-prints"></i> Shoes & Sneakers</a></li>
+            <li><a href="wigs.html"><i class="fas fa-hat-wizard"></i> Wigs & Hair</a></li>
+            <li><a href="beauty.html"><i class="fas fa-palette"></i> Beauty & Wellness</a></li>
+            <li><a href="weekend.html"><i class="fas fa-sun"></i> Weekend & Lifestyle</a></li>
+        </ul>
+    </aside>
+
+    <!-- Category Hero -->
+    <section class="category-hero"
+        style="background-image: linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.65)), url('https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1600');">
+        <div class="hero-content">
+            <h1 class="luxury-script">Jumpsuits & Sets</h1>
+            <p>Elevated 2-piece coordinates, sleek jumpsuits & resort-ready matching sets</p>
+        </div>
+    </section>
+
+    <!-- Filter Bar -->
+    <section class="filter-section">
+        <div class="container">
+            <div class="filter-bar">
+                <div class="filter-left">
+                    <button class="filter-toggle" id="filterToggle">
+                        <i class="fas fa-sliders-h"></i> Filters
+                    </button>
+                    <span class="results-count">Showing products</span>
+                </div>
+                <div class="filter-right">
+                    <select class="sort-select">
+                        <option value="featured">Sort by: Featured</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                        <option value="newest">Newest First</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Filter Panel -->
+            <div class="filter-panel" id="filterPanel" style="display: none;">
+                <div class="filter-group">
+                    <h4>Price Range</h4>
+                    <div class="price-slider">
+                        <input type="range" id="priceRange" min="0" max="50000" step="500" value="50000">
+                        <div class="price-labels">
+                            <span>KSh 0</span>
+                            <span id="priceValue">KSh 50,000</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <h4>Size</h4>
+                    <div class="size-options">
+                        <button class="size-btn">S</button>
+                        <button class="size-btn">M</button>
+                        <button class="size-btn">L</button>
+                        <button class="size-btn">XL</button>
+                        <button class="size-btn">Free Size</button>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <h4>Availability</h4>
+                    <div class="availability-options">
+                        <label class="radio-label">
+                            <input type="radio" name="availability" value="all" checked>
+                            <span>All Items</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="availability" value="in-stock">
+                            <span>In Stock Only</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="availability" value="flash-sale">
+                            <span>Flash Sale Only</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="availability" value="pre-order">
+                            <span>Pre-Order Only</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="filter-actions">
+                    <button class="btn-reset" id="btnResetFilters">Reset Filters</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="products-section">
+        <div class="container">
+            <div class="products-grid" id="categoryProducts">
+                <!-- Products loaded dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4 class="luxury-script">Anne's Fashion Line</h4>
+                    <p>Premium fashion for the modern African woman. Curated with love from Nairobi.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-tiktok"></i></a>
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>Shop</h4>
+                    <ul>
+                        <li><a href="dresses.html">Dresses</a></li>
+                        <li><a href="casual.html">Casual Wear</a></li>
+                        <li><a href="corporate.html">Corporate Wear</a></li>
+                        <li><a href="sweaters.html">Sweaters & Outerwear</a></li>
+                        <li><a href="trousers.html">Trousers & Bottoms</a></li>
+                        <li><a href="jumpsuits.html">Jumpsuits & Sets</a></li>
+                        <li><a href="shoes.html">Shoes & Sneakers</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Collections</h4>
+                    <ul>
+                        <li><a href="accessories.html">Accessories</a></li>
+                        <li><a href="innerwear.html">Innerwear</a></li>
+                        <li><a href="wigs.html">Wigs & Hair</a></li>
+                        <li><a href="beauty.html">Beauty & Wellness</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Returns</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Anne's Fashion Line. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- WhatsApp Sticky Button -->
+    <a href="https://wa.me/254798840085?text=Hi%2C%20I'm%20interested%20in%20your%20fashion%20pieces"
+        class="whatsapp-float" target="_blank" aria-label="Chat on WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <script src="js/cloudflare-client.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/category.js"></script>
+    <script src="js/chatbot.js"></script>
+</body>
+
+</html>

@@ -288,7 +288,7 @@ export default {
         const params: any[] = [];
 
         const fields = [
-          'title', 'description', 'price', 'category', 'sku',
+          'title', 'description', 'price', 'category', 'subcategory', 'sku',
           'image_url', 'media_type', 'media_reference', 'poster_reference',
           'video_key', 'video_url', 'video_mime_type', 'video_size_bytes',
           'video_duration_seconds', 'video_poster_key',
@@ -338,12 +338,12 @@ export default {
         const category = url.searchParams.get('category');
         const featured = url.searchParams.get('featured');
         const search = url.searchParams.get('search');
-        const limit = Math.min(parseInt(url.searchParams.get('limit') || '50'), 100);
+        const limit = Math.min(parseInt(url.searchParams.get('limit') || '100'), 100);
         const offset = Math.max(parseInt(url.searchParams.get('offset') || '0'), 0);
 
         let query = `
           SELECT 
-            p.id, p.title, p.description, p.price, p.category, p.sku,
+            p.id, p.title, p.description, p.price, p.category, p.subcategory, p.sku,
             p.image_url, p.media_type, p.media_reference, p.poster_reference,
             p.video_key, p.video_url, p.video_mime_type, p.video_size_bytes,
             p.video_duration_seconds, p.video_poster_key,
@@ -375,13 +375,16 @@ export default {
         }
 
         const sortParam = url.searchParams.get('sort');
-        let orderClause = 'ORDER BY p.is_flash_sale DESC, p.allow_preorder DESC, p.created_at DESC';
-        if (sortParam === 'price_asc' || sortParam === 'price-low') {
+        // Default to newest first so all new uploads immediately appear on the homepage and catalog
+        let orderClause = 'ORDER BY p.created_at DESC, p.id DESC';
+        if (sortParam === 'featured') {
+          orderClause = 'ORDER BY p.is_featured DESC, p.created_at DESC, p.id DESC';
+        } else if (sortParam === 'price_asc' || sortParam === 'price-low') {
           orderClause = 'ORDER BY p.price ASC';
         } else if (sortParam === 'price_desc' || sortParam === 'price-high') {
           orderClause = 'ORDER BY p.price DESC';
         } else if (sortParam === 'newest') {
-          orderClause = 'ORDER BY p.created_at DESC';
+          orderClause = 'ORDER BY p.created_at DESC, p.id DESC';
         }
 
         query += ` GROUP BY p.id ${orderClause} LIMIT ? OFFSET ?`;
@@ -923,46 +926,139 @@ function normalizeCategory(raw?: string | null): string {
   if (!raw) return 'general';
   const clean = raw.toLowerCase().trim().replace(/[-_]/g, ' ');
   const map: Record<string, string> = {
+    // Casual
+    'casual': 'casual',
     'casualwear': 'casual',
     'casual wear': 'casual',
-    'casual-wear': 'casual',
     'clothes': 'casual',
     'clothing': 'casual',
-    'jackets': 'casual',
-    'jacket': 'casual',
     'tops': 'casual',
     'top': 'casual',
-    'trousers': 'casual',
-    'trouser': 'casual',
-    'pants': 'casual',
-    'jeans': 'casual',
+    't-shirts': 'casual',
+    'tshirts': 'casual',
+    't-shirt': 'casual',
+    'tshirt': 'casual',
+    // Corporate
+    'corporate': 'corporate',
     'corporatewear': 'corporate',
     'corporate wear': 'corporate',
     'corporate-wear': 'corporate',
     'officewear': 'corporate',
     'office wear': 'corporate',
     'office': 'corporate',
+    'suits': 'corporate',
+    'suit': 'corporate',
+    // Weekend
+    'weekend': 'weekend',
     'weekendwear': 'weekend',
     'weekend wear': 'weekend',
     'lifestyle': 'weekend',
-    'dresswear': 'dresses',
-    'dress': 'dresses',
+    // Dresses
     'dresses': 'dresses',
-    'beauty': 'makeup',
-    'beautymakeup': 'makeup',
-    'beauty & makeup': 'makeup',
-    'skincare': 'makeup',
+    'dress': 'dresses',
+    'dresswear': 'dresses',
+    // Sweaters & Outerwear
+    'sweaters': 'sweaters',
+    'sweater': 'sweaters',
+    'sweaters & outerwear': 'sweaters',
+    'sweaters-outerwear': 'sweaters',
+    'outerwear': 'sweaters',
+    'jackets': 'sweaters',
+    'jacket': 'sweaters',
+    'denim jackets': 'sweaters',
+    'trench coats': 'sweaters',
+    'kimono': 'sweaters',
+    'miyaki': 'sweaters',
+    'blazers': 'sweaters',
+    'blazer': 'sweaters',
+    // Trousers & Bottoms
+    'trousers': 'trousers',
+    'trouser': 'trousers',
+    'trousers & bottoms': 'trousers',
+    'trousers-bottoms': 'trousers',
+    'bottoms': 'trousers',
+    'bottom': 'trousers',
+    'pants': 'trousers',
+    'pant': 'trousers',
+    'jeans': 'trousers',
+    'jean': 'trousers',
+    'mummy jeans': 'trousers',
+    'skinny jeans': 'trousers',
+    'palazzos': 'trousers',
+    'leggings': 'trousers',
+    'bbl biker': 'trousers',
+    'shorts': 'trousers',
+    'short': 'trousers',
+    // Jumpsuits & Sets
+    'jumpsuits': 'jumpsuits',
+    'jumpsuit': 'jumpsuits',
+    'jumpsuits & sets': 'jumpsuits',
+    'jumpsuits-sets': 'jumpsuits',
+    'matching sets': 'jumpsuits',
+    'sets': 'jumpsuits',
+    'set': 'jumpsuits',
+    'co ords': 'jumpsuits',
+    'co-ords': 'jumpsuits',
+    'co ord': 'jumpsuits',
+    'co-ord': 'jumpsuits',
+    'loungewear': 'jumpsuits',
+    'vacation wear': 'jumpsuits',
+    '2 piece': 'jumpsuits',
+    'two piece': 'jumpsuits',
+    // Accessories
+    'accessories': 'accessories',
+    'accessory': 'accessories',
+    'fedoras': 'accessories',
+    'chains': 'accessories',
+    'belts': 'accessories',
+    'belt': 'accessories',
+    'sun glasses': 'accessories',
+    'sunglasses': 'accessories',
+    'shades': 'accessories',
+    'brooch': 'accessories',
+    'watches & rings': 'accessories',
+    'watches': 'accessories',
+    'socks': 'accessories',
+    'gloves': 'accessories',
+    // Innerwear
+    'innerwear': 'innerwear',
+    'inner wear': 'innerwear',
+    'bra': 'innerwear',
+    'stockings': 'innerwear',
+    'boob tapes': 'innerwear',
+    'boob tape': 'innerwear',
+    // Beauty & Makeup & Women's Wellness
+    'beauty': 'beauty',
+    'beauty products': 'beauty',
+    'beauty / women\'s wellness': 'beauty',
+    'women\'s wellness': 'beauty',
+    'wellness': 'beauty',
+    'makeup': 'beauty',
+    'beautymakeup': 'beauty',
+    'beauty & makeup': 'beauty',
+    'skincare': 'beauty',
+    // Wigs & Hair
+    'wigs': 'wigs',
+    'wig': 'wigs',
     'hair': 'wigs',
     'hairwigs': 'wigs',
-    'wig': 'wigs',
-    'wigs': 'wigs',
     'wigs & hair': 'wigs',
-    'shoe': 'shoes',
+    'human hair wigs': 'wigs',
+    'braided wigs': 'wigs',
+    // Shoes & Sneakers
     'shoes': 'shoes',
+    'shoe': 'shoes',
     'shoes & sneakers': 'shoes',
     'footwear': 'shoes',
     'heels': 'shoes',
+    'heel': 'shoes',
     'sneakers': 'shoes',
+    'sneaker': 'shoes',
+    'sandals': 'shoes',
+    'sandal': 'shoes',
+    'boots': 'shoes',
+    'boot': 'shoes',
+    'flats & loafers': 'shoes',
   };
   return map[clean] || clean;
 }
@@ -970,13 +1066,18 @@ function normalizeCategory(raw?: string | null): string {
 function getCategoryAliases(cat: string): string[] {
   const norm = normalizeCategory(cat);
   const aliasMap: Record<string, string[]> = {
-    'casual': ['casual', 'casualwear', 'casual wear', 'casual-wear', 'clothes', 'clothing', 'jackets', 'tops', 'trousers', 'pants', 'jeans'],
-    'corporate': ['corporate', 'corporatewear', 'corporate wear', 'corporate-wear', 'officewear', 'office wear', 'office'],
+    'casual': ['casual', 'casualwear', 'casual wear', 'casual-wear', 'clothes', 'clothing', 'tops', 'top', 't-shirts', 'tshirts', 'tshirt'],
+    'corporate': ['corporate', 'corporatewear', 'corporate wear', 'corporate-wear', 'officewear', 'office wear', 'office', 'suits', 'suit'],
     'weekend': ['weekend', 'weekendwear', 'weekend wear', 'lifestyle'],
-    'dresses': ['dresses', 'dress', 'dresswear'],
-    'makeup': ['makeup', 'beauty', 'beautymakeup', 'beauty & makeup', 'skincare'],
-    'wigs': ['wigs', 'wig', 'hair', 'hairwigs', 'wigs & hair'],
-    'shoes': ['shoes', 'shoe', 'shoes & sneakers', 'footwear', 'heels', 'sneakers'],
+    'dresses': ['dresses', 'dress', 'dresswear', 'skater dress', 'party dresses', 'maxi'],
+    'sweaters': ['sweaters', 'sweaters & outerwear', 'sweaters-outerwear', 'outerwear', 'jackets', 'jacket', 'denim jackets', 'trench coats', 'kimono', 'miyaki', 'blazers', 'blazer'],
+    'trousers': ['trousers', 'trousers & bottoms', 'trousers-bottoms', 'bottoms', 'pants', 'pant', 'jeans', 'jean', 'mummy jeans', 'skinny jeans', 'palazzos', 'leggings', 'bbl biker', 'shorts', 'short'],
+    'jumpsuits': ['jumpsuits', 'jumpsuits & sets', 'jumpsuits-sets', 'matching sets', 'sets', 'set', 'co-ords', 'co-ord', 'loungewear', 'vacation wear', '2 piece', 'two piece'],
+    'accessories': ['accessories', 'accessory', 'belts', 'belt', 'fedoras', 'chains', 'sun glasses', 'sunglasses', 'shades', 'brooch', 'watches & rings', 'watches', 'socks', 'gloves'],
+    'innerwear': ['innerwear', 'inner wear', 'bra', 'stockings', 'boob tapes', 'boob tape'],
+    'beauty': ['beauty', 'makeup', 'beauty products', 'beauty / women\'s wellness', 'women\'s wellness', 'wellness', 'beautymakeup', 'beauty & makeup', 'skincare'],
+    'wigs': ['wigs', 'wig', 'hair', 'hairwigs', 'wigs & hair', 'human hair wigs', 'braided wigs'],
+    'shoes': ['shoes', 'shoe', 'shoes & sneakers', 'footwear', 'heels', 'heel', 'sneakers', 'sneaker', 'sandals', 'sandal', 'boots', 'boot', 'flats & loafers'],
   };
   const list = aliasMap[norm] || [norm, cat];
   return Array.from(new Set([norm, cat.toLowerCase().trim(), ...list]));
@@ -1231,7 +1332,7 @@ async function insertProductRecord(body: any, env: Env, listingId: number | null
 
   const inserted = await env.DB.prepare(`
     INSERT INTO products (
-      title, description, price, category, sku,
+      title, description, price, category, subcategory, sku,
       image_url, media_type, media_reference, poster_reference,
       video_key, video_url, video_mime_type, video_size_bytes, video_duration_seconds, video_poster_key,
       sizes, colors, waist_sizes, bust_sizes, shoe_sizes, total_stock,
@@ -1239,7 +1340,7 @@ async function insertProductRecord(body: any, env: Env, listingId: number | null
       listing_id, item_slot,
       created_at, updated_at
     ) VALUES (
-      ?, ?, ?, ?, ?,
+      ?, ?, ?, ?, ?, ?,
       ?, ?, ?, ?,
       ?, ?, ?, ?, ?, ?,
       ?, ?, ?, ?, ?, ?,
@@ -1252,6 +1353,7 @@ async function insertProductRecord(body: any, env: Env, listingId: number | null
     cleanStr(body.description),
     body.price,
     normalizeCategory(body.category),
+    cleanStr(body.subcategory),
     body.sku || null,
     resolvedImageUrl,
     mediaType,
