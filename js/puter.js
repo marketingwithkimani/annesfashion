@@ -43,7 +43,7 @@ const Putter = {
         try {
             const response = await window.puter.ai.chat(message, {
                 system: systemPrompt,
-                model: 'gpt-4o-mini'
+                model: 'gpt-6-luna'
             });
             // Puter.ai chat usually returns { message: { role: 'assistant', content: '...' } } or similar object
             // Just returning the content string

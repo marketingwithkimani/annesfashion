@@ -1,0 +1,21 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /backend/
+Disallow: /api/
+Disallow: /scratch/
+Disallow: /scripts/
+Disallow: /staff/
+Disallow: /uploads/
+Disallow: /worker/
+Disallow: /*.php$
+Disallow: /*.sql$
+Disallow: /.env
+Disallow: /.git/
+
+# Allow specific bots to crawl images
+User-agent: Googlebot-Image
+Allow: /assets/
+
+# Sitemap
+Sitemap: https://annesfashionline.co.ke/sitemap.xml
