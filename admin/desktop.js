@@ -26,6 +26,9 @@ let sessionLeads = {
 // ========================================================
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Always hide loginScreen initially (CSS keeps it visible by default for first load)
+  const loginScreen = document.getElementById('loginScreen');
+
   const session = localStorage.getItem('admin_session');
   if (session) {
     try {
@@ -41,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   // Otherwise show login
-  document.getElementById('loginScreen').style.display = 'flex';
+  if (loginScreen) loginScreen.style.display = 'flex';
 });
 
 function togglePw() {
@@ -172,6 +175,10 @@ function handleLogout() {
 }
 
 function startDashboard() {
+  // Hide login screen (always, whether arriving from form submit or saved session)
+  const loginScreen = document.getElementById('loginScreen');
+  if (loginScreen) loginScreen.style.display = 'none';
+
   const session = localStorage.getItem('admin_session');
   if (session) {
     try {
