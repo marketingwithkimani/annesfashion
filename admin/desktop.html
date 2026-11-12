@@ -576,12 +576,12 @@
       <div class="analytics-notice glass-card" style="border-left: 4px solid var(--gold);">
         <i class="fas fa-satellite" style="color:#D4AF37;font-size:1.5rem;"></i>
         <div>
-          <strong style="color:#fff; display:block; margin-bottom:2px;">Real First-Party Website Analytics Connected</strong>
-          <span style="font-size:0.83rem; color:var(--text-muted);">Tracking real visitors, page traffic, and product engagement via Cloudflare D1.</span>
+          <strong style="color:#fff; display:block; margin-bottom:2px;">Real First-Party Website Analytics & Attribution Connected</strong>
+          <span style="font-size:0.83rem; color:var(--text-muted);">Tracking real visitors, page traffic, product views, and social media referrals live via Cloudflare D1.</span>
         </div>
       </div>
 
-      <div class="stats-grid finance-stats" style="margin-bottom: 24px;">
+      <div class="stats-grid analytics-stats" style="margin-bottom: 24px;">
         <div class="stat-card">
           <div class="stat-icon-wrap" style="--icon-color:#D4AF37;">
             <i class="fas fa-eye"></i>
@@ -609,9 +609,34 @@
             <span class="stat-value gold" id="perf-total-events">0</span>
           </div>
         </div>
+        <div class="stat-card">
+          <div class="stat-icon-wrap" style="--icon-color:#e056fd;">
+            <i class="fas fa-share-alt"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Social Referrals</span>
+            <span class="stat-value gold" id="perf-social-referrals">0</span>
+          </div>
+        </div>
       </div>
 
-      <div class="section-row">
+      <!-- Social Media Inbound Attribution -->
+      <div class="glass-card" style="margin-bottom: 24px;">
+        <div class="card-header">
+          <div>
+            <h3><i class="fas fa-chart-pie" style="color:var(--gold); margin-right:8px;"></i> Social Media Inbound Performance</h3>
+            <div style="font-size:0.82rem; color:var(--text-muted); margin-top:3px;">
+              Live visitor traffic & conversion attributed to your official social channels
+            </div>
+          </div>
+          <span class="badge" style="background:rgba(212,175,55,0.15); color:var(--gold);">Live Referral Tracking</span>
+        </div>
+        <div class="social-traffic-grid" id="socialTrafficGrid">
+          <div class="traffic-loading"><i class="fas fa-spinner fa-spin"></i> Loading live social referral performance...</div>
+        </div>
+      </div>
+
+      <div class="section-row responsive-columns">
         <div class="glass-card flex-1">
           <div class="card-header">
             <h3><i class="fas fa-file-alt"></i> Most Frequently Visited Pages</h3>
@@ -655,16 +680,26 @@
         </div>
       </div>
 
+      <!-- Connected Official Social Channels -->
       <div class="glass-card">
         <div class="card-header">
-          <h3><i class="fas fa-share-alt"></i> Official Social Presence</h3>
+          <div>
+            <h3><i class="fas fa-hashtag" style="color:var(--gold); margin-right:8px;"></i> Official Brand Social Presence</h3>
+            <div style="font-size:0.82rem; color:var(--text-muted); margin-top:3px;">
+              Connected profiles, audience milestones, and 1-click external navigation
+            </div>
+          </div>
           <span class="badge badge-pink">Connected Channels</span>
         </div>
         <div class="social-grid">
+          <!-- Instagram -->
           <div class="social-card instagram">
             <div class="social-header">
               <i class="fab fa-instagram"></i>
-              <span><a href="https://www.instagram.com/annes_fashion_line/" target="_blank" style="color:inherit;text-decoration:none;">@annes_fashion_line <i class="fas fa-external-link-alt" style="font-size:0.75rem;"></i></a></span>
+              <div class="social-title-wrap">
+                <span class="social-name">Instagram</span>
+                <a href="https://www.instagram.com/annes_fashion_line/" target="_blank" class="social-handle" rel="noopener">@annes_fashion_line <i class="fas fa-external-link-alt"></i></a>
+              </div>
             </div>
             <div class="social-stats">
               <div class="social-stat">
@@ -680,31 +715,19 @@
                 <label>Avg Likes</label>
               </div>
             </div>
+            <a href="https://www.instagram.com/annes_fashion_line/" target="_blank" class="btn-social-action">
+              <i class="fab fa-instagram"></i> Open Instagram Profile
+            </a>
           </div>
-          <div class="social-card whatsapp">
-            <div class="social-header">
-              <i class="fab fa-whatsapp"></i>
-              <span><a href="https://wa.me/254798840085" target="_blank" style="color:inherit;text-decoration:none;">+254 798 840 085 <i class="fas fa-external-link-alt" style="font-size:0.75rem;"></i></a></span>
-            </div>
-            <div class="social-stats">
-              <div class="social-stat">
-                <input type="number" class="social-input" id="wa-contacts" placeholder="0" oninput="saveSocialStat('wa_contacts', this.value)">
-                <label>Contacts</label>
-              </div>
-              <div class="social-stat">
-                <input type="number" class="social-input" id="wa-broadcasts" placeholder="0" oninput="saveSocialStat('wa_broadcasts', this.value)">
-                <label>Broadcasts</label>
-              </div>
-              <div class="social-stat">
-                <input type="number" class="social-input" id="wa-orders" placeholder="0" oninput="saveSocialStat('wa_orders', this.value)">
-                <label>WA Orders</label>
-              </div>
-            </div>
-          </div>
+
+          <!-- TikTok -->
           <div class="social-card tiktok">
             <div class="social-header">
               <i class="fab fa-tiktok"></i>
-              <span><a href="https://www.tiktok.com/@annes_fashion_line?is_from_webapp=1&sender_device=pc" target="_blank" style="color:inherit;text-decoration:none;">@annes_fashion_line <i class="fas fa-external-link-alt" style="font-size:0.75rem;"></i></a></span>
+              <div class="social-title-wrap">
+                <span class="social-name">TikTok</span>
+                <a href="https://www.tiktok.com/@annes_fashion_line?is_from_webapp=1&sender_device=pc" target="_blank" class="social-handle" rel="noopener">@annes_fashion_line <i class="fas fa-external-link-alt"></i></a>
+              </div>
             </div>
             <div class="social-stats">
               <div class="social-stat">
@@ -720,49 +743,73 @@
                 <label>Avg Likes</label>
               </div>
             </div>
+            <a href="https://www.tiktok.com/@annes_fashion_line?is_from_webapp=1&sender_device=pc" target="_blank" class="btn-social-action">
+              <i class="fab fa-tiktok"></i> Open TikTok Feed
+            </a>
+          </div>
+
+          <!-- Facebook -->
+          <div class="social-card facebook">
+            <div class="social-header">
+              <i class="fab fa-facebook"></i>
+              <div class="social-title-wrap">
+                <span class="social-name">Facebook</span>
+                <a href="https://www.facebook.com/annesfashionline/" target="_blank" class="social-handle" rel="noopener">Anne's Fashion Line <i class="fas fa-external-link-alt"></i></a>
+              </div>
+            </div>
+            <div class="social-stats">
+              <div class="social-stat">
+                <input type="number" class="social-input" id="fb-followers" placeholder="0" oninput="saveSocialStat('fb_followers', this.value)">
+                <label>Followers</label>
+              </div>
+              <div class="social-stat">
+                <input type="number" class="social-input" id="fb-posts" placeholder="0" oninput="saveSocialStat('fb_posts', this.value)">
+                <label>Posts</label>
+              </div>
+              <div class="social-stat">
+                <input type="number" class="social-input" id="fb-engagement" placeholder="0" oninput="saveSocialStat('fb_engagement', this.value)">
+                <label>Avg Likes</label>
+              </div>
+            </div>
+            <a href="https://www.facebook.com/annesfashionline/" target="_blank" class="btn-social-action">
+              <i class="fab fa-facebook"></i> Open Facebook Page
+            </a>
+          </div>
+
+          <!-- WhatsApp -->
+          <div class="social-card whatsapp">
+            <div class="social-header">
+              <i class="fab fa-whatsapp"></i>
+              <div class="social-title-wrap">
+                <span class="social-name">WhatsApp</span>
+                <a href="https://wa.me/254798840085" target="_blank" class="social-handle" rel="noopener">+254 798 840 085 <i class="fas fa-external-link-alt"></i></a>
+              </div>
+            </div>
+            <div class="social-stats">
+              <div class="social-stat">
+                <input type="number" class="social-input" id="wa-contacts" placeholder="0" oninput="saveSocialStat('wa_contacts', this.value)">
+                <label>Contacts</label>
+              </div>
+              <div class="social-stat">
+                <input type="number" class="social-input" id="wa-broadcasts" placeholder="0" oninput="saveSocialStat('wa_broadcasts', this.value)">
+                <label>Broadcasts</label>
+              </div>
+              <div class="social-stat">
+                <input type="number" class="social-input" id="wa-orders" placeholder="0" oninput="saveSocialStat('wa_orders', this.value)">
+                <label>WA Orders</label>
+              </div>
+            </div>
+            <a href="https://wa.me/254798840085" target="_blank" class="btn-social-action">
+              <i class="fab fa-whatsapp"></i> Chat on WhatsApp
+            </a>
           </div>
         </div>
-      </div>
-          </div>
-          <div class="social-card whatsapp">
-            <div class="social-header">
-              <i class="fab fa-whatsapp"></i>
-              <span>WhatsApp</span>
-            </div>
-            <div class="social-stats">
-              <div class="social-stat">
-                <input type="number" class="social-input" id="wa-contacts" placeholder="0" oninput="saveSocialStat('wa_contacts', this.value)">
-                <label>Contacts</label>
-              </div>
-              <div class="social-stat">
-                <input type="number" class="social-input" id="wa-broadcasts" placeholder="0" oninput="saveSocialStat('wa_broadcasts', this.value)">
-                <label>Broadcasts</label>
-              </div>
-              <div class="social-stat">
-                <input type="number" class="social-input" id="wa-orders" placeholder="0" oninput="saveSocialStat('wa_orders', this.value)">
-                <label>WA Orders</label>
-              </div>
-            </div>
-          </div>
-          <div class="social-card tiktok">
-            <div class="social-header">
-              <i class="fab fa-tiktok"></i>
-              <span>TikTok</span>
-            </div>
-            <div class="social-stats">
-              <div class="social-stat">
-                <input type="number" class="social-input" id="tt-followers" placeholder="0" oninput="saveSocialStat('tt_followers', this.value)">
-                <label>Followers</label>
-              </div>
-              <div class="social-stat">
-                <input type="number" class="social-input" id="tt-views" placeholder="0" oninput="saveSocialStat('tt_views', this.value)">
-                <label>Total Views</label>
-              </div>
-              <div class="social-stat">
-                <input type="number" class="social-input" id="tt-likes" placeholder="0" oninput="saveSocialStat('tt_likes', this.value)">
-                <label>Avg Likes</label>
-              </div>
-            </div>
+
+        <div class="social-api-note">
+          <i class="fas fa-info-circle"></i>
+          <div>
+            <strong>Why don't internal platform reach metrics show automatically without typing?</strong>
+            <span>Direct visitor traffic arriving from Instagram, TikTok, Facebook, and WhatsApp is tracked live in the <em>Social Media Inbound Performance</em> panel above. However, in-app statistics (such as daily profile impressions or private post reach inside Instagram/TikTok apps) require official Meta Graph API and TikTok Developer App approval to access their private internal platform feeds.</span>
           </div>
         </div>
       </div>

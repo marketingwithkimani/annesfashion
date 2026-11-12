@@ -500,6 +500,18 @@ console.log('⚡ Anne\'s Fashion Cloudflare Client initialized with Worker:', CF
         const urlParams = new URLSearchParams(window.location.search);
         const productId = urlParams.get('id') || urlParams.get('listing_id') || null;
 
+        const utmSource = urlParams.get('utm_source') || urlParams.get('ref') || null;
+        const ref = document.referrer || '';
+        let detectedSource = utmSource;
+        if (!detectedSource && ref) {
+            const refLow = ref.toLowerCase();
+            if (refLow.includes('instagram.com')) detectedSource = 'instagram';
+            else if (refLow.includes('tiktok.com')) detectedSource = 'tiktok';
+            else if (refLow.includes('facebook.com') || refLow.includes('fb.com')) detectedSource = 'facebook';
+            else if (refLow.includes('whatsapp.com') || refLow.includes('wa.me')) detectedSource = 'whatsapp';
+            else if (refLow.includes('google.com')) detectedSource = 'google';
+        }
+
         let sessionId = localStorage.getItem('af_session_token');
         if (!sessionId) {
             sessionId = 'af_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
@@ -510,7 +522,9 @@ console.log('⚡ Anne\'s Fashion Cloudflare Client initialized with Worker:', CF
             event_type: productId ? 'product_view' : 'page_view',
             page: page,
             product_id: productId ? parseInt(productId) : null,
-            session_id: sessionId
+            session_id: sessionId,
+            referrer: ref,
+            source: detectedSource || 'direct'
         };
 
         const endpoint = `${CF_WORKER_URL}/api/analytics/event`;

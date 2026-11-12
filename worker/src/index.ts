@@ -1234,10 +1234,22 @@ Only return raw JSON array. No markdown fences, no conversational text.`;
         const sessionId = body.session_id || null;
         const userAgent = request.headers.get('User-Agent') || null;
 
+        const rawReferrer = body.referrer || request.headers.get('Referer') || '';
+        let detectedSource = body.source || null;
+        if (!detectedSource && rawReferrer) {
+          const rLow = rawReferrer.toLowerCase();
+          if (rLow.includes('instagram.com')) detectedSource = 'instagram';
+          else if (rLow.includes('tiktok.com')) detectedSource = 'tiktok';
+          else if (rLow.includes('facebook.com') || rLow.includes('fb.com')) detectedSource = 'facebook';
+          else if (rLow.includes('whatsapp.com') || rLow.includes('wa.me')) detectedSource = 'whatsapp';
+          else if (rLow.includes('google.com')) detectedSource = 'google';
+        }
+        if (!detectedSource) detectedSource = 'direct';
+
         await env.DB.prepare(`
-          INSERT INTO analytics_events (event_type, page, product_id, session_id, user_agent, created_at)
-          VALUES (?, ?, ?, ?, ?, datetime('now'))
-        `).bind(eventType, page, productId, sessionId, userAgent).run();
+          INSERT INTO analytics_events (event_type, page, product_id, session_id, user_agent, referrer, source, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+        `).bind(eventType, page, productId, sessionId, userAgent, rawReferrer || null, detectedSource).run();
 
         return jsonResponse({ success: true }, 201, request, env);
       }
@@ -1252,7 +1264,7 @@ Only return raw JSON array. No markdown fences, no conversational text.`;
           return errorResponse('Unauthorized', 401, request, env);
         }
 
-        const [pageViewsResult, productViewsResult, totalsResult] = await Promise.all([
+        const [pageViewsResult, productViewsResult, totalsResult, socialSourcesResult] = await Promise.all([
           env.DB.prepare(`
             SELECT page, COUNT(*) as views, COUNT(DISTINCT session_id) as visitors
             FROM analytics_events
@@ -1274,19 +1286,31 @@ Only return raw JSON array. No markdown fences, no conversational text.`;
             SELECT 
               COUNT(*) as total_events,
               COUNT(DISTINCT session_id) as unique_visitors,
-              COALESCE(SUM(CASE WHEN date(created_at) = date('now') THEN 1 ELSE 0 END), 0) as today_views
+              COALESCE(SUM(CASE WHEN date(created_at) = date('now') THEN 1 ELSE 0 END), 0) as today_views,
+              COALESCE(SUM(CASE WHEN source IN ('instagram','tiktok','facebook','whatsapp') THEN 1 ELSE 0 END), 0) as social_referrals
             FROM analytics_events
-          `).first<any>()
+          `).first<any>(),
+          env.DB.prepare(`
+            SELECT 
+              COALESCE(source, 'direct') as source,
+              COUNT(*) as visits,
+              COUNT(DISTINCT session_id) as visitors
+            FROM analytics_events
+            GROUP BY source
+            ORDER BY visits DESC
+          `).all<any>()
         ]);
 
         return jsonResponse({
           success: true,
           top_pages: pageViewsResult.results || [],
           top_products: productViewsResult.results || [],
+          social_sources: socialSourcesResult.results || [],
           summary: {
             total_events: totalsResult?.total_events || 0,
             unique_visitors: totalsResult?.unique_visitors || 0,
             today_views: totalsResult?.today_views || 0,
+            social_referrals: totalsResult?.social_referrals || 0,
           }
         }, 200, request, env);
       }

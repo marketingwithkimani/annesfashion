@@ -2025,16 +2025,75 @@ async function loadAnalyticsData() {
 
     if (data.success) {
       // Summary stats
-      const todayViews    = data.today_views    ?? 0;
-      const uniqueVisitors = data.unique_visitors ?? 0;
-      const totalEvents   = data.total_events   ?? 0;
+      const summary = data.summary || {};
+      const todayViews     = summary.today_views     ?? data.today_views     ?? 0;
+      const uniqueVisitors = summary.unique_visitors ?? data.unique_visitors ?? 0;
+      const totalEvents    = summary.total_events    ?? data.total_events    ?? 0;
+      const socialRefs     = summary.social_referrals ?? data.social_referrals ?? 0;
 
       const tvEl = document.getElementById('perf-today-views');
       const uvEl = document.getElementById('perf-unique-visitors');
       const teEl = document.getElementById('perf-total-events');
+      const srEl = document.getElementById('perf-social-referrals');
       if (tvEl) tvEl.textContent = todayViews.toLocaleString();
       if (uvEl) uvEl.textContent = uniqueVisitors.toLocaleString();
       if (teEl) teEl.textContent = totalEvents.toLocaleString();
+      if (srEl) srEl.textContent = socialRefs.toLocaleString();
+
+      // Social Media Inbound Performance Breakdown
+      const trafficGrid = document.getElementById('socialTrafficGrid');
+      if (trafficGrid) {
+        const sources = data.social_sources || [];
+        const sourceMap = {
+          instagram: { name: 'Instagram', icon: 'fab fa-instagram', color: '#f77ab4', visits: 0, visitors: 0 },
+          tiktok:    { name: 'TikTok',    icon: 'fab fa-tiktok',    color: '#7fe4f0', visits: 0, visitors: 0 },
+          facebook:  { name: 'Facebook',  icon: 'fab fa-facebook',  color: '#4267B2', visits: 0, visitors: 0 },
+          whatsapp:  { name: 'WhatsApp',  icon: 'fab fa-whatsapp',  color: '#58db82', visits: 0, visitors: 0 },
+          google:    { name: 'Google Search', icon: 'fab fa-google', color: '#ea4335', visits: 0, visitors: 0 },
+          direct:    { name: 'Direct / Other', icon: 'fas fa-globe', color: '#D4AF37', visits: 0, visitors: 0 }
+        };
+
+        let totalVisitsAcross = 0;
+        sources.forEach(s => {
+          const key = (s.source || 'direct').toLowerCase();
+          if (sourceMap[key]) {
+            sourceMap[key].visits += (s.visits || 0);
+            sourceMap[key].visitors += (s.visitors || 0);
+          } else {
+            sourceMap.direct.visits += (s.visits || 0);
+            sourceMap.direct.visitors += (s.visitors || 0);
+          }
+          totalVisitsAcross += (s.visits || 0);
+        });
+
+        // If no visits recorded yet, default to baseline
+        const maxVisits = Math.max(1, totalVisitsAcross);
+
+        trafficGrid.innerHTML = Object.entries(sourceMap).map(([k, s]) => {
+          const pct = totalVisitsAcross > 0 ? Math.round((s.visits / maxVisits) * 100) : 0;
+          return `
+            <div class="traffic-channel-card">
+              <div class="channel-top">
+                <div class="channel-badge-icon" style="color:${s.color}; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);">
+                  <i class="${s.icon}"></i>
+                </div>
+                <div class="channel-meta">
+                  <span class="channel-title">${s.name}</span>
+                  <span class="channel-visitors">${s.visitors} unique visitors</span>
+                </div>
+                <span class="channel-stat-num" style="color:${s.color}; font-weight:700; font-size:1.15rem;">${s.visits}</span>
+              </div>
+              <div class="traffic-progress-bg">
+                <div class="traffic-progress-bar" style="width:${Math.max(pct, s.visits > 0 ? 8 : 2)}%; background:${s.color};"></div>
+              </div>
+              <div class="channel-sub">
+                <span>Traffic Share</span>
+                <span>${pct}%</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
 
       // Top pages table
       const pagesBody = document.getElementById('topPagesBody');
@@ -2080,7 +2139,12 @@ async function loadAnalyticsData() {
   // ─────────────────────────────────────────────────────────────────────────
 
   // Restore saved social stats from localStorage
-  ['ig_followers', 'ig_posts', 'ig_engagement', 'wa_contacts', 'wa_broadcasts', 'wa_orders', 'tt_followers', 'tt_views', 'tt_likes'].forEach(key => {
+  [
+    'ig_followers', 'ig_posts', 'ig_engagement',
+    'tt_followers', 'tt_views', 'tt_likes',
+    'fb_followers', 'fb_posts', 'fb_engagement',
+    'wa_contacts', 'wa_broadcasts', 'wa_orders'
+  ].forEach(key => {
     const val   = localStorage.getItem(`stat_${key}`);
     const input = document.getElementById(key.replace('_', '-'));
     if (input && val) input.value = val;
