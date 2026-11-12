@@ -16,6 +16,9 @@ export interface Env {
   R2_SECRET_ACCESS_KEY?: string;
   JWT_SECRET?: string;
   ADMIN_AUTH_TOKEN?: string;
+  SERPAPI_KEY?: string;
+  OPENROUTER_API_KEY?: string;
+  OPENROUTER_MODEL?: string;
 }
 
 export interface Product {

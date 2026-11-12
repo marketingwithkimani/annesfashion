@@ -1035,38 +1035,85 @@ async function runOsintScan(category) {
   const loading = document.getElementById(`scan-loading-${category}`);
   const tableWrap = document.getElementById(`leads-table-wrap-${category}`);
 
-  if (loading) loading.style.display = 'block';
+  if (loading) {
+    loading.style.display = 'block';
+    loading.innerHTML = `<div style="text-align:center; padding:30px;">
+      <div class="spinner" style="margin:0 auto 14px;"></div>
+      <div style="color:#D4AF37; font-weight:600;">🤖 GPT-6 Luna scanning the web in real time…</div>
+      <div style="color:#888; font-size:0.82rem; margin-top:6px;">SerpAPI + OpenRouter — live Nairobi results</div>
+    </div>`;
+  }
   if (tableWrap) tableWrap.style.display = 'none';
 
-  // Simulate realistic multi-stage OSINT scan with delay
-  setTimeout(() => {
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/osint/scan`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Admin-Token': adminToken || ''
+      },
+      body: JSON.stringify({ category })
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    if (data.success && data.leads && data.leads.length > 0) {
+      const batch = data.leads.map((item, idx) => ({
+        id: null,
+        category,
+        company_name: item.company || item.name || 'Unknown',
+        contact_name: item.contact || 'HR / Events Team',
+        email: item.email || '—',
+        linkedin_url: item.linkedin_url || item.linkedin || '',
+        website: item.website || '',
+        notes: item.event || item.title || '',
+        event: item.event || '',
+        event_window: item.event_window || '',
+        event_why: item.event_why || '',
+        event_recurrence: item.event_recurrence || '',
+        pitch_angle: item.pitch_angle || '',
+        email_draft: craftEmailDraft(category, item, idx),
+        email_sent: 0
+      }));
+      sessionLeads[category] = batch;
+      renderLeadsTable(category, batch);
+      showToast(`🎯 Live scan complete — ${batch.length} real leads found by GPT-6 Luna!`);
+    } else {
+      throw new Error('No leads returned');
+    }
+  } catch (err) {
+    console.warn('Live OSINT scan failed, falling back to curated data:', err.message);
+    // Fallback to seed data
     let sourceData = [];
     if (category === 'corporate') sourceData = SEED_CORPORATES;
     else if (category === 'corporate_women') sourceData = SEED_CORPORATE_WOMEN;
     else if (category === 'diaspora') sourceData = SEED_DIASPORA;
 
-    // Pick a batch of 10
     const batch = sourceData.slice(0, 10).map((item, idx) => ({
       id: null,
-      category: category,
+      category,
       company_name: item.company || item.name,
       contact_name: item.contact || item.name || 'Welfare / HR Committee',
-      email: item.email,
-      linkedin_url: item.linkedin || (item.platform ? item.platform : 'https://linkedin.com'),
-      website: item.domain ? `https://${item.domain}` : null,
+      email: item.email || '—',
+      linkedin_url: item.linkedin || '',
+      website: item.domain ? `https://${item.domain}` : '',
       notes: item.event || item.title || item.type || '',
+      event: item.event || item.title || '',
+      event_window: item.event_window || 'Q4 (Oct – Dec)',
+      event_why: item.event_why || '',
+      event_recurrence: item.event_recurrence || 'Annual',
+      pitch_angle: item.pitch_angle || 'Boutique voucher gifting partnership',
       email_draft: craftEmailDraft(category, item, idx),
       email_sent: 0
     }));
-
     sessionLeads[category] = batch;
-
+    renderLeadsTable(category, batch);
+    showToast('Live scan unavailable — showing curated leads', 'warning');
+  } finally {
     if (loading) loading.style.display = 'none';
     if (tableWrap) tableWrap.style.display = 'block';
-
-    renderLeadsTable(category, batch);
-    showToast(`OSINT scan complete! Generated 10 targeted leads for ${category.replace('_', ' ')}`);
-  }, 1600);
+  }
 }
 
 function renderLeadsTable(category, leads) {
@@ -1117,12 +1164,29 @@ function renderLeadsTable(category, leads) {
 
 // ── INTEL MODAL ─────────────────────────────────────────────────────────────
 function openIntelModal(index, category) {
-  let sourceData = [];
-  if (category === 'corporate')       sourceData = SEED_CORPORATES;
-  else if (category === 'corporate_women') sourceData = SEED_CORPORATE_WOMEN;
-  else if (category === 'diaspora')   sourceData = SEED_DIASPORA;
-
-  const item = sourceData[index];
+  // Prefer live session leads; fall back to seed data
+  let item = null;
+  if (sessionLeads[category] && sessionLeads[category][index]) {
+    item = sessionLeads[category][index];
+    // Normalise field names from live API response vs seed data shape
+    item = {
+      company: item.company_name || item.company || item.name,
+      contact: item.contact_name || item.contact,
+      title: item.notes || item.title,
+      event: item.event,
+      event_window: item.event_window,
+      event_why: item.event_why,
+      event_recurrence: item.event_recurrence,
+      pitch_angle: item.pitch_angle,
+      type: item.category
+    };
+  } else {
+    let sourceData = [];
+    if (category === 'corporate')       sourceData = SEED_CORPORATES;
+    else if (category === 'corporate_women') sourceData = SEED_CORPORATE_WOMEN;
+    else if (category === 'diaspora')   sourceData = SEED_DIASPORA;
+    item = sourceData[index];
+  }
   if (!item) return;
 
   const modal = document.getElementById('intelModal');

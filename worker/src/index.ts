@@ -1074,6 +1074,106 @@ export default {
       }
 
       // ----------------------------------------------------
+      // LIVE OSINT SCAN (SERPAPI + OPENROUTER GPT-6 LUNA)
+      // POST /api/admin/osint/scan { category: 'corporate' | 'corporate_women' | 'diaspora' }
+      // ----------------------------------------------------
+      if (path === '/api/admin/osint/scan' && method === 'POST') {
+        const body = await request.json().catch(() => ({})) as any;
+        const category = body.category || 'corporate';
+        const serpKey = env.SERPAPI_KEY;
+        const orKey = env.OPENROUTER_API_KEY;
+        const orModel = env.OPENROUTER_MODEL || 'openai/gpt-6-luna';
+
+        if (!serpKey || !orKey) {
+          return jsonResponse({
+            success: false,
+            error: 'Missing SERPAPI_KEY or OPENROUTER_API_KEY in worker secrets'
+          }, 500, request, env);
+        }
+
+        let searchQuery = '';
+        if (category === 'corporate') {
+          searchQuery = 'Kenya corporate annual dinner gala awards Serena Hotel OR Ole Sereni OR Argyle Grand OR Nairobi 2024 OR 2025 OR 2026';
+        } else if (category === 'corporate_women') {
+          searchQuery = 'site:ke.linkedin.com/in Nairobi ("Head of HR" OR "Chief People Officer" OR "Marketing Director" OR "Finance Director") women';
+        } else if (category === 'diaspora') {
+          searchQuery = '"Kenyan Women" ("UK" OR "USA" OR "Dallas" OR "London" OR "Canada") gala OR dinner OR annual party';
+        }
+
+        try {
+          // 1. Fetch live organic search results via SerpAPI
+          const serpUrl = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(searchQuery)}&api_key=${serpKey}&num=8`;
+          const serpRes = await fetch(serpUrl);
+          const serpData = await serpRes.json() as any;
+          const organic = serpData.organic_results || [];
+
+          if (!organic || organic.length === 0) {
+            return jsonResponse({ success: false, error: 'No search results returned from SerpAPI' }, 200, request, env);
+          }
+
+          const searchSnippets = organic.slice(0, 8).map((r: any, i: number) => {
+            return `Result #${i+1}:\nTitle: ${r.title}\nLink: ${r.link}\nSnippet: ${r.snippet || ''}`;
+          }).join('\n---\n');
+
+          // 2. Synthesize with OpenRouter GPT-6 Luna
+          const systemPrompt = `You are an elite OSINT lead generation analyst for Anne's Fashion Line, a luxury boutique in Nairobi, Kenya.
+Anne's Fashion Line specializes in corporate wear, dinner galas, and bespoke boutique vouchers.
+Your goal is to parse real live Google Search results and produce verified leads.
+Return a valid JSON array of 5 to 10 objects with these exact keys:
+- company: Company or organisation name
+- contact: Name or specific role of the decision maker (e.g. HR Director, Events Lead)
+- email: Realistic corporate email pattern (e.g. info@company.co.ke or hr@domain.com)
+- linkedin_url: Real link or LinkedIn search url
+- website: Company website or event URL
+- event: Real event or gala discovered in the snippet
+- event_window: Date, month, or season of the event
+- event_why: Why Anne's Fashion Line boutique vouchers are the ideal fit for this exact event
+- event_recurrence: Annual or repeat recurrence details
+- pitch_angle: Specific angle for batch vouchers or styling
+Only return raw JSON array. No markdown fences, no conversational text.`;
+
+          const orRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${orKey}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              model: orModel,
+              messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: `Category: ${category}\n\nSearch Results:\n${searchSnippets}\n\nGenerate structured leads now:` }
+              ],
+              temperature: 0.3
+            })
+          });
+
+          const orData = await orRes.json() as any;
+          const rawContent = orData.choices?.[0]?.message?.content || '';
+          
+          let parsedLeads: any[] = [];
+          try {
+            const cleaned = rawContent.replace(/```json/gi, '').replace(/```/g, '').trim();
+            parsedLeads = JSON.parse(cleaned);
+          } catch (pe) {
+            console.error('Failed to parse OpenRouter JSON:', pe, rawContent);
+          }
+
+          return jsonResponse({
+            success: true,
+            category,
+            source: 'live_osint',
+            model: orModel,
+            leads: parsedLeads
+          }, 200, request, env);
+
+        } catch (scanErr: any) {
+          console.error('OSINT scan error:', scanErr);
+          return errorResponse(`OSINT scan error: ${scanErr.message}`, 500, request, env);
+        }
+      }
+
+      // ----------------------------------------------------
       // ADMIN LOGIN CHECK (simple password check)
       // POST /api/admin/login  { password: "Admin123" }
       // ----------------------------------------------------
