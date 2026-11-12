@@ -13,10 +13,11 @@
 </head>
 <body>
 
-<!-- Mobile redirect script -->
+<!-- Optional mobile redirect (only on narrow phones when not explicitly requested) -->
 <script>
-  if (window.innerWidth < 1024) {
-    window.location.href = 'index.html';
+  if (window.innerWidth < 640 && !window.location.search.includes('desktop=1')) {
+    // If on a narrow phone, allow switching or redirect
+    // window.location.href = 'index.html';
   }
 </script>
 

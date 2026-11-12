@@ -58,7 +58,7 @@ body {
   position: fixed;
   inset: 0;
   z-index: 1000;
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
   background: radial-gradient(circle at 50% 40%, #151522 0%, #08080c 100%);

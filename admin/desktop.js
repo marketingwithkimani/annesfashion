@@ -1864,13 +1864,6 @@ Anne's Fashion Line`
   return '';
 }
 
-With love from Nairobi,
-Anne's Fashion Line`;
-  }
-
-  return '';
-}
-
 function openEmailModal(index, category) {
   const lead = sessionLeads[category][index];
   if (!lead) return;
