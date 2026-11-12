@@ -3,16 +3,22 @@
    Romantic Kenyan Babe Aesthetic ✨
    ===================================================== */
 
+/* Scoped cart variables so cart drawer styling does not pollute document theme */
 :root {
     --gold-primary: #c9a96e;
     --gold-hover: #e0be82;
     --dark-bg: #0d0d11;
     --card-dark: #15151c;
     --card-darker: #0e0e14;
-    --text-primary: #ffffff;
-    --text-muted: rgba(255, 255, 255, 0.65);
     --border-gold: rgba(201, 169, 110, 0.25);
     --green-mpesa: #00be46;
+}
+
+.wardrobe-cart-drawer,
+.cart-drawer,
+.cart-backdrop {
+    --text-primary: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.65);
 }
 
 /* ========================================

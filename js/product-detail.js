@@ -242,6 +242,174 @@ document.addEventListener('DOMContentLoaded', () => {
             .trim();
     }
 
+    // Comprehensive fashion color resolver for true swatches
+    function resolveFashionColor(colorName) {
+        if (!colorName || typeof colorName !== 'string') return { background: '#888888', isLight: false };
+        const raw = colorName.trim();
+        const c = raw.toLowerCase().replace(/[_-]/g, ' ').replace(/\s+/g, ' ');
+
+        // 1. Check for compound / split colors (e.g. "White with Orange", "Brown and Green", "Black & Gold")
+        const splitMatch = c.match(/^(.+?)\s*(?:and|with|&)\s*(.+)$/);
+        if (splitMatch) {
+            const c1 = resolveFashionColor(splitMatch[1]);
+            const c2 = resolveFashionColor(splitMatch[2]);
+            return {
+                background: `linear-gradient(135deg, ${c1.background} 50%, ${c2.background} 50%)`,
+                isLight: c1.isLight && c2.isLight
+            };
+        }
+
+        // 2. Comprehensive Fashion Dictionary
+        const map = {
+            // True Browns & Chocolates (NOT Maroon!)
+            'brown': { hex: '#6B4423', isLight: false },
+            'chocolate': { hex: '#4A2C11', isLight: false },
+            'chocolate brown': { hex: '#4A2C11', isLight: false },
+            'coffee': { hex: '#4A3525', isLight: false },
+            'mocha': { hex: '#7A5A40', isLight: false },
+            'tan': { hex: '#D2B48C', isLight: true },
+            'camel': { hex: '#C19A6B', isLight: true },
+            'khaki': { hex: '#C3B091', isLight: true },
+
+            // Greens (Emerald, Mint, Luminous, Sage, Olive)
+            'emerald': { hex: '#097969', isLight: false },
+            'emerald green': { hex: '#097969', isLight: false },
+            'mint': { hex: '#98FF98', isLight: true },
+            'mint green': { hex: '#98FF98', isLight: true },
+            'luminous green': { hex: '#39FF14', isLight: true },
+            'neon green': { hex: '#39FF14', isLight: true },
+            'lime': { hex: '#32CD32', isLight: true },
+            'lime green': { hex: '#32CD32', isLight: true },
+            'olive': { hex: '#808000', isLight: false },
+            'olive green': { hex: '#556B2F', isLight: false },
+            'sage': { hex: '#9CAF88', isLight: true },
+            'sage green': { hex: '#9CAF88', isLight: true },
+            'forest green': { hex: '#228B22', isLight: false },
+            'dark green': { hex: '#1B4D3E', isLight: false },
+            'green': { hex: '#2E8B57', isLight: false },
+            'teal': { hex: '#008080', isLight: false },
+            'turquoise': { hex: '#40E0D0', isLight: true },
+
+            // Peaches, Corals & Oranges
+            'peach': { hex: '#FFCBA4', isLight: true },
+            'peach puff': { hex: '#FFDAB9', isLight: true },
+            'apricot': { hex: '#FBCEB1', isLight: true },
+            'coral': { hex: '#FF7F50', isLight: false },
+            'salmon': { hex: '#FA8072', isLight: true },
+            'orange': { hex: '#FFA500', isLight: false },
+            'burnt orange': { hex: '#CC5500', isLight: false },
+            'rust': { hex: '#B7410E', isLight: false },
+            'terracotta': { hex: '#E2725B', isLight: false },
+
+            // Maroons, Reds & Burgundies
+            'maroon': { hex: '#800000', isLight: false },
+            'burgundy': { hex: '#800020', isLight: false },
+            'wine': { hex: '#722F37', isLight: false },
+            'red': { hex: '#E50914', isLight: false },
+            'crimson': { hex: '#DC143C', isLight: false },
+            'ruby': { hex: '#E0115F', isLight: false },
+
+            // Nudes, Neutrals, Whites & Creams
+            'nude': { hex: '#E3BC9A', isLight: true },
+            'beige': { hex: '#F5F5DC', isLight: true },
+            'cream': { hex: '#FFFDD0', isLight: true },
+            'off white': { hex: '#FAF9F6', isLight: true },
+            'ivory': { hex: '#FFFFF0', isLight: true },
+            'white': { hex: '#FFFFFF', isLight: true },
+            'champagne': { hex: '#F7E7CE', isLight: true },
+
+            // Pinks & Purples
+            'pink': { hex: '#FFC0CB', isLight: true },
+            'dusty pink': { hex: '#DCAE96', isLight: true },
+            'dusty rose': { hex: '#DCAE96', isLight: true },
+            'baby pink': { hex: '#F4C2C2', isLight: true },
+            'hot pink': { hex: '#FF69B4', isLight: false },
+            'magenta': { hex: '#FF00FF', isLight: false },
+            'fuchsia': { hex: '#FF00FF', isLight: false },
+            'lavender': { hex: '#E6E6FA', isLight: true },
+            'lilac': { hex: '#C8A2C8', isLight: true },
+            'purple': { hex: '#800080', isLight: false },
+            'plum': { hex: '#8E4585', isLight: false },
+            'mauve': { hex: '#E0B0FF', isLight: true },
+            'violet': { hex: '#8F00FF', isLight: false },
+
+            // Blues
+            'navy': { hex: '#001f3f', isLight: false },
+            'navy blue': { hex: '#001f3f', isLight: false },
+            'royal blue': { hex: '#4169E1', isLight: false },
+            'sky blue': { hex: '#87CEEB', isLight: true },
+            'baby blue': { hex: '#89CFF0', isLight: true },
+            'powder blue': { hex: '#B0E0E6', isLight: true },
+            'blue': { hex: '#1E90FF', isLight: false },
+
+            // Yellows & Golds
+            'yellow': { hex: '#FFD700', isLight: true },
+            'mustard': { hex: '#E1AD01', isLight: false },
+            'mustard yellow': { hex: '#E1AD01', isLight: false },
+            'gold': { hex: '#D4AF37', isLight: false },
+            'rose gold': { hex: '#B76E79', isLight: false },
+            'bronze': { hex: '#CD7F32', isLight: false },
+            'copper': { hex: '#B87333', isLight: false },
+            'silver': { hex: '#C0C0C0', isLight: true },
+
+            // Darks & Greys
+            'black': { hex: '#111111', isLight: false },
+            'grey': { hex: '#808080', isLight: false },
+            'gray': { hex: '#808080', isLight: false },
+            'charcoal': { hex: '#36454F', isLight: false },
+
+            // Prints & Multi
+            'floral': { hex: 'linear-gradient(135deg, #FF9A8B 0%, #FF6A88 55%, #FF99AC 100%)', isLight: false },
+            'multi': { hex: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', isLight: false },
+            'multicolour': { hex: 'linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #4facfe 100%)', isLight: false },
+            'multicolored': { hex: 'linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #4facfe 100%)', isLight: false },
+            'multicolor': { hex: 'linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #4facfe 100%)', isLight: false },
+            'print': { hex: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', isLight: false }
+        };
+
+        if (map[c]) {
+            return { background: map[c].hex, isLight: map[c].isLight };
+        }
+
+        // 3. Keyword matching for multi-word or custom variant names
+        if (c.includes('emerald')) return { background: '#097969', isLight: false };
+        if (c.includes('mint')) return { background: '#98FF98', isLight: true };
+        if (c.includes('peach')) return { background: '#FFCBA4', isLight: true };
+        if (c.includes('luminous') || c.includes('neon')) return { background: '#39FF14', isLight: true };
+        if (c.includes('chocolate')) return { background: '#4A2C11', isLight: false };
+        if (c.includes('brown')) return { background: '#6B4423', isLight: false };
+        if (c.includes('burgundy') || c.includes('wine')) return { background: '#800020', isLight: false };
+        if (c.includes('maroon')) return { background: '#800000', isLight: false };
+        if (c.includes('mustard')) return { background: '#E1AD01', isLight: false };
+        if (c.includes('rust')) return { background: '#B7410E', isLight: false };
+        if (c.includes('olive')) return { background: '#556B2F', isLight: false };
+        if (c.includes('sage')) return { background: '#9CAF88', isLight: true };
+        if (c.includes('navy')) return { background: '#001f3f', isLight: false };
+        if (c.includes('royal')) return { background: '#4169E1', isLight: false };
+        if (c.includes('gold')) return { background: '#D4AF37', isLight: false };
+        if (c.includes('silver')) return { background: '#C0C0C0', isLight: true };
+        if (c.includes('floral')) return { background: 'linear-gradient(135deg, #FF9A8B 0%, #FF6A88 55%, #FF99AC 100%)', isLight: false };
+        if (c.includes('multi')) return { background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', isLight: false };
+        if (c.includes('green')) return { background: '#2E8B57', isLight: false };
+        if (c.includes('blue')) return { background: '#1E90FF', isLight: false };
+        if (c.includes('pink') || c.includes('rose')) return { background: '#FFC0CB', isLight: true };
+        if (c.includes('red')) return { background: '#E50914', isLight: false };
+        if (c.includes('purple')) return { background: '#800080', isLight: false };
+        if (c.includes('orange')) return { background: '#FFA500', isLight: false };
+        if (c.includes('yellow')) return { background: '#FFD700', isLight: true };
+        if (c.includes('nude') || c.includes('beige')) return { background: '#E3BC9A', isLight: true };
+        if (c.includes('white')) return { background: '#FFFFFF', isLight: true };
+        if (c.includes('black')) return { background: '#111111', isLight: false };
+
+        // 4. Fallback: Generate a pleasing distinct HSL color based on string hash (NEVER WHITE!)
+        let hash = 0;
+        for (let i = 0; i < c.length; i++) {
+            hash = c.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const hue = Math.abs(hash) % 360;
+        return { background: `hsl(${hue}, 65%, 45%)`, isLight: false };
+    }
+
     // Multi-Item Showcase State (1 Video -> 1 to 3 Pieces)
     let currentLookItems = [];
     let currentListingData = null;
@@ -658,30 +826,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     validColors.forEach((color, cIdx) => {
                         const isColorActive = activeSavedColor ? activeSavedColor === color : cIdx === 0;
                         const btn = document.createElement('button');
-                        btn.className = `color-btn ${isColorActive ? 'active' : ''}`;
                         btn.setAttribute('data-color', color);
                         btn.title = color;
 
-                        const cLower = color.toLowerCase().trim();
-                        const colorMap = {
-                            'burgundy': '#800020',
-                            'nude': '#e0ac69',
-                            'beige': '#f5f5dc',
-                            'navy': '#001f3f',
-                            'navy blue': '#001f3f',
-                            'royal blue': '#4169e1',
-                            'gold': '#c9a96e',
-                            'rose gold': '#b76e79',
-                            'silver': '#c0c0c0',
-                            'charcoal': '#36454f',
-                            'white': '#ffffff',
-                            'black': '#111111'
-                        };
-                        const bg = colorMap[cLower] || cLower;
-                        btn.style.backgroundColor = bg;
+                        const resolved = resolveFashionColor(color);
+                        btn.style.background = resolved.background;
+                        btn.className = `color-btn ${isColorActive ? 'active' : ''} ${resolved.isLight ? 'check-dark' : ''}`;
 
-                        if (cLower === 'white' || cLower === '#fff' || cLower === '#ffffff' || cLower === 'cream') {
-                            btn.style.border = '2px solid #ccc';
+                        if (resolved.isLight) {
+                            btn.style.borderColor = 'rgba(0, 0, 0, 0.25)';
                         }
 
                         btn.addEventListener('click', () => {

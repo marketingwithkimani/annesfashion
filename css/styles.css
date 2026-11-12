@@ -1,20 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=MonteCarlo&family=Pinyon+Script&display=swap');
 
 /* Base Variables & Theme Setup */
-:root {
+:root,
+[data-theme="light"] {
     /* Light Mode Palette */
     --primary-bg: #ffffff;
     --secondary-bg: #f9f9f9;
     --text-main: #1a1a1a;
-    --text-muted: #666666;
+    --text-primary: #1a1a1a;
+    --text-muted: #555555;
     --accent-gold: #c5a059;
-    --accent-silver: #a8a9ad;
+    --accent-silver: #7a7a7a;
     --accent-highlight: #d4af37;
     --card-bg: #ffffff;
-    --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.05);
-    --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.1);
-    --border-light: #eeeeee;
-    --glass-bg: rgba(255, 255, 255, 0.85);
+    --bg-card: #ffffff;
+    --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.06);
+    --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.12);
+    --border-light: #e5e5e5;
+    --glass-bg: rgba(255, 255, 255, 0.92);
 
     /* Spacing & Layout */
     --container-padding: 4%;
@@ -29,12 +32,14 @@
     --primary-bg: #000000;
     --secondary-bg: #111111;
     --text-main: #ffffff;
+    --text-primary: #ffffff;
     --text-muted: #aaaaaa;
     --accent-gold: #d4af37;
     --accent-silver: #c0c0c0;
     --accent-highlight: #800020;
     /* Subtle burgundy */
     --card-bg: #1a1a1a;
+    --bg-card: #141418;
     --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.5);
     --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.7);
     --border-light: #333333;

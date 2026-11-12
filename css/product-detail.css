@@ -124,6 +124,11 @@
 .product-description {
     line-height: 1.8;
     color: var(--text-muted);
+    font-size: 0.96rem;
+}
+
+[data-theme="light"] .product-description {
+    color: #333333;
 }
 
 /* Product Options */
@@ -181,12 +186,14 @@
     cursor: pointer;
     transition: all 0.3s;
     position: relative;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
 }
 
 .color-btn:hover,
 .color-btn.active {
     border-color: var(--accent-gold);
     transform: scale(1.1);
+    box-shadow: 0 0 12px rgba(201, 169, 110, 0.45);
 }
 
 .color-btn.active::after {
@@ -195,8 +202,14 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: #fff;
+    color: #ffffff;
     font-weight: bold;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+.color-btn.active.check-dark::after {
+    color: #111111;
+    text-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
 }
 
 /* Product Actions */
@@ -603,7 +616,7 @@
 
 .piece-tab-card {
     background: var(--bg-card, #141418);
-    border: 2px solid rgba(255, 255, 255, 0.08);
+    border: 2px solid var(--border-light, rgba(255, 255, 255, 0.08));
     border-radius: 12px;
     padding: 12px;
     cursor: pointer;
@@ -614,10 +627,16 @@
     gap: 6px;
 }
 
+[data-theme="light"] .piece-tab-card {
+    background: #ffffff;
+    border-color: #e5e5e5;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
 .piece-tab-card:hover {
     border-color: rgba(201, 169, 110, 0.5);
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
 .piece-tab-card.active {
@@ -678,17 +697,18 @@
     transition: all 0.3s ease;
 }
 
-.bundle-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 6px;
+[data-theme="light"] .bundle-buy-card {
+    background: linear-gradient(135deg, rgba(201, 169, 110, 0.15), rgba(246, 246, 248, 0.95));
+    border-color: rgba(201, 169, 110, 0.6);
 }
 
 .bundle-title {
     display: flex;
     align-items: center;
     gap: 8px;
+    font-size: 0.95rem;
+    color: var(--text-main);
+}
     font-size: 0.95rem;
     color: var(--text-primary);
 }
