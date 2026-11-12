@@ -490,3 +490,41 @@ window.cfSaveMedia = cfSaveMedia;
 window.CF_WORKER_URL = CF_WORKER_URL;
 
 console.log('⚡ Anne\'s Fashion Cloudflare Client initialized with Worker:', CF_WORKER_URL);
+
+// =====================================================
+// Real-Time First-Party Analytics Event Logger
+// =====================================================
+(function initFirstPartyAnalytics() {
+    try {
+        const page = window.location.pathname.split('/').pop() || 'index.html';
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('id') || urlParams.get('listing_id') || null;
+
+        let sessionId = localStorage.getItem('af_session_token');
+        if (!sessionId) {
+            sessionId = 'af_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
+            localStorage.setItem('af_session_token', sessionId);
+        }
+
+        const payload = {
+            event_type: productId ? 'product_view' : 'page_view',
+            page: page,
+            product_id: productId ? parseInt(productId) : null,
+            session_id: sessionId
+        };
+
+        const endpoint = `${CF_WORKER_URL}/api/analytics/event`;
+        if (navigator.sendBeacon) {
+            navigator.sendBeacon(endpoint, JSON.stringify(payload));
+        } else {
+            fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+                keepalive: true
+            }).catch(() => {});
+        }
+    } catch (e) {
+        // Safe fail
+    }
+})();

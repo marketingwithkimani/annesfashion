@@ -146,9 +146,16 @@ function refreshGrids() {
     const grid = document.getElementById('productsGrid');
     const rail = document.getElementById('socialRail');
 
+    // Hide old separate preorder section if present (Hot Picks section dynamically becomes Pre-order Closet / Flash Sale Closet)
+    const oldPreorderSection = document.getElementById('preorderSection');
+    if (oldPreorderSection) oldPreorderSection.style.display = 'none';
+
     if (grid) {
         if (productsData && productsData.length > 0) {
-            const mixedItems = window.mixContent(productsData, window.socialVideos);
+            // Trending Now section strictly shows regular inventory pieces;
+            // Pre-order items and Flash Sale items are strictly excluded from Trending Now.
+            const trendingProducts = productsData.filter(p => !p.allow_preorder && !p.is_flash_sale);
+            const mixedItems = window.mixContent(trendingProducts, window.socialVideos);
             window.renderProductGrid(grid, mixedItems);
         } else {
             grid.innerHTML = `
@@ -165,7 +172,6 @@ function refreshGrids() {
     updateHeroVerticalVideos();
 
     document.dispatchEvent(new CustomEvent('productsLoaded', { detail: productsData }));
-    fetchPreorders();
     fetchHotCloset();
 }
 
@@ -344,25 +350,25 @@ async function fetchHotCloset() {
         const subTitleEl = section.querySelector('.section-header .section-subtitle');
 
         let hot = [];
-        if (isPreorderActive) {
-            if (badgeEl) badgeEl.innerHTML = '<i class="fas fa-clock"></i> Pre-Order';
-            if (titleEl) titleEl.textContent = 'Pre-Order Wardrobe ⏳';
-            if (subTitleEl) subTitleEl.textContent = 'Reserve incoming boutique pieces before they arrive';
-            hot = [...productsData].filter(p => p.type === 'product' && p.allow_preorder == 1).slice(0, 15);
-        } else if (isFlashSaleActive) {
+        if (isFlashSaleActive) {
             if (badgeEl) badgeEl.innerHTML = '<i class="fas fa-bolt"></i> Flash Sale';
             if (titleEl) titleEl.textContent = 'Flash Sale Closet ⚡';
-            if (subTitleEl) subTitleEl.textContent = 'Limited time luxury boutique pieces at special prices';
+            if (subTitleEl) subTitleEl.textContent = 'Limited time boutique flash deals — grab yours before they sell out';
             hot = [...productsData].filter(p => p.type === 'product' && p.is_flash_sale == 1).slice(0, 15);
+        } else if (isPreorderActive) {
+            if (badgeEl) badgeEl.innerHTML = '<i class="fas fa-clock"></i> Pre-Order';
+            if (titleEl) titleEl.textContent = 'Pre-Order Closet ⏳';
+            if (subTitleEl) subTitleEl.textContent = 'Reserve incoming boutique pieces before they arrive';
+            hot = [...productsData].filter(p => p.type === 'product' && p.allow_preorder == 1).slice(0, 15);
         } else {
             if (badgeEl) badgeEl.innerHTML = '<i class="fas fa-fire"></i> Hot Picks';
             if (titleEl) titleEl.textContent = 'Hot Selling Closet 🔥';
             if (subTitleEl) subTitleEl.textContent = "The pieces everyone's grabbing right now";
             hot = [...productsData]
-                .filter(p => p.type === 'product')
+                .filter(p => p.type === 'product' && !p.allow_preorder && !p.is_flash_sale)
                 .sort((a, b) => {
-                    const scoreA = (a.is_flash_sale ? 4 : 0) + (a.is_featured ? 2 : 0) + (a.allow_preorder ? 1 : 0);
-                    const scoreB = (b.is_flash_sale ? 4 : 0) + (b.is_featured ? 2 : 0) + (b.allow_preorder ? 1 : 0);
+                    const scoreA = (a.is_featured ? 2 : 0);
+                    const scoreB = (b.is_featured ? 2 : 0);
                     if (scoreB !== scoreA) return scoreB - scoreA;
                     return (b.total_stock || 0) - (a.total_stock || 0);
                 })

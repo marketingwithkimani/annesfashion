@@ -85,11 +85,49 @@ export default {
           const body = await request.json() as { key: string; value: string };
           if (!body.key) return errorResponse('Missing setting key', 400, request, env);
 
+          const key = String(body.key).trim();
+          const val = String(body.value).trim().toLowerCase();
+
+          // Mutual exclusion enforcement: Pre-Order and Flash Sale cannot both be ON
+          if (key === 'pre_order_mode' && val === 'on') {
+            await env.DB.prepare(`
+              INSERT INTO settings (setting_key, setting_value, updated_at) 
+              VALUES ('flash_sale_mode', 'off', datetime('now'))
+              ON CONFLICT(setting_key) DO UPDATE SET setting_value = 'off', updated_at = datetime('now')
+            `).run();
+            await env.DB.prepare(`
+              INSERT INTO settings (setting_key, setting_value, updated_at) 
+              VALUES ('hot_picks_mode', 'preorder', datetime('now'))
+              ON CONFLICT(setting_key) DO UPDATE SET setting_value = 'preorder', updated_at = datetime('now')
+            `).run();
+          } else if (key === 'flash_sale_mode' && val === 'on') {
+            await env.DB.prepare(`
+              INSERT INTO settings (setting_key, setting_value, updated_at) 
+              VALUES ('pre_order_mode', 'off', datetime('now'))
+              ON CONFLICT(setting_key) DO UPDATE SET setting_value = 'off', updated_at = datetime('now')
+            `).run();
+            await env.DB.prepare(`
+              INSERT INTO settings (setting_key, setting_value, updated_at) 
+              VALUES ('hot_picks_mode', 'flash_sale', datetime('now'))
+              ON CONFLICT(setting_key) DO UPDATE SET setting_value = 'flash_sale', updated_at = datetime('now')
+            `).run();
+          } else if ((key === 'pre_order_mode' || key === 'flash_sale_mode') && val === 'off') {
+            const otherKey = key === 'pre_order_mode' ? 'flash_sale_mode' : 'pre_order_mode';
+            const other = await env.DB.prepare('SELECT setting_value FROM settings WHERE setting_key = ?').bind(otherKey).first<any>();
+            if (!other || other.setting_value !== 'on') {
+              await env.DB.prepare(`
+                INSERT INTO settings (setting_key, setting_value, updated_at) 
+                VALUES ('hot_picks_mode', 'normal', datetime('now'))
+                ON CONFLICT(setting_key) DO UPDATE SET setting_value = 'normal', updated_at = datetime('now')
+              `).run();
+            }
+          }
+
           await env.DB.prepare(`
             INSERT INTO settings (setting_key, setting_value, updated_at) 
             VALUES (?, ?, datetime('now'))
             ON CONFLICT(setting_key) DO UPDATE SET setting_value = excluded.setting_value, updated_at = datetime('now')
-          `).bind(body.key, String(body.value)).run();
+          `).bind(key, val).run();
 
           return jsonResponse({ success: true, message: 'Setting saved' }, 200, request, env);
         }
@@ -1082,6 +1120,75 @@ export default {
         params.push(id);
         await env.DB.prepare(`UPDATE products SET ${setClauses.join(', ')} WHERE id = ?`).bind(...params).run();
         return jsonResponse({ success: true }, 200, request, env);
+      }
+
+      // ----------------------------------------------------
+      // CLIENT ANALYTICS EVENT INGESTION
+      // POST /api/analytics/event
+      // ----------------------------------------------------
+      if (path === '/api/analytics/event' && method === 'POST') {
+        const body = await request.clone().json().catch(() => ({})) as any;
+        const eventType = body.event_type || 'page_view';
+        const page = body.page || 'index.html';
+        const productId = body.product_id ? parseInt(body.product_id) : null;
+        const sessionId = body.session_id || null;
+        const userAgent = request.headers.get('User-Agent') || null;
+
+        await env.DB.prepare(`
+          INSERT INTO analytics_events (event_type, page, product_id, session_id, user_agent, created_at)
+          VALUES (?, ?, ?, ?, ?, datetime('now'))
+        `).bind(eventType, page, productId, sessionId, userAgent).run();
+
+        return jsonResponse({ success: true }, 201, request, env);
+      }
+
+      // ----------------------------------------------------
+      // ADMIN REAL ANALYTICS AGGREGATION
+      // GET /api/admin/analytics
+      // ----------------------------------------------------
+      if (path === '/api/admin/analytics' && method === 'GET') {
+        const adminToken = request.headers.get('X-Admin-Token');
+        if (env.ADMIN_AUTH_TOKEN && adminToken !== env.ADMIN_AUTH_TOKEN) {
+          return errorResponse('Unauthorized', 401, request, env);
+        }
+
+        const [pageViewsResult, productViewsResult, totalsResult] = await Promise.all([
+          env.DB.prepare(`
+            SELECT page, COUNT(*) as views, COUNT(DISTINCT session_id) as visitors
+            FROM analytics_events
+            WHERE event_type = 'page_view'
+            GROUP BY page
+            ORDER BY views DESC
+            LIMIT 10
+          `).all<any>(),
+          env.DB.prepare(`
+            SELECT ae.product_id, COALESCE(p.title, 'Product #' || ae.product_id) as title, p.price, p.image_url, COUNT(*) as views, COUNT(DISTINCT ae.session_id) as visitors
+            FROM analytics_events ae
+            LEFT JOIN products p ON ae.product_id = p.id
+            WHERE ae.event_type = 'product_view' AND ae.product_id IS NOT NULL
+            GROUP BY ae.product_id
+            ORDER BY views DESC
+            LIMIT 15
+          `).all<any>(),
+          env.DB.prepare(`
+            SELECT 
+              COUNT(*) as total_events,
+              COUNT(DISTINCT session_id) as unique_visitors,
+              COALESCE(SUM(CASE WHEN date(created_at) = date('now') THEN 1 ELSE 0 END), 0) as today_views
+            FROM analytics_events
+          `).first<any>()
+        ]);
+
+        return jsonResponse({
+          success: true,
+          top_pages: pageViewsResult.results || [],
+          top_products: productViewsResult.results || [],
+          summary: {
+            total_events: totalsResult?.total_events || 0,
+            unique_visitors: totalsResult?.unique_visitors || 0,
+            today_views: totalsResult?.today_views || 0,
+          }
+        }, 200, request, env);
       }
 
       // 404

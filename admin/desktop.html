@@ -94,7 +94,7 @@
       </a>
       <a class="nav-item" data-section="leadgen" onclick="showSection('leadgen',this)">
         <i class="fas fa-search-location nav-icon"></i>
-        <span>Lead Gen</span>
+        <span>Get Clients</span>
       </a>
       <a class="nav-item" data-section="analytics" onclick="showSection('analytics',this)">
         <i class="fas fa-chart-pie nav-icon"></i>
@@ -427,12 +427,11 @@
       </div>
     </div>
 
-    <!-- ======== LEAD GEN SECTION ======== -->
+    <!-- ======== GET CLIENTS SECTION ======== -->
     <div id="section-leadgen" class="section">
       <div class="glass-card">
         <div class="card-header">
-          <h3><i class="fas fa-search-location"></i> Lead Generation</h3>
-          <span class="badge badge-blue">AI-Powered</span>
+          <h3><i class="fas fa-search-location"></i> Get Clients</h3>
         </div>
         <div class="leadgen-tabs">
           <button class="leadgen-tab active" onclick="switchLeadTab('corporate', this)">
@@ -573,29 +572,61 @@
 
     <!-- ======== ANALYTICS SECTION ======== -->
     <div id="section-analytics" class="section">
-      <div class="analytics-notice glass-card">
-        <i class="fas fa-plug" style="color:#D4AF37;font-size:1.5rem;"></i>
-        <span>Connect your analytics tools to see live data</span>
+      <div class="analytics-notice glass-card" style="border-left: 4px solid var(--gold);">
+        <i class="fas fa-satellite" style="color:#D4AF37;font-size:1.5rem;"></i>
+        <div>
+          <strong style="color:#fff; display:block; margin-bottom:2px;">Real First-Party Website Analytics Connected</strong>
+          <span style="font-size:0.83rem; color:var(--text-muted);">Tracking real visitors, page traffic, and product engagement via Cloudflare D1.</span>
+        </div>
+      </div>
+
+      <div class="stats-grid finance-stats" style="margin-bottom: 24px;">
+        <div class="stat-card">
+          <div class="stat-icon-wrap" style="--icon-color:#D4AF37;">
+            <i class="fas fa-eye"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Today's Page Views</span>
+            <span class="stat-value gold" id="perf-today-views">0</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-wrap" style="--icon-color:#4a9d6f;">
+            <i class="fas fa-users"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Unique Visitors</span>
+            <span class="stat-value gold" id="perf-unique-visitors">0</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-wrap" style="--icon-color:#5b8dee;">
+            <i class="fas fa-layer-group"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Total Events Logged</span>
+            <span class="stat-value gold" id="perf-total-events">0</span>
+          </div>
+        </div>
       </div>
 
       <div class="section-row">
         <div class="glass-card flex-1">
           <div class="card-header">
-            <h3><i class="fas fa-eye"></i> Product Views</h3>
-            <span class="badge">Mock Data</span>
+            <h3><i class="fas fa-file-alt"></i> Most Frequently Visited Pages</h3>
+            <span class="badge" style="background:rgba(212,175,55,0.15); color:var(--gold);">Live Traffic</span>
           </div>
-          <p class="section-desc">Track your product visibility and engagement. <em>Live tracking requires client-side analytics pixel integration.</em></p>
           <div class="table-wrap">
-            <table class="data-table" id="productViewsTable">
+            <table class="data-table" id="topPagesTable">
               <thead>
                 <tr>
-                  <th>Product</th>
-                  <th>Views</th>
-                  <th>Trend</th>
+                  <th>Page</th>
+                  <th>Total Views</th>
+                  <th>Visitors</th>
                 </tr>
               </thead>
-              <tbody id="productViewsBody">
-                <!-- populated by JS -->
+              <tbody id="topPagesBody">
+                <tr><td colspan="3" class="loading-row"><i class="fas fa-spinner fa-spin"></i> Loading live page visits...</td></tr>
               </tbody>
             </table>
           </div>
@@ -603,47 +634,36 @@
 
         <div class="glass-card flex-1">
           <div class="card-header">
-            <h3><i class="fas fa-tachometer-alt"></i> Site Performance</h3>
+            <h3><i class="fas fa-fire"></i> Most Frequently Viewed Products</h3>
+            <span class="badge" style="background:rgba(212,175,55,0.15); color:var(--gold);">Live Clicks</span>
           </div>
-          <div class="perf-cards">
-            <div class="perf-card">
-              <div class="perf-icon"><i class="fas fa-users"></i></div>
-              <div class="perf-info">
-                <span class="perf-label">Page Views</span>
-                <span class="perf-value">—</span>
-                <span class="perf-hint">Connect analytics</span>
-              </div>
-            </div>
-            <div class="perf-card">
-              <div class="perf-icon"><i class="fas fa-sign-out-alt"></i></div>
-              <div class="perf-info">
-                <span class="perf-label">Bounce Rate</span>
-                <span class="perf-value">—</span>
-                <span class="perf-hint">Connect analytics</span>
-              </div>
-            </div>
-            <div class="perf-card">
-              <div class="perf-icon"><i class="fas fa-clock"></i></div>
-              <div class="perf-info">
-                <span class="perf-label">Avg Session</span>
-                <span class="perf-value">—</span>
-                <span class="perf-hint">Connect analytics</span>
-              </div>
-            </div>
+          <div class="table-wrap">
+            <table class="data-table" id="productViewsTable">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Price</th>
+                  <th>Views</th>
+                </tr>
+              </thead>
+              <tbody id="productViewsBody">
+                <tr><td colspan="3" class="loading-row"><i class="fas fa-spinner fa-spin"></i> Loading product views...</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
 
       <div class="glass-card">
         <div class="card-header">
-          <h3><i class="fab fa-instagram"></i> Social Media</h3>
-          <span class="badge badge-pink">Manual Input</span>
+          <h3><i class="fas fa-share-alt"></i> Official Social Presence</h3>
+          <span class="badge badge-pink">Connected Channels</span>
         </div>
         <div class="social-grid">
           <div class="social-card instagram">
             <div class="social-header">
               <i class="fab fa-instagram"></i>
-              <span>Instagram</span>
+              <span><a href="https://www.instagram.com/annes_fashion_line/" target="_blank" style="color:inherit;text-decoration:none;">@annes_fashion_line <i class="fas fa-external-link-alt" style="font-size:0.75rem;"></i></a></span>
             </div>
             <div class="social-stats">
               <div class="social-stat">
@@ -659,6 +679,49 @@
                 <label>Avg Likes</label>
               </div>
             </div>
+          </div>
+          <div class="social-card whatsapp">
+            <div class="social-header">
+              <i class="fab fa-whatsapp"></i>
+              <span><a href="https://wa.me/254798840085" target="_blank" style="color:inherit;text-decoration:none;">+254 798 840 085 <i class="fas fa-external-link-alt" style="font-size:0.75rem;"></i></a></span>
+            </div>
+            <div class="social-stats">
+              <div class="social-stat">
+                <input type="number" class="social-input" id="wa-contacts" placeholder="0" oninput="saveSocialStat('wa_contacts', this.value)">
+                <label>Contacts</label>
+              </div>
+              <div class="social-stat">
+                <input type="number" class="social-input" id="wa-broadcasts" placeholder="0" oninput="saveSocialStat('wa_broadcasts', this.value)">
+                <label>Broadcasts</label>
+              </div>
+              <div class="social-stat">
+                <input type="number" class="social-input" id="wa-orders" placeholder="0" oninput="saveSocialStat('wa_orders', this.value)">
+                <label>WA Orders</label>
+              </div>
+            </div>
+          </div>
+          <div class="social-card tiktok">
+            <div class="social-header">
+              <i class="fab fa-tiktok"></i>
+              <span><a href="https://www.tiktok.com/@annes_fashion_line?is_from_webapp=1&sender_device=pc" target="_blank" style="color:inherit;text-decoration:none;">@annes_fashion_line <i class="fas fa-external-link-alt" style="font-size:0.75rem;"></i></a></span>
+            </div>
+            <div class="social-stats">
+              <div class="social-stat">
+                <input type="number" class="social-input" id="tt-followers" placeholder="0" oninput="saveSocialStat('tt_followers', this.value)">
+                <label>Followers</label>
+              </div>
+              <div class="social-stat">
+                <input type="number" class="social-input" id="tt-views" placeholder="0" oninput="saveSocialStat('tt_views', this.value)">
+                <label>Total Views</label>
+              </div>
+              <div class="social-stat">
+                <input type="number" class="social-input" id="tt-likes" placeholder="0" oninput="saveSocialStat('tt_likes', this.value)">
+                <label>Avg Likes</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
           </div>
           <div class="social-card whatsapp">
             <div class="social-header">
@@ -711,7 +774,7 @@
 <div class="modal-overlay" id="emailModal" onclick="closeEmailModal(event)">
   <div class="modal-box">
     <div class="modal-header">
-      <h3><i class="fas fa-envelope-open-text"></i> AI-Generated Email</h3>
+      <h3 id="emailModalHeader"><i class="fas fa-envelope-open-text"></i> Tailored Outreach Pitch</h3>
       <button class="modal-close" onclick="closeEmailModal(null, true)"><i class="fas fa-times"></i></button>
     </div>
     <div class="modal-body">
@@ -724,7 +787,25 @@
         <i class="fas fa-copy"></i> Copy Email
       </button>
       <button class="btn-gold" onclick="markLeadSent()">
-        <i class="fas fa-check"></i> Mark Sent
+        <i class="fas fa-check"></i> Mark Contacted
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== EVENT INTEL DISCOVERY MODAL ===================== -->
+<div class="modal-overlay" id="intelModal" onclick="closeIntelModal(event)">
+  <div class="modal-box" style="max-width: 700px;">
+    <div class="modal-header">
+      <h3 id="intelModalTitle"><i class="fas fa-calendar-check" style="color:var(--gold);"></i> Client Event &amp; Discovery Intel</h3>
+      <button class="modal-close" onclick="closeIntelModal(null, true)"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="intelModalContent">
+      <!-- Intel content rendered here dynamically -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn-gold" onclick="openEmailFromIntel()">
+        <i class="fas fa-envelope"></i> Generate Pitch for this Event
       </button>
     </div>
   </div>
