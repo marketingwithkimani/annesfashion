@@ -899,6 +899,191 @@ export default {
         return jsonResponse({ success: true, ...backupResult }, 200, request, env);
       }
 
+      // ----------------------------------------------------
+      // ADMIN STATS ENDPOINT
+      // ----------------------------------------------------
+      if (path === '/api/admin/stats' && method === 'GET') {
+        const adminToken = request.headers.get('X-Admin-Token');
+        if (env.ADMIN_AUTH_TOKEN && adminToken !== env.ADMIN_AUTH_TOKEN) {
+          return errorResponse('Unauthorized', 401, request, env);
+        }
+        
+        const today = new Date().toISOString().split('T')[0];
+        const thisMonth = today.substring(0, 7);
+        
+        const [todaySales, monthSales, totalProducts, preorderCount, flashSaleCount, lowStock] = await Promise.all([
+          env.DB.prepare(`SELECT COUNT(*) as cnt, COALESCE(SUM(total_amount),0) as rev FROM sales WHERE date(created_at) = ?`).bind(today).first<any>(),
+          env.DB.prepare(`SELECT COUNT(*) as cnt, COALESCE(SUM(total_amount),0) as rev FROM sales WHERE strftime('%Y-%m', created_at) = ?`).bind(thisMonth).first<any>(),
+          env.DB.prepare(`SELECT COUNT(*) as cnt FROM products WHERE is_active = 1 AND is_archived = 0`).first<any>(),
+          env.DB.prepare(`SELECT COUNT(*) as cnt FROM products WHERE allow_preorder = 1 AND is_active = 1`).first<any>(),
+          env.DB.prepare(`SELECT COUNT(*) as cnt FROM products WHERE is_flash_sale = 1 AND is_active = 1`).first<any>(),
+          env.DB.prepare(`SELECT COUNT(*) as cnt FROM products WHERE total_stock <= 2 AND is_active = 1 AND is_archived = 0`).first<any>(),
+        ]);
+        
+        const { results: recentSales } = await env.DB.prepare(`
+          SELECT id, sale_number, customer_name, total_amount, payment_method, created_at
+          FROM sales ORDER BY id DESC LIMIT 10
+        `).all();
+        
+        const { results: topProducts } = await env.DB.prepare(`
+          SELECT p.title, SUM(si.quantity) as total_sold, SUM(si.total_price) as total_revenue
+          FROM sale_items si JOIN products p ON si.product_id = p.id
+          GROUP BY si.product_id ORDER BY total_sold DESC LIMIT 5
+        `).all();
+        
+        return jsonResponse({
+          success: true,
+          today: { sales: todaySales?.cnt || 0, revenue: todaySales?.rev || 0 },
+          this_month: { sales: monthSales?.cnt || 0, revenue: monthSales?.rev || 0 },
+          total_products: totalProducts?.cnt || 0,
+          preorder_count: preorderCount?.cnt || 0,
+          flash_sale_count: flashSaleCount?.cnt || 0,
+          low_stock_count: lowStock?.cnt || 0,
+          recent_sales: recentSales || [],
+          top_products: topProducts || [],
+        }, 200, request, env);
+      }
+
+      // ----------------------------------------------------
+      // ADMIN SALES/FINANCE DATA
+      // ----------------------------------------------------
+      if (path === '/api/admin/sales' && method === 'GET') {
+        const adminToken = request.headers.get('X-Admin-Token');
+        if (env.ADMIN_AUTH_TOKEN && adminToken !== env.ADMIN_AUTH_TOKEN) {
+          return errorResponse('Unauthorized', 401, request, env);
+        }
+        
+        const period = url.searchParams.get('period') || '30';
+        const days = Math.min(parseInt(period) || 30, 365);
+        
+        const { results: sales } = await env.DB.prepare(`
+          SELECT date(created_at) as day, COUNT(*) as count, SUM(total_amount) as revenue
+          FROM sales
+          WHERE date(created_at) >= date('now', '-' || ? || ' days')
+          GROUP BY day ORDER BY day ASC
+        `).bind(days).all();
+        
+        const { results: allSales } = await env.DB.prepare(`
+          SELECT id, sale_number, customer_name, customer_phone, total_amount, 
+                 payment_method, payment_status, delivery_status, sale_type, created_at
+          FROM sales ORDER BY id DESC LIMIT 100
+        `).all();
+        
+        const totals = await env.DB.prepare(`
+          SELECT COALESCE(SUM(total_amount),0) as all_time, COUNT(*) as all_count FROM sales
+        `).first<any>();
+        
+        return jsonResponse({
+          success: true,
+          chart_data: sales || [],
+          all_sales: allSales || [],
+          totals: { revenue: totals?.all_time || 0, count: totals?.all_count || 0 },
+        }, 200, request, env);
+      }
+
+      // ----------------------------------------------------
+      // ADMIN LEADS MANAGEMENT
+      // ----------------------------------------------------
+      if (path === '/api/admin/leads' && method === 'GET') {
+        const adminToken = request.headers.get('X-Admin-Token');
+        if (env.ADMIN_AUTH_TOKEN && adminToken !== env.ADMIN_AUTH_TOKEN) {
+          return errorResponse('Unauthorized', 401, request, env);
+        }
+        const category = url.searchParams.get('category');
+        const query = category
+          ? `SELECT * FROM leads WHERE category = ? ORDER BY id DESC LIMIT 100`
+          : `SELECT * FROM leads ORDER BY id DESC LIMIT 100`;
+        const { results } = category
+          ? await env.DB.prepare(query).bind(category).all()
+          : await env.DB.prepare(query).all();
+        return jsonResponse({ success: true, leads: results || [] }, 200, request, env);
+      }
+
+      if (path === '/api/admin/leads' && method === 'POST') {
+        const adminToken = request.headers.get('X-Admin-Token');
+        if (env.ADMIN_AUTH_TOKEN && adminToken !== env.ADMIN_AUTH_TOKEN) {
+          return errorResponse('Unauthorized', 401, request, env);
+        }
+        const body = await request.json() as any;
+        // Support bulk insert (array) or single
+        const leads = Array.isArray(body) ? body : [body];
+        const inserted: number[] = [];
+        for (const lead of leads) {
+          const res = await env.DB.prepare(`
+            INSERT INTO leads (category, company_name, contact_name, email, linkedin_url, website, notes, email_draft)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          `).bind(
+            lead.category, lead.company_name || null, lead.contact_name || null,
+            lead.email || null, lead.linkedin_url || null, lead.website || null,
+            lead.notes || null, lead.email_draft || null
+          ).run();
+          inserted.push(res.meta.last_row_id as number);
+        }
+        return jsonResponse({ success: true, ids: inserted }, 201, request, env);
+      }
+
+      if (path.match(/^\/api\/admin\/leads\/\d+$/) && method === 'PUT') {
+        const adminToken = request.headers.get('X-Admin-Token');
+        if (env.ADMIN_AUTH_TOKEN && adminToken !== env.ADMIN_AUTH_TOKEN) {
+          return errorResponse('Unauthorized', 401, request, env);
+        }
+        const id = parseInt(path.split('/')[4]);
+        const body = await request.json() as any;
+        await env.DB.prepare(`
+          UPDATE leads SET email_sent = ?, email_draft = ?, notes = ? WHERE id = ?
+        `).bind(body.email_sent ?? 0, body.email_draft || null, body.notes || null, id).run();
+        return jsonResponse({ success: true }, 200, request, env);
+      }
+
+      // ----------------------------------------------------
+      // ADMIN LOGIN CHECK (simple password check)
+      // POST /api/admin/login  { password: "Admin123" }
+      // ----------------------------------------------------
+      if (path === '/api/admin/login' && method === 'POST') {
+        const body = await request.json() as { password: string };
+        const ADMIN_PASSWORD = 'Admin123';
+        if (body.password === ADMIN_PASSWORD) {
+          return jsonResponse({ success: true, token: env.ADMIN_AUTH_TOKEN || 'admin-session' }, 200, request, env);
+        }
+        return errorResponse('Invalid password', 401, request, env);
+      }
+
+      // ----------------------------------------------------
+      // ADMIN PRODUCTS (get all with preorder/flash sale flags)
+      // GET /api/admin/products?mode=preorder|flash_sale|all
+      // ----------------------------------------------------
+      if (path === '/api/admin/products' && method === 'GET') {
+        const adminToken = request.headers.get('X-Admin-Token');
+        if (env.ADMIN_AUTH_TOKEN && adminToken !== env.ADMIN_AUTH_TOKEN) {
+          return errorResponse('Unauthorized', 401, request, env);
+        }
+        const mode = url.searchParams.get('mode') || 'all';
+        let query = `SELECT id, title, category, price, image_url, total_stock, is_featured, allow_preorder, is_flash_sale, is_active FROM products WHERE is_archived = 0`;
+        if (mode === 'preorder') query += ` AND allow_preorder = 1`;
+        if (mode === 'flash_sale') query += ` AND is_flash_sale = 1`;
+        query += ` ORDER BY id DESC LIMIT 200`;
+        const { results } = await env.DB.prepare(query).all();
+        return jsonResponse({ success: true, products: results || [] }, 200, request, env);
+      }
+      
+      // PUT /api/admin/products/:id/toggle
+      if (path.match(/^\/api\/admin\/products\/\d+\/toggle$/) && method === 'PUT') {
+        const adminToken = request.headers.get('X-Admin-Token');
+        if (env.ADMIN_AUTH_TOKEN && adminToken !== env.ADMIN_AUTH_TOKEN) {
+          return errorResponse('Unauthorized', 401, request, env);
+        }
+        const id = parseInt(path.split('/')[4]);
+        const body = await request.json() as any;
+        const setClauses: string[] = ['updated_at = datetime(\'now\')'];
+        const params: any[] = [];
+        if ('allow_preorder' in body) { setClauses.push('allow_preorder = ?'); params.push(body.allow_preorder ? 1 : 0); }
+        if ('is_flash_sale' in body) { setClauses.push('is_flash_sale = ?'); params.push(body.is_flash_sale ? 1 : 0); }
+        if ('is_featured' in body) { setClauses.push('is_featured = ?'); params.push(body.is_featured ? 1 : 0); }
+        params.push(id);
+        await env.DB.prepare(`UPDATE products SET ${setClauses.join(', ')} WHERE id = ?`).bind(...params).run();
+        return jsonResponse({ success: true }, 200, request, env);
+      }
+
       // 404
       return errorResponse(`Endpoint not found: ${method} ${path}`, 404, request, env);
 

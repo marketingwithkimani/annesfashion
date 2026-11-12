@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Anne's Fashion Line</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="desktop.css">
+</head>
+<body>
+
+<!-- Mobile redirect script -->
+<script>
+  if (window.innerWidth < 1024) {
+    window.location.href = 'index.html';
+  }
+</script>
+
+<!-- ===================== LOGIN SCREEN ===================== -->
+<div id="loginScreen">
+  <div class="login-bg">
+    <div class="login-particles"></div>
+  </div>
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-logo-wrap" id="loginLogo">
+        <div class="login-crown-ring"></div>
+        <i class="fas fa-crown login-crown-icon" id="crownIcon"></i>
+      </div>
+      <h1 class="login-title">Anne's Fashion Line</h1>
+      <p class="login-subtitle">Admin Dashboard</p>
+      <form class="login-form" id="loginForm" onsubmit="handleLogin(event)">
+        <div class="login-field">
+          <label for="adminPhone">Admin Phone Number</label>
+          <div class="password-wrap">
+            <i class="fas fa-phone pw-icon"></i>
+            <input type="tel" id="adminPhone" placeholder="e.g. 0712345678 or +254..." autocomplete="username" required>
+          </div>
+        </div>
+        <div class="login-field">
+          <label for="adminPassword">Authorization Password</label>
+          <div class="password-wrap">
+            <i class="fas fa-lock pw-icon"></i>
+            <input type="password" id="adminPassword" placeholder="Enter password (e.g. Admin123)" autocomplete="current-password" required>
+            <button type="button" class="pw-toggle" onclick="togglePw()"><i class="fas fa-eye" id="pwEyeIcon"></i></button>
+          </div>
+        </div>
+        <div class="login-error" id="loginError"></div>
+        <button type="submit" class="login-btn" id="loginBtn">
+          <span class="login-btn-text">Authorize &amp; Sign In</span>
+          <i class="fas fa-arrow-right login-btn-icon"></i>
+        </button>
+      </form>
+      <p class="login-footer-text">Anne's Fashion Line &copy; 2025</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DASHBOARD ===================== -->
+<div id="dashboard" hidden>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-logo" id="sidebarLogo">
+        <i class="fas fa-crown"></i>
+      </div>
+      <div class="sidebar-brand-text">
+        <span class="sidebar-brand-name">Anne's Fashion</span>
+        <span class="sidebar-brand-sub">Admin</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="nav-item active" data-section="home" onclick="showSection('home',this)">
+        <i class="fas fa-home nav-icon"></i>
+        <span>Home</span>
+      </a>
+      <a class="nav-item" data-section="preorder" onclick="showSection('preorder',this)">
+        <i class="fas fa-clock nav-icon"></i>
+        <span>Pre-Order</span>
+      </a>
+      <a class="nav-item" data-section="flashsale" onclick="showSection('flashsale',this)">
+        <i class="fas fa-bolt nav-icon"></i>
+        <span>Flash Sale</span>
+      </a>
+      <a class="nav-item" data-section="finance" onclick="showSection('finance',this)">
+        <i class="fas fa-chart-line nav-icon"></i>
+        <span>Finance</span>
+      </a>
+      <a class="nav-item" data-section="leadgen" onclick="showSection('leadgen',this)">
+        <i class="fas fa-search-location nav-icon"></i>
+        <span>Lead Gen</span>
+      </a>
+      <a class="nav-item" data-section="analytics" onclick="showSection('analytics',this)">
+        <i class="fas fa-chart-pie nav-icon"></i>
+        <span>Analytics</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="sidebar-logout-btn" onclick="handleLogout()">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Sidebar separator -->
+  <div class="sidebar-separator"></div>
+
+  <!-- Main content -->
+  <main class="main-content">
+
+    <!-- Top bar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h2 class="topbar-title" id="topbarTitle">Dashboard</h2>
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-refresh" id="refreshBtn" onclick="refreshCurrentSection()" title="Refresh">
+          <i class="fas fa-sync-alt"></i>
+        </button>
+        <div class="topbar-admin">
+          <i class="fas fa-user-shield"></i>
+          <span>Admin</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======== HOME SECTION ======== -->
+    <div id="section-home" class="section active">
+      <div class="stats-grid" id="homeStatsGrid">
+        <div class="stat-card">
+          <div class="stat-icon-wrap" style="--icon-color:#D4AF37;">
+            <i class="fas fa-coins"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Today's Revenue</span>
+            <span class="stat-value gold" id="stat-today-rev">KSh —</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-wrap" style="--icon-color:#4a9d6f;">
+            <i class="fas fa-calendar-alt"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">This Month</span>
+            <span class="stat-value gold" id="stat-month-rev">KSh —</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-wrap" style="--icon-color:#5b8dee;">
+            <i class="fas fa-box-open"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Total Products</span>
+            <span class="stat-value gold" id="stat-products">—</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-wrap" style="--icon-color:#e05252;">
+            <i class="fas fa-exclamation-triangle"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Low Stock</span>
+            <span class="stat-value gold" id="stat-lowstock">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-row">
+        <div class="glass-card flex-2">
+          <div class="card-header">
+            <h3><i class="fas fa-receipt"></i> Recent Sales</h3>
+            <span class="badge">Last 10</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table" id="recentSalesTable">
+              <thead>
+                <tr>
+                  <th>Order #</th>
+                  <th>Customer</th>
+                  <th>Amount</th>
+                  <th>Payment</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="recentSalesBody">
+                <tr><td colspan="5" class="loading-row"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="glass-card flex-1">
+          <div class="card-header">
+            <h3><i class="fas fa-trophy"></i> Top Products</h3>
+            <span class="badge">Top 5</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table" id="topProductsTable">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Product</th>
+                  <th>Sold</th>
+                </tr>
+              </thead>
+              <tbody id="topProductsBody">
+                <tr><td colspan="3" class="loading-row"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======== PRE-ORDER SECTION ======== -->
+    <div id="section-preorder" class="section">
+      <div class="section-row">
+        <div class="glass-card flex-1">
+          <div class="card-header">
+            <h3><i class="fas fa-toggle-on"></i> Global Pre-Order Mode</h3>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <span class="toggle-label" id="preorderModeLabel">Pre-Order Mode: <strong>OFF</strong></span>
+              <p class="toggle-desc">When enabled, customers can pre-order out-of-stock items.</p>
+            </div>
+            <label class="big-toggle">
+              <input type="checkbox" id="globalPreorderToggle" onchange="toggleGlobalMode('pre_order_mode', this)">
+              <span class="big-toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="glass-card flex-1">
+          <div class="card-header">
+            <h3><i class="fas fa-broadcast-tower"></i> Shipment Broadcast</h3>
+          </div>
+          <form id="shipmentBroadcastForm" class="broadcast-form" onsubmit="sendShipmentBroadcast(event)">
+            <div class="form-group">
+              <label>Customer Phone Number</label>
+              <input type="tel" id="broadcastPhone" placeholder="+254XXXXXXXXX" class="form-input">
+            </div>
+            <div class="form-group">
+              <label>Tracking Number</label>
+              <input type="text" id="broadcastTracking" placeholder="e.g. ANNE-20250101-001" class="form-input">
+            </div>
+            <div class="form-group">
+              <label>Message</label>
+              <textarea id="broadcastMsg" rows="3" class="form-input" placeholder="Your order has been dispatched..."></textarea>
+            </div>
+            <button type="submit" class="btn-gold">
+              <i class="fas fa-paper-plane"></i> Send Broadcast
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <div class="card-header">
+          <h3><i class="fas fa-boxes"></i> Products — Pre-Order Toggle</h3>
+          <div class="search-wrap">
+            <i class="fas fa-search search-icon-sm"></i>
+            <input type="text" id="preorderSearch" placeholder="Search products..." class="search-input" oninput="filterProducts('preorder', this.value)">
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="preorderProductTable">
+            <thead>
+              <tr>
+                <th style="width:60px;">Image</th>
+                <th>Product Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th style="width:120px;">Pre-Order</th>
+              </tr>
+            </thead>
+            <tbody id="preorderProductBody">
+              <tr><td colspan="6" class="loading-row"><i class="fas fa-spinner fa-spin"></i> Loading products...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======== FLASH SALE SECTION ======== -->
+    <div id="section-flashsale" class="section">
+      <div class="section-row">
+        <div class="glass-card flex-1">
+          <div class="card-header">
+            <h3><i class="fas fa-toggle-on"></i> Global Flash Sale Mode</h3>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <span class="toggle-label" id="flashSaleModeLabel">Flash Sale: <strong>OFF</strong></span>
+              <p class="toggle-desc">When enabled, Hot Picks on the main site shows flash sale items.</p>
+            </div>
+            <label class="big-toggle">
+              <input type="checkbox" id="globalFlashSaleToggle" onchange="toggleGlobalMode('flash_sale_mode', this)">
+              <span class="big-toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+        <div class="glass-card flex-1">
+          <div class="card-header">
+            <h3><i class="fas fa-info-circle"></i> Flash Sale Info</h3>
+          </div>
+          <div class="info-box">
+            <i class="fas fa-bolt" style="color:#D4AF37;font-size:2rem;margin-bottom:10px;"></i>
+            <p>Toggle individual products below to include them in the flash sale. When <strong>Flash Sale Mode</strong> is ON, only flash sale products appear in the Hot Picks section on the main website.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <div class="card-header">
+          <h3><i class="fas fa-boxes"></i> Products — Flash Sale Toggle</h3>
+          <div class="search-wrap">
+            <i class="fas fa-search search-icon-sm"></i>
+            <input type="text" id="flashsaleSearch" placeholder="Search products..." class="search-input" oninput="filterProducts('flashsale', this.value)">
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="flashsaleProductTable">
+            <thead>
+              <tr>
+                <th style="width:60px;">Image</th>
+                <th>Product Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th style="width:120px;">Flash Sale</th>
+              </tr>
+            </thead>
+            <tbody id="flashsaleProductBody">
+              <tr><td colspan="6" class="loading-row"><i class="fas fa-spinner fa-spin"></i> Loading products...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======== FINANCE SECTION ======== -->
+    <div id="section-finance" class="section">
+      <div class="glass-card">
+        <div class="card-header">
+          <h3><i class="fas fa-chart-line"></i> Revenue Overview</h3>
+          <div class="period-selector">
+            <button class="period-btn active" data-period="7" onclick="setFinancePeriod(7, this)">7 Days</button>
+            <button class="period-btn" data-period="30" onclick="setFinancePeriod(30, this)">30 Days</button>
+            <button class="period-btn" data-period="90" onclick="setFinancePeriod(90, this)">90 Days</button>
+            <button class="period-btn" data-period="0" onclick="setFinancePeriod(0, this)">All Time</button>
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </div>
+
+      <div class="stats-grid finance-stats">
+        <div class="stat-card">
+          <div class="stat-icon-wrap" style="--icon-color:#D4AF37;">
+            <i class="fas fa-money-bill-wave"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Total Revenue</span>
+            <span class="stat-value gold" id="finance-total-rev">KSh —</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-wrap" style="--icon-color:#4a9d6f;">
+            <i class="fas fa-shopping-cart"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Total Orders</span>
+            <span class="stat-value gold" id="finance-total-orders">—</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-wrap" style="--icon-color:#5b8dee;">
+            <i class="fas fa-calculator"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Avg Order Value</span>
+            <span class="stat-value gold" id="finance-avg-order">KSh —</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <div class="card-header">
+          <h3><i class="fas fa-table"></i> Sales Transactions</h3>
+          <div class="sort-wrap">
+            <select class="sort-select" id="finSortBy" onchange="sortFinanceTable()">
+              <option value="date-desc">Newest First</option>
+              <option value="date-asc">Oldest First</option>
+              <option value="amount-desc">Highest Amount</option>
+              <option value="amount-asc">Lowest Amount</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table sortable-table" id="financeTable">
+            <thead>
+              <tr>
+                <th>Order #</th>
+                <th>Customer</th>
+                <th>Amount</th>
+                <th>Payment Method</th>
+                <th>Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="financeTableBody">
+              <tr><td colspan="6" class="loading-row"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======== LEAD GEN SECTION ======== -->
+    <div id="section-leadgen" class="section">
+      <div class="glass-card">
+        <div class="card-header">
+          <h3><i class="fas fa-search-location"></i> Lead Generation</h3>
+          <span class="badge badge-blue">AI-Powered</span>
+        </div>
+        <div class="leadgen-tabs">
+          <button class="leadgen-tab active" onclick="switchLeadTab('corporate', this)">
+            <i class="fas fa-building"></i> Corporate Clients
+          </button>
+          <button class="leadgen-tab" onclick="switchLeadTab('corporate_women', this)">
+            <i class="fas fa-female"></i> Corporate Women
+          </button>
+          <button class="leadgen-tab" onclick="switchLeadTab('diaspora', this)">
+            <i class="fas fa-globe-africa"></i> Diaspora
+          </button>
+        </div>
+
+        <!-- Corporate Clients tab -->
+        <div class="leadgen-tab-content active" id="lead-tab-corporate">
+          <div class="leadgen-controls">
+            <div class="scan-info">
+              <i class="fas fa-info-circle"></i> Generating <strong>10 leads</strong> per scan
+            </div>
+            <div class="scan-actions">
+              <button class="btn-gold" onclick="runOsintScan('corporate')">
+                <i class="fas fa-radar"></i> Run OSINT Scan
+              </button>
+              <button class="btn-outline-gold" onclick="saveLeads('corporate')">
+                <i class="fas fa-save"></i> Save Leads
+              </button>
+            </div>
+          </div>
+          <div class="scan-loading" id="scan-loading-corporate" style="display:none;">
+            <div class="scan-anim">
+              <i class="fas fa-satellite-dish fa-spin"></i>
+              <span>Scanning for corporate leads...</span>
+            </div>
+          </div>
+          <div class="table-wrap" id="leads-table-wrap-corporate">
+            <table class="data-table" id="leads-table-corporate">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Company / Name</th>
+                  <th>Email</th>
+                  <th>Contact</th>
+                  <th>LinkedIn</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="leads-body-corporate">
+                <tr><td colspan="7" class="empty-row"><i class="fas fa-search"></i> Run a scan to generate leads</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Corporate Women tab -->
+        <div class="leadgen-tab-content" id="lead-tab-corporate_women">
+          <div class="leadgen-controls">
+            <div class="scan-info">
+              <i class="fas fa-info-circle"></i> Generating <strong>10 leads</strong> per scan
+            </div>
+            <div class="scan-actions">
+              <button class="btn-gold" onclick="runOsintScan('corporate_women')">
+                <i class="fas fa-radar"></i> Run OSINT Scan
+              </button>
+              <button class="btn-outline-gold" onclick="saveLeads('corporate_women')">
+                <i class="fas fa-save"></i> Save Leads
+              </button>
+            </div>
+          </div>
+          <div class="scan-loading" id="scan-loading-corporate_women" style="display:none;">
+            <div class="scan-anim">
+              <i class="fas fa-satellite-dish fa-spin"></i>
+              <span>Scanning for corporate women leads...</span>
+            </div>
+          </div>
+          <div class="table-wrap" id="leads-table-wrap-corporate_women">
+            <table class="data-table" id="leads-table-corporate_women">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Company / Name</th>
+                  <th>Email</th>
+                  <th>Contact</th>
+                  <th>LinkedIn</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="leads-body-corporate_women">
+                <tr><td colspan="7" class="empty-row"><i class="fas fa-search"></i> Run a scan to generate leads</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Diaspora tab -->
+        <div class="leadgen-tab-content" id="lead-tab-diaspora">
+          <div class="leadgen-controls">
+            <div class="scan-info">
+              <i class="fas fa-info-circle"></i> Generating <strong>10 leads</strong> per scan
+            </div>
+            <div class="scan-actions">
+              <button class="btn-gold" onclick="runOsintScan('diaspora')">
+                <i class="fas fa-radar"></i> Run OSINT Scan
+              </button>
+              <button class="btn-outline-gold" onclick="saveLeads('diaspora')">
+                <i class="fas fa-save"></i> Save Leads
+              </button>
+            </div>
+          </div>
+          <div class="scan-loading" id="scan-loading-diaspora" style="display:none;">
+            <div class="scan-anim">
+              <i class="fas fa-satellite-dish fa-spin"></i>
+              <span>Scanning for diaspora leads...</span>
+            </div>
+          </div>
+          <div class="table-wrap" id="leads-table-wrap-diaspora">
+            <table class="data-table" id="leads-table-diaspora">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Company / Name</th>
+                  <th>Email</th>
+                  <th>Contact</th>
+                  <th>LinkedIn</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="leads-body-diaspora">
+                <tr><td colspan="7" class="empty-row"><i class="fas fa-search"></i> Run a scan to generate leads</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======== ANALYTICS SECTION ======== -->
+    <div id="section-analytics" class="section">
+      <div class="analytics-notice glass-card">
+        <i class="fas fa-plug" style="color:#D4AF37;font-size:1.5rem;"></i>
+        <span>Connect your analytics tools to see live data</span>
+      </div>
+
+      <div class="section-row">
+        <div class="glass-card flex-1">
+          <div class="card-header">
+            <h3><i class="fas fa-eye"></i> Product Views</h3>
+            <span class="badge">Mock Data</span>
+          </div>
+          <p class="section-desc">Track your product visibility and engagement. <em>Live tracking requires client-side analytics pixel integration.</em></p>
+          <div class="table-wrap">
+            <table class="data-table" id="productViewsTable">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Views</th>
+                  <th>Trend</th>
+                </tr>
+              </thead>
+              <tbody id="productViewsBody">
+                <!-- populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="glass-card flex-1">
+          <div class="card-header">
+            <h3><i class="fas fa-tachometer-alt"></i> Site Performance</h3>
+          </div>
+          <div class="perf-cards">
+            <div class="perf-card">
+              <div class="perf-icon"><i class="fas fa-users"></i></div>
+              <div class="perf-info">
+                <span class="perf-label">Page Views</span>
+                <span class="perf-value">—</span>
+                <span class="perf-hint">Connect analytics</span>
+              </div>
+            </div>
+            <div class="perf-card">
+              <div class="perf-icon"><i class="fas fa-sign-out-alt"></i></div>
+              <div class="perf-info">
+                <span class="perf-label">Bounce Rate</span>
+                <span class="perf-value">—</span>
+                <span class="perf-hint">Connect analytics</span>
+              </div>
+            </div>
+            <div class="perf-card">
+              <div class="perf-icon"><i class="fas fa-clock"></i></div>
+              <div class="perf-info">
+                <span class="perf-label">Avg Session</span>
+                <span class="perf-value">—</span>
+                <span class="perf-hint">Connect analytics</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <div class="card-header">
+          <h3><i class="fab fa-instagram"></i> Social Media</h3>
+          <span class="badge badge-pink">Manual Input</span>
+        </div>
+        <div class="social-grid">
+          <div class="social-card instagram">
+            <div class="social-header">
+              <i class="fab fa-instagram"></i>
+              <span>Instagram</span>
+            </div>
+            <div class="social-stats">
+              <div class="social-stat">
+                <input type="number" class="social-input" id="ig-followers" placeholder="0" oninput="saveSocialStat('ig_followers', this.value)">
+                <label>Followers</label>
+              </div>
+              <div class="social-stat">
+                <input type="number" class="social-input" id="ig-posts" placeholder="0" oninput="saveSocialStat('ig_posts', this.value)">
+                <label>Posts</label>
+              </div>
+              <div class="social-stat">
+                <input type="number" class="social-input" id="ig-engagement" placeholder="0" oninput="saveSocialStat('ig_engagement', this.value)">
+                <label>Avg Likes</label>
+              </div>
+            </div>
+          </div>
+          <div class="social-card whatsapp">
+            <div class="social-header">
+              <i class="fab fa-whatsapp"></i>
+              <span>WhatsApp</span>
+            </div>
+            <div class="social-stats">
+              <div class="social-stat">
+                <input type="number" class="social-input" id="wa-contacts" placeholder="0" oninput="saveSocialStat('wa_contacts', this.value)">
+                <label>Contacts</label>
+              </div>
+              <div class="social-stat">
+                <input type="number" class="social-input" id="wa-broadcasts" placeholder="0" oninput="saveSocialStat('wa_broadcasts', this.value)">
+                <label>Broadcasts</label>
+              </div>
+              <div class="social-stat">
+                <input type="number" class="social-input" id="wa-orders" placeholder="0" oninput="saveSocialStat('wa_orders', this.value)">
+                <label>WA Orders</label>
+              </div>
+            </div>
+          </div>
+          <div class="social-card tiktok">
+            <div class="social-header">
+              <i class="fab fa-tiktok"></i>
+              <span>TikTok</span>
+            </div>
+            <div class="social-stats">
+              <div class="social-stat">
+                <input type="number" class="social-input" id="tt-followers" placeholder="0" oninput="saveSocialStat('tt_followers', this.value)">
+                <label>Followers</label>
+              </div>
+              <div class="social-stat">
+                <input type="number" class="social-input" id="tt-views" placeholder="0" oninput="saveSocialStat('tt_views', this.value)">
+                <label>Total Views</label>
+              </div>
+              <div class="social-stat">
+                <input type="number" class="social-input" id="tt-likes" placeholder="0" oninput="saveSocialStat('tt_likes', this.value)">
+                <label>Avg Likes</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ===================== EMAIL MODAL ===================== -->
+<div class="modal-overlay" id="emailModal" onclick="closeEmailModal(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3><i class="fas fa-envelope-open-text"></i> AI-Generated Email</h3>
+      <button class="modal-close" onclick="closeEmailModal(null, true)"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="email-preview" id="emailPreviewContent">
+        <!-- email content rendered here -->
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline-gold" onclick="copyEmailContent()">
+        <i class="fas fa-copy"></i> Copy Email
+      </button>
+      <button class="btn-gold" onclick="markLeadSent()">
+        <i class="fas fa-check"></i> Mark Sent
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== LOADING OVERLAY ===================== -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner-wrap">
+    <i class="fas fa-crown fa-spin loading-crown"></i>
+    <span>Loading...</span>
+  </div>
+</div>
+
+<!-- ===================== TOAST ===================== -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="desktop.js"></script>
+</body>
+</html>

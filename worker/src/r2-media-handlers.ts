@@ -37,7 +37,7 @@ const ALLOWED_VIDEO_TYPES = new Set([
 ]);
 
 const CACHE_IMMUTABLE = 'public, max-age=31536000, immutable'; // 1 year
-const CACHE_SHORT     = 'public, max-age=3600';                // 1 hour fallback
+const CACHE_SHORT = 'public, max-age=3600';                // 1 hour fallback
 
 // ─── Presigned Upload URL ──────────────────────────────────────────────────────
 
@@ -198,6 +198,20 @@ export async function handleServeMedia(request: Request, env: Env, key: string):
   }
 
   try {
+    // 1. Check Cloudflare Edge Cache first
+    const cache = (caches as any).default;
+    const cacheUrl = new URL(request.url);
+    const cacheKey = new Request(cacheUrl.toString(), request);
+
+    // Only check cache for non-Range requests (Range is used for video seeking)
+    const isRangeRequest = Boolean(request.headers.get('Range'));
+    if (!isRangeRequest && cache) {
+      const cached = await cache.match(cacheKey);
+      if (cached) {
+        return cached;
+      }
+    }
+
     const object = await env.IMAGES!.get(key);
 
     if (!object) {
@@ -211,8 +225,9 @@ export async function handleServeMedia(request: Request, env: Env, key: string):
     // Determine cache duration based on media type
     const ct = headers.get('content-type') || '';
     const isVideo = ct.startsWith('video/');
-    headers.set('Cache-Control', isVideo ? CACHE_IMMUTABLE : CACHE_IMMUTABLE);
+    headers.set('Cache-Control', CACHE_IMMUTABLE);
     headers.set('X-Content-Type-Options', 'nosniff');
+    headers.set('Access-Control-Allow-Origin', '*');
 
     // Support range requests for video seeking
     if (isVideo) {
@@ -225,7 +240,18 @@ export async function handleServeMedia(request: Request, env: Env, key: string):
       return new Response(null, { status: 304, headers });
     }
 
-    return new Response(object.body, { status: 200, headers });
+    const response = new Response(object.body, { status: 200, headers });
+
+    // Store in Cloudflare Edge Cache for ultra-fast instant delivery
+    if (!isRangeRequest && cache) {
+      try {
+        await cache.put(cacheKey, response.clone());
+      } catch (cacheErr) {
+        // Safe to ignore if cache write fails
+      }
+    }
+
+    return response;
   } catch (err: any) {
     console.error('R2 serve error:', err);
     return new Response('Internal error', { status: 500 });

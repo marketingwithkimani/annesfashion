@@ -1,0 +1,866 @@
+{
+  "50": {
+    "order": 50,
+    "title": "White Long Church Dress",
+    "price": 12000.0,
+    "category": "dresses",
+    "subcategory": "Long church dress",
+    "colors": [
+      "White"
+    ],
+    "sizes": [
+      "14"
+    ],
+    "variants": [
+      {
+        "size": "14",
+        "qty": 1
+      }
+    ],
+    "total_stock": 1,
+    "images": [
+      "White Long Church Dress.jpg"
+    ],
+    "notes": ""
+  },
+  "51": {
+    "order": 51,
+    "title": "Peach & Green Dinner Dress",
+    "price": 12000.0,
+    "category": "dresses",
+    "subcategory": "Dinner dress",
+    "colors": [
+      "Peach",
+      "green"
+    ],
+    "sizes": [
+      "14",
+      "12"
+    ],
+    "variants": [
+      {
+        "size": "14",
+        "qty": 1
+      },
+      {
+        "size": "12",
+        "qty": 1
+      }
+    ],
+    "total_stock": 2,
+    "images": [
+      "Peach _ Green Dinner Dress.jpg"
+    ],
+    "notes": "Green size 12 qty 1 was sent in a separate follow-up; associated here provisionally."
+  },
+  "52": {
+    "order": 52,
+    "title": "Black & Gold Short Party Dress",
+    "price": 8000.0,
+    "category": "dresses",
+    "subcategory": "Short party dress",
+    "colors": [
+      "Black with gold"
+    ],
+    "sizes": [
+      "8",
+      "10"
+    ],
+    "variants": [
+      {
+        "size": "8",
+        "qty": 1
+      },
+      {
+        "size": "10",
+        "qty": 1
+      }
+    ],
+    "total_stock": 2,
+    "images": [
+      "Black _ Gold Short Party Dress.jpg"
+    ],
+    "notes": ""
+  },
+  "53": {
+    "order": 53,
+    "title": "Pink Dinner Dress",
+    "price": 15000.0,
+    "category": "dresses",
+    "subcategory": "Dinner dress",
+    "colors": [
+      "Pink"
+    ],
+    "sizes": [
+      "6"
+    ],
+    "variants": [
+      {
+        "size": "6",
+        "qty": 1
+      }
+    ],
+    "total_stock": 1,
+    "images": [
+      "Pink Dinner Dress 53.jpg"
+    ],
+    "notes": ""
+  },
+  "54": {
+    "order": 54,
+    "title": "Lilac Wedding Guest Dress",
+    "price": 10000.0,
+    "category": "dresses",
+    "subcategory": "Wedding dress",
+    "colors": [
+      "Lilac purple"
+    ],
+    "sizes": [
+      "10"
+    ],
+    "variants": [
+      {
+        "size": "10",
+        "qty": 1
+      }
+    ],
+    "total_stock": 1,
+    "images": [
+      "Lilac Wedding Guest Dress.jpg"
+    ],
+    "notes": ""
+  },
+  "55": {
+    "order": 55,
+    "title": "Peach Dinner Dress",
+    "price": 15000.0,
+    "category": "dresses",
+    "subcategory": "Dinner dress",
+    "colors": [
+      "Peach"
+    ],
+    "sizes": [
+      "10"
+    ],
+    "variants": [
+      {
+        "size": "10",
+        "qty": 1
+      }
+    ],
+    "total_stock": 1,
+    "images": [
+      "Peach Dinner Dress 55.jpg"
+    ],
+    "notes": ""
+  },
+  "56": {
+    "order": 56,
+    "title": "Purple Dinner Dress",
+    "price": 15000.0,
+    "category": "dresses",
+    "subcategory": "Dinner dress",
+    "colors": [
+      "Purple"
+    ],
+    "sizes": [
+      "10"
+    ],
+    "variants": [
+      {
+        "size": "10",
+        "qty": 1
+      }
+    ],
+    "total_stock": 1,
+    "images": [
+      "Purple Dinner Dress.jpg"
+    ],
+    "notes": ""
+  },
+  "57": {
+    "order": 57,
+    "title": "Black & Red / Black & Pink Sequin Dinner Dress",
+    "price": 12000.0,
+    "category": "dresses",
+    "subcategory": "Dinner dress",
+    "colors": [
+      "Black with red sequin",
+      "black with pink sequin"
+    ],
+    "sizes": [
+      "6"
+    ],
+    "variants": [
+      {
+        "size": "6",
+        "qty": 2
+      }
+    ],
+    "total_stock": 2,
+    "images": [
+      "Black _ Red _ Black _ Pink Sequin Dinner Dress.jpg"
+    ],
+    "notes": "Colour quantities not split between the two colour options."
+  },
+  "58": {
+    "order": 58,
+    "title": "Black & Nude Dinner Dress",
+    "price": 15000.0,
+    "category": "dresses",
+    "subcategory": "Dinner dress",
+    "colors": [
+      "Black",
+      "nude"
+    ],
+    "sizes": [
+      "12"
+    ],
+    "variants": [
+      {
+        "size": "12",
+        "qty": 2
+      }
+    ],
+    "total_stock": 2,
+    "images": [
+      "Black _ Nude Dinner Dress.jpg"
+    ],
+    "notes": ""
+  },
+  "59": {
+    "order": 59,
+    "title": "Peach Dinner Dress",
+    "price": 15000.0,
+    "category": "dresses",
+    "subcategory": "Dinner dress",
+    "colors": [
+      "Peach"
+    ],
+    "sizes": [
+      "6"
+    ],
+    "variants": [
+      {
+        "size": "6",
+        "qty": 1
+      }
+    ],
+    "total_stock": 1,
+    "images": [
+      "Peach Dinner Dress 59.jpg"
+    ],
+    "notes": ""
+  },
+  "60": {
+    "order": 60,
+    "title": "Black & Purple Dinner Dress",
+    "price": 12000.0,
+    "category": "dresses",
+    "subcategory": "Dinner dress",
+    "colors": [
+      "Black",
+      "purple"
+    ],
+    "sizes": [
+      "6",
+      "8"
+    ],
+    "variants": [
+      {
+        "size": "6",
+        "qty": 1
+      },
+      {
+        "size": "8",
+        "qty": 1
+      }
+    ],
+    "total_stock": 2,
+    "images": [
+      "Black _ Purple Dinner Dress.jpg"
+    ],
+    "notes": "Price not supplied."
+  },
+  "61": {
+    "order": 61,
+    "title": "Peach & Pink Dinner Dress",
+    "price": 12000.0,
+    "category": "dresses",
+    "subcategory": "Dinner dress",
+    "colors": [
+      "Peach",
+      "pink"
+    ],
+    "sizes": [
+      "8",
+      "10"
+    ],
+    "variants": [
+      {
+        "size": "8",
+        "qty": 1
+      },
+      {
+        "size": "10",
+        "qty": 1
+      }
+    ],
+    "total_stock": 2,
+    "images": [
+      "Peach _ Pink Dinner Dress.jpg"
+    ],
+    "notes": ""
+  },
+  "62": {
+    "order": 62,
+    "title": "Peach Dinner Dress",
+    "price": 15000.0,
+    "category": "dresses",
+    "subcategory": "Dinner dress",
+    "colors": [
+      "Peach"
+    ],
+    "sizes": [
+      "12"
+    ],
+    "variants": [
+      {
+        "size": "12",
+        "qty": 1
+      }
+    ],
+    "total_stock": 1,
+    "images": [
+      "Peach Dinner Dress.jpg"
+    ],
+    "notes": "Price not supplied."
+  },
+  "63": {
+    "order": 63,
+    "title": "Floral Long Church Dress",
+    "price": 10000.0,
+    "category": "dresses",
+    "subcategory": "Long church dress",
+    "colors": [
+      "Floral"
+    ],
+    "sizes": [
+      "Free size"
+    ],
+    "variants": [
+      {
+        "size": "Free size",
+        "qty": 1
+      }
+    ],
+    "total_stock": 1,
+    "images": [
+      "Floral Long Church Dress.jpg"
+    ],
+    "notes": "Price not supplied."
+  },
+  "65": {
+    "order": 65,
+    "title": "Green & Pink Occasion Dress",
+    "price": 12000.0,
+    "category": "dresses",
+    "subcategory": "Occasion dress",
+    "colors": [
+      "Green",
+      "pink"
+    ],
+    "sizes": [
+      "6"
+    ],
+    "variants": [
+      {
+        "size": "6",
+        "qty": 2
+      }
+    ],
+    "total_stock": 2,
+    "images": [
+      "Green _ Pink Occasion Dress.jpg"
+    ],
+    "notes": ""
+  },
+  "66": {
+    "order": 66,
+    "title": "Silkish Dinner Dress",
+    "price": 12000.0,
+    "category": "dresses",
+    "subcategory": "Dinner dress",
+    "colors": [
+      "Silkish"
+    ],
+    "sizes": [
+      "14"
+    ],
+    "variants": [
+      {
+        "size": "14",
+        "qty": 2
+      }
+    ],
+    "total_stock": 2,
+    "images": [
+      "Silkish Dinner Dress.jpg"
+    ],
+    "notes": "Price 12k sent in a later standalone message; associated provisionally."
+  },
+  "67": {
+    "order": 67,
+    "title": "Pink Dinner Dress",
+    "price": 12000.0,
+    "category": "dresses",
+    "subcategory": "Dinner dress",
+    "colors": [
+      "Pink"
+    ],
+    "sizes": [
+      "6"
+    ],
+    "variants": [
+      {
+        "size": "6",
+        "qty": 1
+      }
+    ],
+    "total_stock": 1,
+    "images": [
+      "Pink Dinner Dress.jpg"
+    ],
+    "notes": ""
+  },
+  "68": {
+    "order": 68,
+    "title": "White Free-Size Long Church Dress",
+    "price": 15000.0,
+    "category": "dresses",
+    "subcategory": "Long church dress",
+    "colors": [
+      "White"
+    ],
+    "sizes": [
+      "Free size"
+    ],
+    "variants": [
+      {
+        "size": "Free size",
+        "qty": 2
+      }
+    ],
+    "total_stock": 2,
+    "images": [
+      "White Free-Size Long Church Dress.jpg"
+    ],
+    "notes": ""
+  },
+  "69": {
+    "order": 69,
+    "title": "White Floral Long Church Dress",
+    "price": 7000.0,
+    "category": "dresses",
+    "subcategory": "Long church dress",
+    "colors": [
+      "White floral"
+    ],
+    "sizes": [
+      "6"
+    ],
+    "variants": [
+      {
+        "size": "6",
+        "qty": 1
+      }
+    ],
+    "total_stock": 1,
+    "images": [
+      "White Floral Long Church Dress.jpg"
+    ],
+    "notes": ""
+  },
+  "77": {
+    "order": 77,
+    "title": "Off-White Long Sequin Dress",
+    "price": 2000.0,
+    "category": "dresses",
+    "subcategory": "Long sequin dress",
+    "colors": [
+      "Off-white"
+    ],
+    "sizes": [
+      "8",
+      "10"
+    ],
+    "variants": [
+      {
+        "size": "8",
+        "qty": 1
+      },
+      {
+        "size": "10",
+        "qty": 1
+      }
+    ],
+    "total_stock": 2,
+    "images": [
+      "Off-White Long Sequin Dress.jpg"
+    ],
+    "notes": "User clarified: total quantity 1 across sizes 8 and 10; confirm whether qty 1 applies to each size or one shared piece."
+  },
+  "78": {
+    "order": 78,
+    "title": "Red Long Dinner Dress",
+    "price": 2000.0,
+    "category": "dresses",
+    "subcategory": "Long dinner dress",
+    "colors": [
+      "Red"
+    ],
+    "sizes": [
+      "8",
+      "10"
+    ],
+    "variants": [
+      {
+        "size": "8",
+        "qty": 1
+      },
+      {
+        "size": "10",
+        "qty": 1
+      }
+    ],
+    "total_stock": 2,
+    "images": [
+      "Red Long Dinner Dress.jpg"
+    ],
+    "notes": "Sizes 8 and 10 supplied; quantity not stated."
+  },
+  "79": {
+    "order": 79,
+    "title": "Red Dinner Dress",
+    "price": 2000.0,
+    "category": "dresses",
+    "subcategory": "Dinner dress",
+    "colors": [
+      "Red"
+    ],
+    "sizes": [
+      "8"
+    ],
+    "variants": [
+      {
+        "size": "8",
+        "qty": 1
+      }
+    ],
+    "total_stock": 1,
+    "images": [
+      "Red Dinner Dress 79.jpg"
+    ],
+    "notes": ""
+  },
+  "80": {
+    "order": 80,
+    "title": "Peach Short Dinner Dress",
+    "price": 800.0,
+    "category": "dresses",
+    "subcategory": "Short dinner dress",
+    "colors": [
+      "Peach"
+    ],
+    "sizes": [
+      "6"
+    ],
+    "variants": [
+      {
+        "size": "6",
+        "qty": 1
+      }
+    ],
+    "total_stock": 1,
+    "images": [
+      "Peach Short Dinner Dress.jpg"
+    ],
+    "notes": ""
+  },
+  "82": {
+    "order": 82,
+    "title": "White Short Evening Dress",
+    "price": 1000.0,
+    "category": "dresses",
+    "subcategory": "Short evening dress",
+    "colors": [
+      "White"
+    ],
+    "sizes": [
+      "8"
+    ],
+    "variants": [
+      {
+        "size": "8",
+        "qty": 1
+      }
+    ],
+    "total_stock": 1,
+    "images": [
+      "White Short Evening Dress.jpg"
+    ],
+    "notes": ""
+  },
+  "83": {
+    "order": 83,
+    "title": "Brown & Green Shirt Dress",
+    "price": 2000.0,
+    "category": "dresses",
+    "subcategory": "Shirt dress",
+    "colors": [
+      "Brown",
+      "green"
+    ],
+    "sizes": [
+      "6",
+      "8",
+      "10"
+    ],
+    "variants": [
+      {
+        "size": "6",
+        "qty": 2
+      },
+      {
+        "size": "8",
+        "qty": 2
+      },
+      {
+        "size": "10",
+        "qty": 1
+      }
+    ],
+    "total_stock": 5,
+    "images": [
+      "Brown _ Green Shirt Dress.jpg"
+    ],
+    "notes": ""
+  },
+  "84": {
+    "order": 84,
+    "title": "White & Brown Office Wear",
+    "price": 2000.0,
+    "category": "dresses",
+    "subcategory": "Office wear",
+    "colors": [
+      "White",
+      "brown"
+    ],
+    "sizes": [
+      "6"
+    ],
+    "variants": [
+      {
+        "size": "6",
+        "qty": 2
+      }
+    ],
+    "total_stock": 2,
+    "images": [
+      "White _ Brown Office Wear.jpg"
+    ],
+    "notes": ""
+  },
+  "85": {
+    "order": 85,
+    "title": "Silver Evening Dress",
+    "price": 1000.0,
+    "category": "dresses",
+    "subcategory": "Evening dress",
+    "colors": [
+      "Silver"
+    ],
+    "sizes": [
+      "8"
+    ],
+    "variants": [
+      {
+        "size": "8",
+        "qty": 1
+      }
+    ],
+    "total_stock": 1,
+    "images": [
+      "Silver Evening Dress 81 _ 85.jpg"
+    ],
+    "notes": "Also appears as product 81; keep one stock record only."
+  },
+  "86": {
+    "order": 86,
+    "title": "Red Short Dinner Dress",
+    "price": 1000.0,
+    "category": "dresses",
+    "subcategory": "Dinner dress",
+    "colors": [
+      "Red"
+    ],
+    "sizes": [
+      "6"
+    ],
+    "variants": [
+      {
+        "size": "6",
+        "qty": 1
+      }
+    ],
+    "total_stock": 1,
+    "images": [
+      "Red Short Dinner Dress.jpg"
+    ],
+    "notes": "Image placeholder in chat has no accompanying product details."
+  },
+  "87": {
+    "order": 87,
+    "title": "Floral Dinner Dress",
+    "price": 1000.0,
+    "category": "dresses",
+    "subcategory": "Dinner dress",
+    "colors": [
+      "Floral"
+    ],
+    "sizes": [
+      "6"
+    ],
+    "variants": [
+      {
+        "size": "6",
+        "qty": 1
+      }
+    ],
+    "total_stock": 1,
+    "images": [
+      "Floral Dinner Dress 87.jpg"
+    ],
+    "notes": "Image placeholder in chat has no accompanying product details."
+  },
+  "88": {
+    "order": 88,
+    "title": "White & Orange Evening Dress",
+    "price": 2000.0,
+    "category": "dresses",
+    "subcategory": "Evening dress",
+    "colors": [
+      "White with orange"
+    ],
+    "sizes": [
+      "6"
+    ],
+    "variants": [
+      {
+        "size": "6",
+        "qty": 1
+      }
+    ],
+    "total_stock": 1,
+    "images": [
+      "White _ Orange Evening Dress.jpg"
+    ],
+    "notes": "Image placeholder in chat has no accompanying product details."
+  },
+  "89": {
+    "order": 89,
+    "title": "Black Short Dinner Dress",
+    "price": 3000.0,
+    "category": "dresses",
+    "subcategory": "Dinner dress",
+    "colors": [
+      "Black"
+    ],
+    "sizes": [
+      "8"
+    ],
+    "variants": [
+      {
+        "size": "8",
+        "qty": 1
+      }
+    ],
+    "total_stock": 1,
+    "images": [
+      "Black Short Dinner Dress 89.jpg"
+    ],
+    "notes": "No product description can be matched confidently from the chat export."
+  },
+  "90": {
+    "order": 90,
+    "title": "Floral Occasion Dress",
+    "price": 2000.0,
+    "category": "dresses",
+    "subcategory": "Occasion dress",
+    "colors": [
+      "Floral"
+    ],
+    "sizes": [
+      "6"
+    ],
+    "variants": [
+      {
+        "size": "6",
+        "qty": 1
+      }
+    ],
+    "total_stock": 1,
+    "images": [
+      "Floral Occasion Dress 90.jpg"
+    ],
+    "notes": "No product description can be matched confidently from the chat export."
+  },
+  "91": {
+    "order": 91,
+    "title": "White Floral Evening Dress",
+    "price": 1000.0,
+    "category": "dresses",
+    "subcategory": "White evening dress",
+    "colors": [
+      "White floral"
+    ],
+    "sizes": [
+      "8"
+    ],
+    "variants": [
+      {
+        "size": "8",
+        "qty": 1
+      }
+    ],
+    "total_stock": 1,
+    "images": [
+      "White Floral Evening Dress 91.jpg"
+    ],
+    "notes": "Details supplied separately at 10:03; user identifies this as product 91."
+  },
+  "92": {
+    "order": 92,
+    "title": "Multicoloured Evening Dress",
+    "price": 2000.0,
+    "category": "dresses",
+    "subcategory": "Evening dress",
+    "colors": [
+      "Multicoloured"
+    ],
+    "sizes": [
+      "10"
+    ],
+    "variants": [
+      {
+        "size": "10",
+        "qty": 1
+      }
+    ],
+    "total_stock": 1,
+    "images": [
+      "Multicoloured Evening Dress 92.jpg"
+    ],
+    "notes": "Details supplied separately at 10:05; user identifies this as product 92."
+  }
+}

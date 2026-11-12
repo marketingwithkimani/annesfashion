@@ -657,6 +657,14 @@ section {
     position: relative;
     overflow: hidden;
     border-radius: 18px 18px 0 0;
+    background: linear-gradient(110deg, #181824 8%, #262638 18%, #181824 33%);
+    background-size: 200% 100%;
+    animation: mediaCardShimmer 1.8s infinite linear;
+}
+
+@keyframes mediaCardShimmer {
+    0% { background-position-x: 100%; }
+    100% { background-position-x: -100%; }
 }
 
 .product-media img,

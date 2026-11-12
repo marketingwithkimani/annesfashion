@@ -310,7 +310,7 @@ function startPreorderAutoScroll() {
 // Wardrobe functionality handled via js/cart.js
 
 // ========================================
-// Hot Selling Closet
+// Hot Selling Closet / Pre-Order Wardrobe / Flash Sale Closet
 // ========================================
 async function fetchHotCloset() {
     const section = document.getElementById('hotClosetSection');
@@ -318,16 +318,56 @@ async function fetchHotCloset() {
     if (!section || !grid) return;
 
     try {
-        // Pick up to 10 products: flash sale first, then featured, then by stock
-        const hot = [...productsData]
-            .filter(p => p.type === 'product')
-            .sort((a, b) => {
-                const scoreA = (a.is_flash_sale ? 4 : 0) + (a.is_featured ? 2 : 0) + (a.allow_preorder ? 1 : 0);
-                const scoreB = (b.is_flash_sale ? 4 : 0) + (b.is_featured ? 2 : 0) + (b.allow_preorder ? 1 : 0);
-                if (scoreB !== scoreA) return scoreB - scoreA;
-                return (b.total_stock || 0) - (a.total_stock || 0);
-            })
-            .slice(0, 10);
+        // Read active global mode from Cloudflare settings
+        let settings = window.siteSettings;
+        if (!settings && typeof fetchCloudflareSettings === 'function') {
+            settings = await fetchCloudflareSettings();
+        } else if (!settings) {
+            try {
+                const sRes = await fetch('https://api.annesfashion.co.ke/api/settings');
+                const sData = await sRes.json();
+                if (sData.success) settings = sData.settings;
+            } catch(e) {}
+        }
+        settings = settings || {};
+
+        const hotPicksMode = (settings['hot_picks_mode'] || '').toLowerCase();
+        const isPreorderModeOn = (settings['pre_order_mode'] || 'off').toLowerCase() === 'on';
+        const isFlashSaleModeOn = (settings['flash_sale_mode'] || 'off').toLowerCase() === 'on';
+
+        const isPreorderActive = hotPicksMode === 'preorder' || (hotPicksMode !== 'flash_sale' && isPreorderModeOn);
+        const isFlashSaleActive = hotPicksMode === 'flash_sale' || (!isPreorderActive && isFlashSaleModeOn);
+
+        // Dynamically update section header based on active mode
+        const badgeEl = section.querySelector('.section-header .luxury-badge');
+        const titleEl = section.querySelector('.section-header .section-title');
+        const subTitleEl = section.querySelector('.section-header .section-subtitle');
+
+        let hot = [];
+        if (isPreorderActive) {
+            if (badgeEl) badgeEl.innerHTML = '<i class="fas fa-clock"></i> Pre-Order';
+            if (titleEl) titleEl.textContent = 'Pre-Order Wardrobe ⏳';
+            if (subTitleEl) subTitleEl.textContent = 'Reserve incoming boutique pieces before they arrive';
+            hot = [...productsData].filter(p => p.type === 'product' && p.allow_preorder == 1).slice(0, 15);
+        } else if (isFlashSaleActive) {
+            if (badgeEl) badgeEl.innerHTML = '<i class="fas fa-bolt"></i> Flash Sale';
+            if (titleEl) titleEl.textContent = 'Flash Sale Closet ⚡';
+            if (subTitleEl) subTitleEl.textContent = 'Limited time luxury boutique pieces at special prices';
+            hot = [...productsData].filter(p => p.type === 'product' && p.is_flash_sale == 1).slice(0, 15);
+        } else {
+            if (badgeEl) badgeEl.innerHTML = '<i class="fas fa-fire"></i> Hot Picks';
+            if (titleEl) titleEl.textContent = 'Hot Selling Closet 🔥';
+            if (subTitleEl) subTitleEl.textContent = "The pieces everyone's grabbing right now";
+            hot = [...productsData]
+                .filter(p => p.type === 'product')
+                .sort((a, b) => {
+                    const scoreA = (a.is_flash_sale ? 4 : 0) + (a.is_featured ? 2 : 0) + (a.allow_preorder ? 1 : 0);
+                    const scoreB = (b.is_flash_sale ? 4 : 0) + (b.is_featured ? 2 : 0) + (b.allow_preorder ? 1 : 0);
+                    if (scoreB !== scoreA) return scoreB - scoreA;
+                    return (b.total_stock || 0) - (a.total_stock || 0);
+                })
+                .slice(0, 10);
+        }
 
         if (hot.length === 0) {
             section.style.display = 'none';
