@@ -2151,20 +2151,14 @@ async function loadAnalyticsData() {
   });
 
   // Restore Meta Pixel ID
-  const pixelId = localStorage.getItem('fb_pixel_id') || '';
+  const pixelId = localStorage.getItem('fb_pixel_id') || '1869859564464225';
   const pixelInput = document.getElementById('admin-fb-pixel-id');
   const pixelBadge = document.getElementById('fb-pixel-badge');
   if (pixelInput) pixelInput.value = pixelId;
   if (pixelBadge) {
-    if (pixelId) {
-      pixelBadge.textContent = `Pixel Active (${pixelId})`;
-      pixelBadge.style.background = 'rgba(16,185,129,0.18)';
-      pixelBadge.style.color = '#10b981';
-    } else {
-      pixelBadge.textContent = 'Paste Pixel ID to Activate';
-      pixelBadge.style.background = 'rgba(212,175,55,0.18)';
-      pixelBadge.style.color = '#D4AF37';
-    }
+    pixelBadge.textContent = `Pixel Active (${pixelId})`;
+    pixelBadge.style.background = 'rgba(16,185,129,0.18)';
+    pixelBadge.style.color = '#10b981';
   }
 }
 

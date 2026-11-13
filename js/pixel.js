@@ -16,8 +16,11 @@
     s.parentNode.insertBefore(t,s)}(window, document,'script',
     'https://connect.facebook.net/en_US/fbevents.js');
 
+    // Official Meta Pixel ID for Anne's Fashion Line
+    const DEFAULT_PIXEL_ID = '1869859564464225';
+
     function getPixelId() {
-        return window.FB_PIXEL_ID || localStorage.getItem('fb_pixel_id') || '';
+        return window.FB_PIXEL_ID || localStorage.getItem('fb_pixel_id') || DEFAULT_PIXEL_ID;
     }
 
     function initMetaPixel(id) {
@@ -26,9 +29,23 @@
             fbq('init', String(id).trim());
             fbq('track', 'PageView');
             console.log('[Meta Pixel] Initialized with ID:', id);
+            injectNoscriptPixel(String(id).trim());
         } catch (err) {
             console.warn('[Meta Pixel] Init error:', err);
         }
+    }
+
+    function injectNoscriptPixel(id) {
+        if (!document.body || document.getElementById('fb-pixel-noscript')) return;
+        const noscript = document.createElement('noscript');
+        noscript.id = 'fb-pixel-noscript';
+        const img = document.createElement('img');
+        img.height = 1;
+        img.width = 1;
+        img.style.display = 'none';
+        img.src = `https://www.facebook.com/tr?id=${encodeURIComponent(id)}&ev=PageView&noscript=1`;
+        noscript.appendChild(img);
+        document.body.appendChild(noscript);
     }
 
     // Global tracking functions for FB Ads conversions
