@@ -805,6 +805,36 @@
           </div>
         </div>
       </div>
+
+      <!-- Meta (Facebook) Pixel Configuration Card -->
+      <div class="glass-card" style="margin-top: 24px;">
+        <div class="card-header">
+          <div>
+            <h3><i class="fab fa-facebook-square" style="color:#4267B2; margin-right:8px;"></i> Meta (Facebook) Ads Pixel Tracking</h3>
+            <div style="font-size:0.82rem; color:var(--text-muted); margin-top:3px;">
+              Tracks PageViews, Product Views, Add-to-Cart, Initiate Checkout, Purchases, and WhatsApp Leads for Meta Ads
+            </div>
+          </div>
+          <span class="badge" id="fb-pixel-badge" style="background:rgba(66,103,178,0.18); color:#7ba3f5;">Meta Pixel Active</span>
+        </div>
+
+        <div style="display:flex; gap:14px; align-items:flex-end; flex-wrap:wrap; max-width:650px;">
+          <div style="flex:1; min-width:260px;">
+            <label style="font-size:0.78rem; text-transform:uppercase; letter-spacing:0.8px; color:var(--text-muted); display:block; margin-bottom:6px;">
+              Meta Pixel ID (from Meta Events Manager)
+            </label>
+            <input type="text" id="admin-fb-pixel-id" placeholder="e.g. 123456789012345" 
+                   style="width:100%; padding:10px 14px; background:rgba(18,18,28,0.85); border:1px solid rgba(255,255,255,0.12); border-radius:var(--radius-sm); color:#fff; font-size:0.95rem; font-family:inherit;">
+          </div>
+          <button type="button" class="btn-primary-gold" onclick="saveAdminPixelId()" style="padding:10px 22px; height:42px; white-space:nowrap;">
+            <i class="fas fa-save"></i> Save Pixel ID
+          </button>
+        </div>
+        <div style="font-size:0.8rem; color:#888; margin-top:12px; display:flex; align-items:center; gap:8px;">
+          <i class="fas fa-check-circle" style="color:#10b981;"></i>
+          <span>Fires PageView on all pages &bull; ViewContent on products &bull; AddToCart in wardrobe &bull; InitiateCheckout &bull; Purchase on M-Pesa &bull; Contact on WhatsApp</span>
+        </div>
+      </div>
     </div>
 
   </main>

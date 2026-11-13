@@ -2149,6 +2149,41 @@ async function loadAnalyticsData() {
     const input = document.getElementById(key.replace('_', '-'));
     if (input && val) input.value = val;
   });
+
+  // Restore Meta Pixel ID
+  const pixelId = localStorage.getItem('fb_pixel_id') || '';
+  const pixelInput = document.getElementById('admin-fb-pixel-id');
+  const pixelBadge = document.getElementById('fb-pixel-badge');
+  if (pixelInput) pixelInput.value = pixelId;
+  if (pixelBadge) {
+    if (pixelId) {
+      pixelBadge.textContent = `Pixel Active (${pixelId})`;
+      pixelBadge.style.background = 'rgba(16,185,129,0.18)';
+      pixelBadge.style.color = '#10b981';
+    } else {
+      pixelBadge.textContent = 'Paste Pixel ID to Activate';
+      pixelBadge.style.background = 'rgba(212,175,55,0.18)';
+      pixelBadge.style.color = '#D4AF37';
+    }
+  }
+}
+
+function saveAdminPixelId() {
+  const input = document.getElementById('admin-fb-pixel-id');
+  if (!input) return;
+  const newId = input.value.trim();
+  if (!newId) {
+    showToast('Please enter a valid Meta Pixel ID', 'warning');
+    return;
+  }
+  localStorage.setItem('fb_pixel_id', newId);
+  const pixelBadge = document.getElementById('fb-pixel-badge');
+  if (pixelBadge) {
+    pixelBadge.textContent = `Pixel Active (${newId})`;
+    pixelBadge.style.background = 'rgba(16,185,129,0.18)';
+    pixelBadge.style.color = '#10b981';
+  }
+  showToast(`Meta Pixel ID ${newId} saved & activated for FB Ads!`);
 }
 
 function saveSocialStat(key, val) {

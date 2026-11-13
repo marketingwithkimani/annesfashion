@@ -201,6 +201,11 @@
         renderCartDrawer();
         openCart();
         showBabeToast("Added to wardrobe, babe! 💕 You're gonna slay ✨");
+
+        // Meta (Facebook) Pixel AddToCart event
+        if (typeof window.trackFBAddToCart === 'function') {
+            window.trackFBAddToCart(product);
+        }
     };
 
     window.openCart = openCart;
@@ -360,6 +365,15 @@
             checkoutStep = 2; // skip auth if already signed in
         } else {
             checkoutStep = 1;
+        }
+
+        // Meta (Facebook) Pixel InitiateCheckout event
+        if (typeof window.trackFBInitiateCheckout === 'function') {
+            const total = cart.reduce((sum, item) => {
+                const p = parseFloat(String(item.price || 0).replace(/[^0-9.]/g, '')) || 0;
+                return sum + (p * (item.quantity || 1));
+            }, 0);
+            window.trackFBInitiateCheckout(cart, total);
         }
 
         renderCheckoutStep();
@@ -1103,6 +1117,11 @@
             }
 
             if (data && (data.success || data.sale_number)) {
+                // Meta (Facebook) Pixel Purchase event
+                if (typeof window.trackFBPurchase === 'function') {
+                    window.trackFBPurchase(data, orderPayload);
+                }
+
                 cart = [];
                 saveCart();
                 updateCartBadge();
